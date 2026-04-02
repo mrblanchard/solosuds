@@ -5,7 +5,6 @@ import {
   Leaf,
   CalendarDays,
   Users,
-  Mic,
   Shield,
   CreditCard,
   Smartphone,
@@ -43,16 +42,14 @@ export default function LandingPage() {
       <section className="relative overflow-hidden bg-gradient-to-b from-indigo-50 to-white px-4 py-24 text-center">
         <div className="mx-auto max-w-3xl">
           <div className="mb-4 inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
-            HIPAA-compliant · AI-powered · Built for SMBs
+            HIPAA-compliant · Built for SMBs
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-6xl">
             Clinical documentation{" "}
             <span className="text-indigo-600">should be effortless</span>
           </h1>
           <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
-            SoapSuds combines AI-powered SOAP note generation, intelligent
-            scheduling, and integrated billing into one HIPAA-compliant platform
-            built for modern healthcare practices.
+          SoapSuds combines intelligent scheduling, integrated billing, and secure SOAP documentation into one HIPAA-compliant platform built for modern healthcare practices.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/register">
@@ -263,7 +260,7 @@ const sudsLetters = [
     letter: "D",
     label: "Documentation",
     description:
-      "The SOAP notes themselves — AI-assisted, structured, and stored securely for every session.",
+      "The SOAP notes themselves — structured, stored securely, and accessible for every session.",
   },
   {
     letter: "S",
@@ -274,12 +271,6 @@ const sudsLetters = [
 ];
 
 const features = [
-  {
-    title: "AI SOAP Notes",
-    icon: Mic,
-    description: "Record sessions with your voice. Our AI transcribes and structures everything into SOAP sections automatically.",
-    bullets: ["Whisper-powered transcription", "GPT-4 SOAP generation", "Customizable templates", "Note duplication"],
-  },
   {
     title: "Smart Scheduling",
     icon: CalendarDays,
@@ -308,7 +299,7 @@ const features = [
     title: "Mobile-First",
     icon: Smartphone,
     description: "Document on the go with a fully responsive interface optimized for tablets and smartphones.",
-    bullets: ["Responsive web app", "Touch-friendly calendar", "Voice recording on mobile", "Offline notes"],
+    bullets: ["Responsive web app", "Touch-friendly calendar", "Offline notes"],
   },
 ];
 
