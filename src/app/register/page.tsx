@@ -26,7 +26,7 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const noAccount = searchParams.get("error") === "no-account";
+  const noAccount = !!searchParams.get("error"); // any OAuth error means "no account found"
   const [error, setError] = useState<string | null>(null);
 
   const {
