@@ -136,7 +136,9 @@ export default function IntakeFormEditor({ form }: Props) {
         </CardHeader>
         <CardContent className="space-y-4">
           {fields.length === 0 && (
-            <p className="te, index) => (
+            <p className="text-sm text-gray-400">No fields yet. Add one below.</p>
+          )}
+          {fields.map((field, index) => (
             <div
               key={field.id}
               draggable
@@ -169,9 +171,7 @@ export default function IntakeFormEditor({ form }: Props) {
                       <option key={t.value} value={t.value}>{t.label}</option>
                     ))}
                   </select>
-                </divion key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
+                </div>
                 <button onClick={() => removeField(field.id)} className="text-gray-400 hover:text-red-500">
                   <Trash2 className="h-4 w-4" />
                 </button>
