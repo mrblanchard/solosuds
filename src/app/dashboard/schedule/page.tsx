@@ -4,6 +4,7 @@ import { ScheduleCalendar } from "@/components/schedule/schedule-calendar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { redirect } from "next/navigation";
 
 const STATUS_COLORS: Record<string, string> = {
   SCHEDULED: "#6366f1",
@@ -16,7 +17,8 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default async function SchedulePage() {
   const session = await auth();
-  const orgId = session?.user?.organizationId!;
+  if (!session?.user?.organizationId) redirect("/login");
+  const orgId = session.user.organizationId;
 
   // Fetch 3-month window of appointments
   const now = new Date();
