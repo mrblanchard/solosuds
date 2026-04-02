@@ -51,6 +51,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      // Credentials sign-in is validated by authorize() above
+      if (account?.provider === "credentials") return true;
+
+      // For OAuth (Google etc.): only allow sign-in if the user already has an account.
+      // This prevents random people from auto-creating accounts via OAuth.
+      if (user.email) {
+        const existing = await db.user.findUnique({
+          where: { email: user.email },
+          select: { id: true },
+        });
+        if (!existing) {
+          return "/register?error=no-account";
+        }
+      }
+
+      return true;
+    },
     async jwt({ token, user, trigger }) {
       if (user || trigger === "signIn" || trigger === "update" || !token.organizationId) {
         const id = (user?.id ?? token.sub) as string;

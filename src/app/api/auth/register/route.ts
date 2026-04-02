@@ -25,8 +25,13 @@ export async function POST(request: NextRequest) {
 
     // Create org + owner user in a transaction
     const user = await db.$transaction(async (tx: Parameters<Parameters<typeof db.$transaction>[0]>[0]) => {
+      // Generate a unique slug from the org name
+      const baseSlug = organizationName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const existing = await tx.organization.findMany({ where: { slug: { startsWith: baseSlug } }, select: { slug: true } });
+      const slug = existing.length === 0 ? baseSlug : `${baseSlug}-${existing.length}`;
+
       const org = await tx.organization.create({
-        data: { name: organizationName },
+        data: { name: organizationName, slug },
       });
 
       return tx.user.create({
