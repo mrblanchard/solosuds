@@ -32,7 +32,7 @@ export default async function AppointmentDetailPage({ params }: Props) {
       service: true,
       room: true,
       soapNotes: { select: { id: true, createdAt: true, status: true }, orderBy: { createdAt: "desc" } },
-      invoices: { select: { id: true, invoiceNumber: true, status: true, amount: true } },
+      invoices: { select: { id: true, number: true, status: true, total: true } },
     },
   });
 
@@ -174,7 +174,7 @@ export default async function AppointmentDetailPage({ params }: Props) {
           <ul className="divide-y divide-gray-100">
             {appointment.invoices.map((inv) => (
               <li key={inv.id} className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm font-medium text-gray-900">#{inv.invoiceNumber}</span>
+                <span className="text-sm font-medium text-gray-900">#{inv.number}</span>
                 <div className="flex items-center gap-3">
                   <Badge variant={STATUS_VARIANT[inv.status] ?? "secondary"}>{inv.status}</Badge>
                   <Link

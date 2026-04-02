@@ -28,7 +28,6 @@ export default async function InvoiceDetailPage({ params }: Props) {
     where: { id, organizationId: session.user.organizationId },
     include: {
       client: true,
-      soapNote: { select: { id: true, createdAt: true } },
       appointment: { select: { id: true, startTime: true } },
     },
   });
@@ -50,7 +49,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900">
-              Invoice #{invoice.invoiceNumber}
+              Invoice #{invoice.number}
             </h1>
             <Badge variant={STATUS_VARIANT[invoice.status] ?? "secondary"}>
               {invoice.status}
@@ -85,14 +84,6 @@ export default async function InvoiceDetailPage({ params }: Props) {
         </div>
         <div className="rounded-xl border border-gray-100 p-4 space-y-2">
           <p className="text-xs font-medium uppercase text-gray-400">Linked To</p>
-          {invoice.soapNote && (
-            <Link
-              href={`/dashboard/notes/${invoice.soapNote.id}`}
-              className="block text-sm text-indigo-600 hover:underline"
-            >
-              SOAP Note · {formatDate(invoice.soapNote.createdAt)}
-            </Link>
-          )}
           {invoice.appointment && (
             <Link
               href={`/dashboard/schedule/${invoice.appointment.id}`}
@@ -101,7 +92,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
               Appointment · {formatDate(invoice.appointment.startTime)}
             </Link>
           )}
-          {!invoice.soapNote && !invoice.appointment && (
+          {!invoice.appointment && (
             <p className="text-sm text-gray-400">None</p>
           )}
         </div>
@@ -143,7 +134,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
             <tr>
               <td colSpan={3} className="px-4 py-3 text-right font-semibold text-gray-900">Total</td>
               <td className="px-4 py-3 text-right font-bold text-gray-900 text-base">
-                {formatCurrency(invoice.amount)}
+                {formatCurrency(invoice.total)}
               </td>
             </tr>
           </tfoot>
