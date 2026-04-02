@@ -17,10 +17,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Practice name is required" }, { status: 400 });
   }
 
+  // Generate a unique slug from the name
+  const baseSlug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const existing = await db.organization.findMany({ where: { slug: { startsWith: baseSlug } }, select: { slug: true } });
+  const slug = existing.length === 0 ? baseSlug : `${baseSlug}-${existing.length}`;
+
   const org = await db.organization.create({
     data: {
       name: name.trim(),
-      ownerId: session.user.id,
+      slug,
     },
   });
 
