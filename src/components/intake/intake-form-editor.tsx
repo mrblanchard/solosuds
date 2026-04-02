@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, GripVertical } from "lucide-react";
 
 interface Field {
   id: string;
@@ -48,6 +48,8 @@ export default function IntakeFormEditor({ form }: Props) {
   const [description, setDescription] = useState(form.description);
   const [fields, setFields] = useState<Field[]>(form.fields);
   const [isActive, setIsActive] = useState(form.isActive);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   function addField(type: Field["type"]) {
     setFields((f) => [...f, { id: generateId(), type, label: "", required: false }]);
@@ -57,7 +59,28 @@ export default function IntakeFormEditor({ form }: Props) {
     setFields((f) => f.map((field) => (field.id === id ? { ...field, ...changes } : field)));
   }
 
-  function removeField(id: string) {
+  f
+
+  function handleDragStart(index: number) {
+    setDragIndex(index);
+  }
+
+  function handleDragEnter(index: number) {
+    setDragOverIndex(index);
+  }
+
+  function handleDragEnd() {
+    if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
+      setFields((prev) => {
+        const next = [...prev];
+        const [moved] = next.splice(dragIndex, 1);
+        next.splice(dragOverIndex, 0, moved);
+        return next;
+      });
+    }
+    setDragIndex(null);
+    setDragOverIndex(null);
+  }unction removeField(id: string) {
     setFields((f) => f.filter((field) => field.id !== id));
   }
 
@@ -111,18 +134,40 @@ export default function IntakeFormEditor({ form }: Props) {
         </CardHeader>
         <CardContent className="space-y-4">
           {fields.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-4">No fields yet. Add some below.</p>
-          )}
-          {fields.map((field) => (
-            <div key={field.id} className="rounded-lg border border-gray-100 p-4 space-y-3">
+            <p className="te, index) => (
+            <div
+              key={field.id}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragEnter={() => handleDragEnter(index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => e.preventDefault()}
+              className={`rounded-lg border p-4 space-y-3 transition-all ${
+                dragIndex === index
+                  ? "opacity-40 border-dashed border-indigo-300 bg-indigo-50"
+                  : dragOverIndex === index && dragIndex !== index
+                  ? "border-indigo-400 border-2 shadow-sm"
+                  : "border-gray-100"
+              }`}
+            >
               <div className="flex items-center justify-between">
-                <select
-                  value={field.type}
-                  onChange={(e) => updateField(field.id, { type: e.target.value as Field["type"] })}
-                  className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600"
-                >
-                  {FIELD_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 touch-none"
+                    title="Drag to reorder"
+                  >
+                    <GripVertical className="h-4 w-4" />
+                  </span>
+                  <select
+                    value={field.type}
+                    onChange={(e) => updateField(field.id, { type: e.target.value as Field["type"] })}
+                    className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600"
+                  >
+                    {FIELD_TYPES.map((t) => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                </divion key={t.value} value={t.value}>{t.label}</option>
                   ))}
                 </select>
                 <button onClick={() => removeField(field.id)} className="text-gray-400 hover:text-red-500">
