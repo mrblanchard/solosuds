@@ -72,9 +72,14 @@ npx prisma studio        # open DB browser
 
 ## Deploying to Production
 
-Code is hosted on [Forgejo](https://v14.next.forgejo.org/soapsuds/soapsuds). The production server is a Linode VPS running PM2 + cloudflared.
+Code is hosted on [Forgejo](https://v14.next.forgejo.org/soapsuds/soapsuds). The production server is a Linode VPS (Ubuntu 24.04, 1GB RAM, Newark NJ) running PM2 + cloudflared.
 
-### Workflow
+**Server IP:** `45.33.68.189`  
+**Tunnel:** `soapsuds-prod` (ID: `96854119-0d6e-4303-a1b7-914706b14f52`) → `soapsuds.app`  
+**Process manager:** PM2 (`pm2 list`, `pm2 logs soapsuds`)  
+**Swap:** 2GB swapfile at `/swapfile` (needed for builds on 1GB RAM)
+
+### Deploy workflow
 
 1. Make changes locally and test on `dev.soapsuds.app`
 2. Commit and push to Forgejo:
@@ -88,12 +93,24 @@ Code is hosted on [Forgejo](https://v14.next.forgejo.org/soapsuds/soapsuds). The
    ssh root@45.33.68.189
    cd /app/soapsuds
    git pull
-   npm install
+   npm install        # only if package.json changed
+   npx prisma generate  # only if schema.prisma changed
    npm run build
    pm2 restart soapsuds
    ```
 
-### First-time server setup
+### First-time server setup (already done)
 
-See the setup script in the deployment history. Server runs Node.js 22, PM2 process manager, and cloudflared for the `soapsuds.app` tunnel.
+- Node.js 22 via NodeSource
+- PM2 with systemd startup (`pm2 startup systemd`)
+- cloudflared as systemd service (`/etc/systemd/system/cloudflared.service`)
+- 2GB swap at `/swapfile`
+- App cloned to `/app/soapsuds`
+- `.env` at `/app/soapsuds/.env` (not in git — must be set manually on server)
+
+### Google OAuth redirect URIs
+
+Both of these must be in Google Console → OAuth client → Authorized redirect URIs:
+- `https://dev.soapsuds.app/api/auth/callback/google`
+- `https://soapsuds.app/api/auth/callback/google`
 
