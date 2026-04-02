@@ -9,7 +9,7 @@ import { Plus, Copy, Trash2, Send } from "lucide-react";
 
 export default async function IntakeFormsPage() {
   const session = await auth();
-  if (!session?.user?.organizationId) redirect("/login");
+  if (!session?.user?.organizationId) redirect("/dashboard");
 
   const forms = await db.intakeForm.findMany({
     where: { organizationId: session.user.organizationId },

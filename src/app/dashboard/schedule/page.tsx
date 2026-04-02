@@ -17,7 +17,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default async function SchedulePage() {
   const session = await auth();
-  if (!session?.user?.organizationId) redirect("/login");
+  if (!session?.user?.organizationId) redirect("/dashboard");
   const orgId = session.user.organizationId;
 
   // Fetch 3-month window of appointments

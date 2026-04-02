@@ -51,14 +51,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user || !token.organizationId) {
-        const dbUser = await db.user.findUnique({
-          where: { id: (user?.id ?? token.sub) as string },
-          select: { role: true, organizationId: true },
-        });
-        token.role = dbUser?.role;
-        token.organizationId = dbUser?.organizationId;
+    async jwt({ token, user, trigger }) {
+      if (user || trigger === "signIn" || trigger === "update" || !token.organizationId) {
+        const id = (user?.id ?? token.sub) as string;
+        if (id) {
+          const dbUser = await db.user.findUnique({
+            where: { id },
+            select: { role: true, organizationId: true },
+          });
+          if (dbUser) {
+            token.role = dbUser.role;
+            token.organizationId = dbUser.organizationId;
+          }
+        }
       }
       return token;
     },

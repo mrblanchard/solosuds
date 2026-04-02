@@ -12,7 +12,7 @@ interface Props {
 
 export default async function MessagesPage({ searchParams }: Props) {
   const session = await auth();
-  if (!session?.user?.organizationId) redirect("/login");
+  if (!session?.user?.organizationId) redirect("/dashboard");
 
   const orgId = session.user.organizationId;
   const selectedClientId = searchParams.clientId;

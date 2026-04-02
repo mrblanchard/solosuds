@@ -6,7 +6,7 @@ import OrgSettings from "@/components/settings/org-settings";
 
 export default async function SettingsPage() {
   const session = await auth();
-  if (!session?.user?.id || !session?.user?.organizationId) redirect("/login");
+  if (!session?.user?.id || !session?.user?.organizationId) redirect("/dashboard");
 
   const [user, org] = await Promise.all([
     db.user.findUnique({
@@ -19,7 +19,7 @@ export default async function SettingsPage() {
     }),
   ]);
 
-  if (!user || !org) redirect("/login");
+  if (!user || !org) redirect("/dashboard");
 
   return (
     <div className="mx-auto max-w-2xl space-y-8 p-6">
