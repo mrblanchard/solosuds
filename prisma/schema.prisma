@@ -1,0 +1,360 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Auth (NextAuth v5) ───────────────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Organizations / Practices ───────────────────────────────────────────────
+
+model Organization {
+  id                   String    @id @default(cuid())
+  name                 String
+  slug                 String    @unique
+  phone                String?
+  email                String?
+  address              String?
+  website              String?
+  logoUrl              String?
+  primaryColor         String?
+  timezone             String    @default("America/New_York")
+  hipaaAcceptedAt      DateTime?
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  subscriptionStatus   String?   @default("trialing")
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  users         User[]
+  clients       Client[]
+  appointments  Appointment[]
+  soapNotes     SoapNote[]
+  templates     NoteTemplate[]
+  intakeForms   IntakeForm[]
+  rooms         Room[]
+  services      Service[]
+  invoices      Invoice[]
+  messages      Message[]
+}
+
+// ─── Users / Practitioners ────────────────────────────────────────────────────
+
+enum UserRole {
+  OWNER
+  ADMIN
+  PRACTITIONER
+  FRONT_DESK
+}
+
+model User {
+  id                   String        @id @default(cuid())
+  name                 String?
+  email                String        @unique
+  emailVerified        DateTime?
+  image                String?
+  hashedPassword       String?
+  role                 UserRole      @default(PRACTITIONER)
+  organizationId       String?
+  organization         Organization? @relation(fields: [organizationId], references: [id])
+  title                String?
+  bio                  String?       @db.Text
+  phone                String?
+  calendarColor        String?
+  googleCalendarToken  Json?
+  outlookCalendarToken Json?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  appointments Appointment[]
+  soapNotes    SoapNote[]
+  sentMessages Message[]     @relation("SentMessages")
+}
+
+// ─── Clients / Patients ───────────────────────────────────────────────────────
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+model Client {
+  id               String       @id @default(cuid())
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id])
+  firstName        String
+  lastName         String
+  email            String?
+  phone            String?
+  dateOfBirth      DateTime?
+  gender           String?
+  pronouns         String?
+  address          String?
+  city             String?
+  state            String?
+  zip              String?
+  country          String?
+  emergencyName    String?
+  emergencyPhone   String?
+  referralSource   String?
+  internalNotes    String?      @db.Text
+  status           ClientStatus @default(ACTIVE)
+  stripeCustomerId String?      @unique
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  appointments      Appointment[]
+  soapNotes         SoapNote[]
+  intakeSubmissions IntakeSubmission[]
+  invoices          Invoice[]
+  messages          Message[]
+  tags              ClientTag[]
+}
+
+model ClientTag {
+  id       String @id @default(cuid())
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name     String
+
+  @@unique([clientId, name])
+}
+
+// ─── Services ─────────────────────────────────────────────────────────────────
+
+model Service {
+  id              String       @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  name            String
+  description     String?      @db.Text
+  durationMinutes Int          @default(60)
+  price           Int          // cents
+  color           String?
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+
+  appointments Appointment[]
+}
+
+// ─── Scheduling ───────────────────────────────────────────────────────────────
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model Room {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  color          String?
+
+  appointments Appointment[]
+}
+
+model Appointment {
+  id             String            @id @default(cuid())
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id])
+  clientId       String
+  client         Client            @relation(fields: [clientId], references: [id])
+  practitionerId String
+  practitioner   User              @relation(fields: [practitionerId], references: [id])
+  serviceId      String?
+  service        Service?          @relation(fields: [serviceId], references: [id])
+  roomId         String?
+  room           Room?             @relation(fields: [roomId], references: [id])
+  startTime      DateTime
+  endTime        DateTime
+  status         AppointmentStatus @default(SCHEDULED)
+  notes          String?           @db.Text
+  reminderSentAt DateTime?
+  googleEventId  String?
+  outlookEventId String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  soapNotes SoapNote[]
+  invoices  Invoice[]
+}
+
+// ─── SOAP Notes ───────────────────────────────────────────────────────────────
+
+enum NoteStatus {
+  DRAFT
+  SIGNED
+  LOCKED
+  AMENDED
+}
+
+model SoapNote {
+  id             String        @id @default(cuid())
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  clientId       String
+  client         Client        @relation(fields: [clientId], references: [id])
+  practitionerId String
+  practitioner   User          @relation(fields: [practitionerId], references: [id])
+  appointmentId  String?
+  appointment    Appointment?  @relation(fields: [appointmentId], references: [id])
+  templateId     String?
+  template       NoteTemplate? @relation(fields: [templateId], references: [id])
+  sessionDate    DateTime
+  status         NoteStatus    @default(DRAFT)
+
+  subjective String? @db.Text
+  objective  String? @db.Text
+  assessment String? @db.Text
+  plan       String? @db.Text
+
+  transcript    String?  @db.Text
+  aiSuggestions Json?
+
+  bodyChartUrls  String[]
+  diagnosisCodes String[]
+  procedureCodes String[]
+
+  signedAt  DateTime?
+  signedBy  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model NoteTemplate {
+  id                    String       @id @default(cuid())
+  organizationId        String
+  organization          Organization @relation(fields: [organizationId], references: [id])
+  name                  String
+  sessionType           String?
+  subjectivePrompt      String?      @db.Text
+  objectivePrompt       String?      @db.Text
+  assessmentPrompt      String?      @db.Text
+  planPrompt            String?      @db.Text
+  defaultDiagnosisCodes String[]
+  defaultProcedureCodes String[]
+  isDefault             Boolean      @default(false)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  soapNotes SoapNote[]
+}
+
+// ─── Intake Forms ─────────────────────────────────────────────────────────────
+
+model IntakeForm {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  title          String
+  description    String?
+  fields         Json
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  submissions IntakeSubmission[]
+}
+
+model IntakeSubmission {
+  id          String     @id @default(cuid())
+  formId      String
+  form        IntakeForm @relation(fields: [formId], references: [id])
+  clientId    String?
+  client      Client?    @relation(fields: [clientId], references: [id])
+  responses   Json
+  submittedAt DateTime   @default(now())
+  createdAt   DateTime   @default(now())
+}
+
+// ─── Billing ──────────────────────────────────────────────────────────────────
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  VOID
+}
+
+model Invoice {
+  id                    String        @id @default(cuid())
+  organizationId        String
+  organization          Organization  @relation(fields: [organizationId], references: [id])
+  clientId              String
+  client                Client        @relation(fields: [clientId], references: [id])
+  appointmentId         String?
+  appointment           Appointment?  @relation(fields: [appointmentId], references: [id])
+  number                String
+  status                InvoiceStatus @default(DRAFT)
+  subtotal              Int
+  tax                   Int           @default(0)
+  total                 Int
+  dueDate               DateTime?
+  paidAt                DateTime?
+  stripePaymentIntentId String?
+  notes                 String?       @db.Text
+  lineItems             Json
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}
+
+// ─── Messaging ────────────────────────────────────────────────────────────────
+
+model Message {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  senderId       String
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
+  clientId       String?
+  client         Client?      @relation(fields: [clientId], references: [id])
+  subject        String?
+  body           String       @db.Text
+  isRead         Boolean      @default(false)
+  sentAt         DateTime     @default(now())
+}

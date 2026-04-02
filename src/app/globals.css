@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  /* Sage green replaces the default indigo — calming, therapeutic, earthy */
+  --color-indigo-50: #f0f5f0;
+  --color-indigo-100: #dceadd;
+  --color-indigo-200: #b7d4b9;
+  --color-indigo-300: #8bb88e;
+  --color-indigo-400: #619865;
+  --color-indigo-500: #4a804f;
+  --color-indigo-600: #3a6b41;
+  --color-indigo-700: #2d5433;
+  --color-indigo-800: #234228;
+  --color-indigo-900: #1a321f;
+
+  /* Warm neutral backgrounds */
+  --color-gray-50: #fafaf7;
+  --color-gray-100: #f3f3ee;
+  --color-gray-200: #e8e8e1;
+}
+
+:root {
+  --background: #fafaf7;
+  --foreground: #2a2a25;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}

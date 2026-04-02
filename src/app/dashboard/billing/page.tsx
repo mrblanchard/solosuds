@@ -1,0 +1,165 @@
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { CreditCard, Plus } from "lucide-react";
+import { formatDate, formatCurrency } from "@/lib/utils";
+
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const session = await auth();
+  const orgId = session?.user?.organizationId!;
+  const params = await searchParams;
+
+  const [invoices, summary] = await Promise.all([
+    db.invoice.findMany({
+      where: {
+        organizationId: orgId,
+        ...(params.status ? { status: params.status as never } : {}),
+      },
+      include: { client: { select: { firstName: true, lastName: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }),
+    db.invoice.groupBy({
+      by: ["status"],
+      _sum: { total: true },
+      _count: true,
+      where: { organizationId: orgId },
+    }),
+  ]);
+
+  const summaryMap = Object.fromEntries(
+    summary.map((s) => [s.status, { total: s._sum.total ?? 0, count: s._count }])
+  );
+
+  const stats = [
+    { label: "Outstanding", status: "SENT", color: "text-yellow-600", bg: "bg-yellow-50" },
+    { label: "Overdue", status: "OVERDUE", color: "text-red-600", bg: "bg-red-50" },
+    { label: "Paid (All Time)", status: "PAID", color: "text-green-600", bg: "bg-green-50" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Billing</h1>
+        <Link href="/dashboard/billing/new">
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            New Invoice
+          </Button>
+        </Link>
+      </div>
+
+      {/* Summary stats */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {stats.map((stat) => (
+          <Link key={stat.status} href={`/dashboard/billing?status=${stat.status}`}>
+            <div className="rounded-xl border border-gray-200 bg-white p-5 hover:shadow-md transition-shadow">
+              <p className="text-sm text-gray-500">{stat.label}</p>
+              <p className={`text-2xl font-bold ${stat.color}`}>
+                {formatCurrency(summaryMap[stat.status]?.total ?? 0)}
+              </p>
+              <p className="text-xs text-gray-400">
+                {summaryMap[stat.status]?.count ?? 0} invoice{(summaryMap[stat.status]?.count ?? 0) !== 1 ? "s" : ""}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Status filter */}
+      <div className="flex gap-2 border-b border-gray-200">
+        {["", "DRAFT", "SENT", "PAID", "OVERDUE", "VOID"].map((s) => (
+          <Link
+            key={s}
+            href={`/dashboard/billing${s ? `?status=${s}` : ""}`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              (params.status ?? "") === s
+                ? "border-indigo-600 text-indigo-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {s || "All"}
+          </Link>
+        ))}
+      </div>
+
+      {invoices.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
+          <CreditCard className="h-12 w-12 text-gray-300 mb-3" />
+          <h3 className="text-sm font-medium text-gray-900">No invoices</h3>
+          <p className="mt-1 text-sm text-gray-500">Create your first invoice to get paid.</p>
+          <Link href="/dashboard/billing/new" className="mt-4">
+            <Button size="sm">
+              <Plus className="h-4 w-4 mr-1" />
+              New Invoice
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Invoice</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Client</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Due</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Amount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Status</th>
+                <th className="relative px-6 py-3" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {invoices.map((inv) => (
+                <tr key={inv.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">#{inv.number}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {inv.client.firstName} {inv.client.lastName}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {formatDate(inv.createdAt, "MMM d, yyyy")}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {inv.dueDate ? formatDate(inv.dueDate, "MMM d, yyyy") : "—"}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                    {formatCurrency(inv.total)}
+                  </td>
+                  <td className="px-6 py-4">
+                    <InvoiceStatusBadge status={inv.status} />
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <Link
+                      href={`/dashboard/billing/${inv.id}`}
+                      className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                    >
+                      View →
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function InvoiceStatusBadge({ status }: { status: string }) {
+  const map: Record<string, { variant: "default" | "success" | "warning" | "secondary" | "destructive"; label: string }> = {
+    DRAFT: { variant: "secondary", label: "Draft" },
+    SENT: { variant: "warning", label: "Sent" },
+    PAID: { variant: "success", label: "Paid" },
+    OVERDUE: { variant: "destructive", label: "Overdue" },
+    VOID: { variant: "secondary", label: "Void" },
+  };
+  const config = map[status] ?? { variant: "secondary" as const, label: status };
+  return <Badge variant={config.variant}>{config.label}</Badge>;
+}
