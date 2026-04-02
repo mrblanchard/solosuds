@@ -80,7 +80,9 @@ export default function IntakeFormEditor({ form }: Props) {
     }
     setDragIndex(null);
     setDragOverIndex(null);
-  }unction removeField(id: string) {
+  }
+
+  function removeField(id: string) {
     setFields((f) => f.filter((field) => field.id !== id));
   }
 

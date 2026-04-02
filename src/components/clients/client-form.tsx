@@ -11,7 +11,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
-import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 
 const schema = z.object({
   firstName: z.string().min(1, "First name is required"),

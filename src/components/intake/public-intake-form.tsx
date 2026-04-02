@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
-import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { CheckCircle } from "lucide-react";
