@@ -52,18 +52,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account }) {
-      // Credentials sign-in is validated by authorize() above
+      // Credentials sign-in is handled by authorize() above
       if (account?.provider === "credentials") return true;
 
-      // For OAuth (Google etc.): only allow sign-in if the user already has an account.
-      // This prevents random people from auto-creating accounts via OAuth.
-      if (user.email) {
-        const existing = await db.user.findUnique({
-          where: { email: user.email },
-          select: { id: true },
+      // For OAuth: PrismaAdapter creates the user BEFORE this callback fires.
+      // Detect a brand-new account by checking if it was created within the last
+      // 5 seconds. If so, the user never registered manually — delete the
+      // auto-created record and send them to the registration page.
+      if (user.id) {
+        const dbUser = await db.user.findUnique({
+          where: { id: user.id },
+          select: { createdAt: true },
         });
-        if (!existing) {
-          return "/register?error=no-account";
+        if (dbUser) {
+          const ageMs = Date.now() - new Date(dbUser.createdAt).getTime();
+          if (ageMs < 5000) {
+            // Brand-new account created by the OAuth flow — remove it and gate them
+            await db.user.delete({ where: { id: user.id } });
+            return "/register?error=no-account";
+          }
         }
       }
 
