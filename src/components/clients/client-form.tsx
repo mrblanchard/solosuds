@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
+import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 
 const schema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -45,6 +46,8 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -88,7 +91,10 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
             <Input {...register("lastName")} placeholder="Smith" />
           </FormField>
           <FormField label="Date of Birth" error={errors.dateOfBirth?.message}>
-            <Input type="date" {...register("dateOfBirth")} />
+            <DateWheelPicker
+              value={watch("dateOfBirth") ?? ""}
+              onChange={(v) => setValue("dateOfBirth", v, { shouldValidate: true })}
+            />
           </FormField>
           <FormField label="Gender">
             <Input {...register("gender")} placeholder="e.g. Female, Male, Non-binary" />

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { formatCurrency } from "@/lib/utils";
 import { CheckCircle } from "lucide-react";
 
@@ -158,7 +159,10 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Date <span className="text-red-500">*</span></Label>
-                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-1" />
+                <DateWheelPicker
+                  value={date}
+                  onChange={setDate}
+                />
               </div>
               <div>
                 <Label>Time <span className="text-red-500">*</span></Label>

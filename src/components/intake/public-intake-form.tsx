@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
+import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { CheckCircle } from "lucide-react";
@@ -114,11 +114,9 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
               />
             )}
             {field.type === "date" && (
-              <Input
-                type="date"
+              <DateWheelPicker
                 value={(values[field.id] as string) ?? ""}
-                onChange={(e) => set(field.id, e.target.value)}
-                className="mt-1"
+                onChange={(v) => set(field.id, v)}
               />
             )}
             {field.type === "select" && (
