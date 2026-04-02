@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 
-export const resend = new Resend(process.env.RESEND_API_KEY!);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY || "re_placeholder");
+}
 
 export async function sendAppointmentReminder({
   to,
@@ -17,7 +19,7 @@ export async function sendAppointmentReminder({
   appointmentTime: string;
   serviceName: string;
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
     to,
     subject: `Reminder: Your appointment on ${appointmentDate}`,
@@ -45,7 +47,7 @@ export async function sendIntakeFormLink({
   clientName: string;
   formUrl: string;
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
     to,
     subject: "Please complete your intake form",

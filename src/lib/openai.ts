@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
 export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
+  apiKey: process.env.OPENAI_API_KEY || "sk-placeholder",
 });
 
 export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
