@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
 import { formatPhone, stripPhone, normalizeEmail } from "@/lib/utils";
+import { Copy, Check, RefreshCw, Mail, X } from "lucide-react";
 
 interface OrgData {
   id: string;
@@ -20,6 +21,7 @@ interface OrgData {
   practiceType: string;
   noteType: string;
   defaultIntakeFormId: string | null;
+  inviteCode: string | null;
 }
 
 interface IntakeForm {
@@ -47,6 +49,13 @@ export default function OrgSettings({ org, intakeForms = [] }: Props) {
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState(org.inviteCode);
+  const [copied, setCopied] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [sendingInvite, setSendingInvite] = useState(false);
+  const [inviteMessage, setInviteMessage] = useState<string | null>(null);
 
   function set(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -113,6 +122,84 @@ export default function OrgSettings({ org, intakeForms = [] }: Props) {
         <CardTitle>Organization</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Team Invite Link */}
+        <div className="mb-4 pb-4 border-b">
+          <Label>Team Registration Link</Label>
+          <p className="text-xs text-gray-500 mt-0.5 mb-2">
+            Share this link with team members so they can register and join your organization
+          </p>
+          {inviteCode ? (
+            <div className="flex items-center gap-2">
+              <Input
+                readOnly
+                value={`${typeof window !== "undefined" ? window.location.origin : ""}/register?invite=${inviteCode}`}
+                className="flex-1 text-sm font-mono bg-gray-50"
+                onClick={(e) => (e.target as HTMLInputElement).select()}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/register?invite=${inviteCode}`);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="shrink-0"
+              >
+                {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => { setShowEmailModal(true); setInviteEmail(""); setInviteMessage(null); }}
+                className="shrink-0"
+                title="Email this link"
+              >
+                <Mail className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={regenerating}
+                onClick={async () => {
+                  setRegenerating(true);
+                  const res = await fetch("/api/settings/organization/invite", { method: "POST" });
+                  if (res.ok) {
+                    const data = await res.json();
+                    setInviteCode(data.inviteCode);
+                  }
+                  setRegenerating(false);
+                }}
+                className="shrink-0"
+                title="Generate a new link (old link will stop working)"
+              >
+                <RefreshCw className={`h-4 w-4 ${regenerating ? "animate-spin" : ""}`} />
+              </Button>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={regenerating}
+              onClick={async () => {
+                setRegenerating(true);
+                const res = await fetch("/api/settings/organization/invite", { method: "POST" });
+                if (res.ok) {
+                  const data = await res.json();
+                  setInviteCode(data.inviteCode);
+                }
+                setRegenerating(false);
+              }}
+            >
+              Generate Invite Link
+            </Button>
+          )}
+        </div>
+
         <form onSubmit={(e) => { e.preventDefault(); save(); }}>
         {fields.map((f) => (
           <div key={f.key} className="mb-4">
@@ -242,6 +329,67 @@ export default function OrgSettings({ org, intakeForms = [] }: Props) {
         </Button>
         </form>
       </CardContent>
+
+      {/* Email Invite Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowEmailModal(false)}>
+          <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Send Invite Email</h3>
+              <button type="button" onClick={() => setShowEmailModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">
+              Enter an email address to send a team invitation for <strong>{form.name}</strong>.
+            </p>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (!inviteEmail.trim()) return;
+              setSendingInvite(true);
+              setInviteMessage(null);
+              const res = await fetch("/api/settings/organization/invite-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: inviteEmail.trim() }),
+              });
+              setSendingInvite(false);
+              if (res.ok) {
+                setInviteMessage("Invitation sent!");
+                setInviteEmail("");
+              } else {
+                const data = await res.json();
+                setInviteMessage(data.error ?? "Failed to send invitation");
+              }
+            }}>
+              <Label htmlFor="invite-email">Email address</Label>
+              <Input
+                id="invite-email"
+                type="email"
+                placeholder="colleague@example.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                className="mt-1 mb-4"
+                autoFocus
+                required
+              />
+              {inviteMessage && (
+                <p className={`text-sm mb-3 ${inviteMessage === "Invitation sent!" ? "text-green-600" : "text-red-600"}`}>
+                  {inviteMessage}
+                </p>
+              )}
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setShowEmailModal(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={sendingInvite}>
+                  {sendingInvite ? "Sending…" : "Send Invitation"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

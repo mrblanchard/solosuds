@@ -17,7 +17,7 @@ export default async function SettingsPage() {
     }),
     db.organization.findUnique({
       where: { id: session.user.organizationId },
-      select: { id: true, name: true, phone: true, email: true, address: true, website: true, timezone: true, practiceType: true, noteType: true, defaultIntakeFormId: true },
+      select: { id: true, name: true, phone: true, email: true, address: true, website: true, timezone: true, practiceType: true, noteType: true, defaultIntakeFormId: true, inviteCode: true },
     }),
     db.service.findMany({
       where: { organizationId: session.user.organizationId, isActive: true },

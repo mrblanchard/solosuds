@@ -34,10 +34,17 @@ function RegisterContent() {
   const [prefillEmail, setPrefillEmail] = useState("");
   const [prefillName, setPrefillName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [inviteOrgName, setInviteOrgName] = useState<string | null>(null);
 
   const schema = fromGoogle
     ? registerSchema.extend({ password: z.string().optional() })
     : registerSchema;
+
+  // When joining via invite, org name is not required
+  const activeSchema = inviteCode
+    ? schema.extend({ organizationName: z.string().optional() })
+    : schema;
 
   const {
     register,
@@ -45,7 +52,7 @@ function RegisterContent() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(activeSchema),
   });
 
   useEffect(() => {
@@ -53,9 +60,28 @@ function RegisterContent() {
     const fg = params.get("fromGoogle") === "1";
     const email = params.get("email") ?? "";
     const name = params.get("name") ?? "";
+    const invite = params.get("invite");
     setFromGoogle(fg);
     if (email) { setPrefillEmail(email); setValue("email", email); }
     if (name) { setPrefillName(name); setValue("name", name); }
+    if (invite) {
+      setInviteCode(invite);
+      // Look up the org name for the invite code
+      fetch(`/api/auth/invite-info?code=${encodeURIComponent(invite)}`)
+        .then((r) => r.ok ? r.json() : null)
+        .then((data) => {
+          if (data?.organizationName) {
+            setInviteOrgName(data.organizationName);
+          } else {
+            setError("Invalid or expired invite link");
+            setInviteCode(null);
+          }
+        })
+        .catch(() => {
+          setError("Could not verify invite link");
+          setInviteCode(null);
+        });
+    }
   }, [setValue]);
 
   async function onSubmit(data: RegisterForm) {
@@ -64,7 +90,7 @@ function RegisterContent() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, fromGoogle }),
+        body: JSON.stringify({ ...data, fromGoogle, inviteCode }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -91,8 +117,16 @@ function RegisterContent() {
           <div className="flex items-center justify-center mb-4">
             <img src="/icon.svg" alt="SoapSuds" style={{height:"48px",width:"auto"}} />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
-          <p className="mt-1 text-sm text-gray-500">Start your 14-day free trial — no credit card required</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {inviteCode ? "Join your team" : "Create your account"}
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            {inviteCode
+              ? inviteOrgName
+                ? `You've been invited to join ${inviteOrgName}`
+                : "Verifying invite link…"
+              : "Start your 14-day free trial — no credit card required"}
+          </p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
@@ -108,6 +142,7 @@ function RegisterContent() {
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {!inviteCode && (
             <div>
               <Label htmlFor="organizationName">Practice / Organization name</Label>
               <Input
@@ -121,6 +156,7 @@ function RegisterContent() {
                 <p className="mt-1 text-xs text-red-600">{errors.organizationName.message}</p>
               )}
             </div>
+            )}
 
             <div>
               <Label htmlFor="name">Your full name</Label>

@@ -66,6 +66,7 @@ model Organization {
   timezone             String    @default("America/New_York")
   noteType             String    @default("SOAP")   // SOAP | SESSION
   defaultIntakeFormId  String?
+  inviteCode           String?   @unique
   hipaaAcceptedAt      DateTime?
   stripeCustomerId     String?   @unique
   stripeSubscriptionId String?   @unique

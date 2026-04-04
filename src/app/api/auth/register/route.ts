@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { db } from "@/lib/db";
 import { validatePassword } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { organizationName, name, email, password, fromGoogle } = body;
+    const { organizationName, name, email, password, fromGoogle, inviteCode } = body;
 
-    if (!organizationName || !name || !email) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    if (!name || !email) {
+      return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
+    }
+    if (!inviteCode && !organizationName) {
+      return NextResponse.json({ error: "Organization name is required" }, { status: 400 });
     }
 
     if (typeof organizationName !== "string" || organizationName.length > 200) {
@@ -47,13 +51,40 @@ export async function POST(request: NextRequest) {
 
     // Create org + owner user in a transaction
     const user = await db.$transaction(async (tx: Parameters<Parameters<typeof db.$transaction>[0]>[0]) => {
+      // If registering with an invite code, join existing org
+      if (inviteCode) {
+        const org = await tx.organization.findUnique({ where: { inviteCode } });
+        if (!org) {
+          throw new Error("INVALID_INVITE");
+        }
+
+        if (existingUser) {
+          return tx.user.update({
+            where: { id: existingUser.id },
+            data: { name, organizationId: org.id, role: "PRACTITIONER", ...(hashedPassword ? { hashedPassword } : {}) },
+          });
+        }
+
+        return tx.user.create({
+          data: {
+            name,
+            email,
+            hashedPassword,
+            role: "PRACTITIONER",
+            organizationId: org.id,
+          },
+        });
+      }
+
+      // Otherwise create a new org
       // Generate a unique slug from the org name
       const baseSlug = organizationName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
       const slugCheck = await tx.organization.findMany({ where: { slug: { startsWith: baseSlug } }, select: { slug: true } });
       const slug = slugCheck.length === 0 ? baseSlug : `${baseSlug}-${slugCheck.length}`;
 
+      const code = crypto.randomBytes(16).toString("hex");
       const org = await tx.organization.create({
-        data: { name: organizationName, slug },
+        data: { name: organizationName, slug, inviteCode: code },
       });
 
       if (existingUser) {
@@ -77,6 +108,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ id: user.id }, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && error.message === "INVALID_INVITE") {
+      return NextResponse.json({ error: "Invalid or expired invite link" }, { status: 400 });
+    }
     console.error("[POST /api/auth/register]", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
