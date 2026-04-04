@@ -58,6 +58,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<1 | 2>(1);
   const [practiceType, setPracticeType] = useState<PracticeType | null>(null);
   const [name, setName] = useState("");
+  const [noteType, setNoteType] = useState<"SOAP" | "SESSION">("SOAP");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -70,7 +71,7 @@ export default function OnboardingPage() {
       const res = await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), practiceType }),
+        body: JSON.stringify({ name: name.trim(), practiceType, noteType }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -214,6 +215,35 @@ export default function OnboardingPage() {
                   autoFocus
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Note format
+                </label>
+                <p className="text-xs text-gray-500 mb-2">
+                  Choose your preferred note format. You can change this later in Settings.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    { value: "SOAP" as const, label: "SOAP Notes", desc: "Subjective, Objective, Assessment, Plan" },
+                    { value: "SESSION" as const, label: "Session Notes", desc: "Free-form session documentation" },
+                  ]).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setNoteType(opt.value)}
+                      className={`rounded-lg border-2 p-3 text-left text-sm transition-colors ${
+                        noteType === opt.value
+                          ? "border-indigo-500 bg-indigo-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <span className="font-medium text-gray-900">{opt.label}</span>
+                      <span className="block text-xs text-gray-500 mt-0.5">{opt.desc}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {error && <p className="text-sm text-red-600">{error}</p>}

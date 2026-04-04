@@ -21,9 +21,10 @@ interface Field {
 interface Props {
   formId: string;
   fields: Field[];
+  clientId?: string;
 }
 
-export default function PublicIntakeForm({ formId, fields }: Props) {
+export default function PublicIntakeForm({ formId, fields, clientId }: Props) {
   const [values, setValues] = useState<Record<string, string | boolean>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -50,7 +51,7 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
     const res = await fetch(`/api/intake-forms/${formId}/submit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ responses: values }),
+      body: JSON.stringify({ responses: values, clientId: clientId || undefined }),
     });
     setSubmitting(false);
 

@@ -60,3 +60,20 @@ export async function sendIntakeFormLink({
     `,
   });
 }
+
+export async function sendEmail({
+  to,
+  subject,
+  html,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+}) {
+  return getResend().emails.send({
+    from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+    to,
+    subject,
+    html,
+  });
+}

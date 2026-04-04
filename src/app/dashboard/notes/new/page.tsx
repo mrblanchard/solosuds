@@ -26,8 +26,8 @@ export default async function NewNotePage({
     }),
     db.noteTemplate.findMany({
       where: { organizationId: orgId },
-      select: { id: true, name: true },
-      orderBy: { name: "asc" },
+      select: { id: true, name: true, isDefault: true },
+      orderBy: [{ isDefault: "desc" }, { name: "asc" }],
     }),
   ]);
 
@@ -43,7 +43,7 @@ export default async function NewNotePage({
         </Link>
         <span className="text-gray-300">/</span>
         <h1 className="text-xl font-bold text-gray-900">
-          {params.duplicateFrom ? "Duplicate Note" : "New SOAP Note"}
+          {params.duplicateFrom ? "Duplicate Note" : "New Note"}
         </h1>
       </div>
 

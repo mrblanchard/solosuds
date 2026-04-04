@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { formatCurrency, formatDateTime, formatDate } from "@/lib/utils";
 import SavedToast from "@/components/ui/saved-toast";
+import TaskManager from "@/components/dashboard/task-manager";
 
 // ─── Dynamic import (v2 requires an explicit `width` prop) ─────────────────
 
@@ -45,7 +46,8 @@ export type SectionId =
   | "quick-actions"
   | "recent-notes"
   | "upcoming"
-  | "messages";
+  | "messages"
+  | "tasks";
 
 const ALL_SECTIONS: SectionId[] = [
   "stat-clients",
@@ -57,6 +59,7 @@ const ALL_SECTIONS: SectionId[] = [
   "recent-notes",
   "upcoming",
   "messages",
+  "tasks",
 ];
 
 const DEFAULT_ACTIVE: SectionId[] = [
@@ -66,6 +69,7 @@ const DEFAULT_ACTIVE: SectionId[] = [
   "stat-invoices",
   "schedule",
   "quick-actions",
+  "tasks",
 ];
 
 type SectionMeta = {
@@ -84,6 +88,7 @@ const SECTION_META: Record<SectionId, SectionMeta> = {
   "recent-notes":      { title: "Recent Notes",           description: "Latest SOAP notes across all clients", icon: FileText },
   upcoming:            { title: "Upcoming Appointments",  description: "Next 7 days schedule",                 icon: CalendarDays },
   messages:            { title: "Recent Messages",        description: "Latest client messages",               icon: MessageSquare },
+  tasks:               { title: "Tasks",                  description: "To-do list and task management",        icon: FileText },
 };
 
 // ─── Default grid layouts ─────────────────────────────────────────────────────
@@ -97,9 +102,10 @@ const DEFAULT_LAYOUTS: ResponsiveLayouts = {
     { i: "stat-invoices",     x: 9,  y: 0,  w: 3,  h: 3, minW: 2, minH: 2, maxH: 4 },
     { i: "schedule",          x: 0,  y: 3,  w: 6,  h: 9, minW: 3, minH: 4 },
     { i: "quick-actions",     x: 6,  y: 3,  w: 6,  h: 9, minW: 3, minH: 4 },
-    { i: "recent-notes",      x: 0,  y: 12, w: 6,  h: 9, minW: 3, minH: 4 },
-    { i: "upcoming",          x: 6,  y: 12, w: 6,  h: 9, minW: 3, minH: 4 },
-    { i: "messages",          x: 0,  y: 21, w: 12, h: 8, minW: 3, minH: 4 },
+    { i: "tasks",             x: 0,  y: 12, w: 6,  h: 11, minW: 3, minH: 6 },
+    { i: "recent-notes",      x: 6,  y: 12, w: 6,  h: 9, minW: 3, minH: 4 },
+    { i: "upcoming",          x: 0,  y: 23, w: 6,  h: 9, minW: 3, minH: 4 },
+    { i: "messages",          x: 6,  y: 23, w: 6, h: 8, minW: 3, minH: 4 },
   ],
   md: [
     { i: "stat-clients",      x: 0, y: 0,  w: 4, h: 3, minW: 2, minH: 2, maxH: 4 },
@@ -108,9 +114,10 @@ const DEFAULT_LAYOUTS: ResponsiveLayouts = {
     { i: "stat-invoices",     x: 4, y: 3,  w: 4, h: 3, minW: 2, minH: 2, maxH: 4 },
     { i: "schedule",          x: 0, y: 6,  w: 8, h: 9, minW: 3, minH: 4 },
     { i: "quick-actions",     x: 0, y: 15, w: 8, h: 8, minW: 3, minH: 4 },
-    { i: "recent-notes",      x: 0, y: 23, w: 8, h: 9, minW: 3, minH: 4 },
-    { i: "upcoming",          x: 0, y: 32, w: 8, h: 9, minW: 3, minH: 4 },
-    { i: "messages",          x: 0, y: 41, w: 8, h: 8, minW: 3, minH: 4 },
+    { i: "tasks",             x: 0, y: 23, w: 8, h: 11, minW: 3, minH: 6 },
+    { i: "recent-notes",      x: 0, y: 34, w: 8, h: 9, minW: 3, minH: 4 },
+    { i: "upcoming",          x: 0, y: 43, w: 8, h: 9, minW: 3, minH: 4 },
+    { i: "messages",          x: 0, y: 52, w: 8, h: 8, minW: 3, minH: 4 },
   ],
   sm: [
     { i: "stat-clients",      x: 0, y: 0,  w: 2, h: 3, minW: 1, minH: 2, maxH: 4 },
@@ -119,9 +126,10 @@ const DEFAULT_LAYOUTS: ResponsiveLayouts = {
     { i: "stat-invoices",     x: 2, y: 3,  w: 2, h: 3, minW: 1, minH: 2, maxH: 4 },
     { i: "schedule",          x: 0, y: 6,  w: 4, h: 9, minW: 2, minH: 4 },
     { i: "quick-actions",     x: 0, y: 15, w: 4, h: 8, minW: 2, minH: 4 },
-    { i: "recent-notes",      x: 0, y: 23, w: 4, h: 9, minW: 2, minH: 4 },
-    { i: "upcoming",          x: 0, y: 32, w: 4, h: 9, minW: 2, minH: 4 },
-    { i: "messages",          x: 0, y: 41, w: 4, h: 8, minW: 2, minH: 4 },
+    { i: "tasks",             x: 0, y: 23, w: 4, h: 11, minW: 2, minH: 6 },
+    { i: "recent-notes",      x: 0, y: 34, w: 4, h: 9, minW: 2, minH: 4 },
+    { i: "upcoming",          x: 0, y: 43, w: 4, h: 9, minW: 2, minH: 4 },
+    { i: "messages",          x: 0, y: 52, w: 4, h: 8, minW: 2, minH: 4 },
   ],
   xs: [
     { i: "stat-clients",      x: 0, y: 0,  w: 2, h: 3, minW: 1, minH: 2, maxH: 4 },
@@ -130,9 +138,10 @@ const DEFAULT_LAYOUTS: ResponsiveLayouts = {
     { i: "stat-invoices",     x: 2, y: 3,  w: 2, h: 3, minW: 1, minH: 2, maxH: 4 },
     { i: "schedule",          x: 0, y: 6,  w: 4, h: 9, minW: 2, minH: 4 },
     { i: "quick-actions",     x: 0, y: 15, w: 4, h: 8, minW: 2, minH: 4 },
-    { i: "recent-notes",      x: 0, y: 23, w: 4, h: 9, minW: 2, minH: 4 },
-    { i: "upcoming",          x: 0, y: 32, w: 4, h: 9, minW: 2, minH: 4 },
-    { i: "messages",          x: 0, y: 41, w: 4, h: 8, minW: 2, minH: 4 },
+    { i: "tasks",             x: 0, y: 23, w: 4, h: 11, minW: 2, minH: 6 },
+    { i: "recent-notes",      x: 0, y: 34, w: 4, h: 9, minW: 2, minH: 4 },
+    { i: "upcoming",          x: 0, y: 43, w: 4, h: 9, minW: 2, minH: 4 },
+    { i: "messages",          x: 0, y: 52, w: 4, h: 8, minW: 2, minH: 4 },
   ],
 };
 
@@ -157,8 +166,11 @@ function loadState(userId: string): StoredState {
           ALL_SECTIONS.includes(id as SectionId)
         );
         // Collect all known section IDs from layouts
+        const layoutItems = Object.values(parsed.layouts)
+          .flat()
+          .filter((l): l is LayoutItem => l != null);
         const knownIds = new Set<string>([
-          ...Object.values(parsed.layouts).flat().map((l: LayoutItem) => l.i),
+          ...layoutItems.map((l) => l.i),
           ...hidden,
         ]);
         // Newly added sections default to hidden until user shows them
@@ -629,6 +641,12 @@ export default function DashboardWidgets({
             ))}
           </div>
         )}
+      </ListCard>
+    ),
+
+    tasks: (
+      <ListCard title="Tasks">
+        <TaskManager />
       </ListCard>
     ),
   };

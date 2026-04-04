@@ -64,6 +64,8 @@ model Organization {
   logoUrl              String?
   primaryColor         String?
   timezone             String    @default("America/New_York")
+  noteType             String    @default("SOAP")   // SOAP | SESSION
+  defaultIntakeFormId  String?
   hipaaAcceptedAt      DateTime?
   stripeCustomerId     String?   @unique
   stripeSubscriptionId String?   @unique
@@ -81,6 +83,7 @@ model Organization {
   services      Service[]
   invoices      Invoice[]
   messages      Message[]
+  tasks         Task[]
 }
 
 // ─── Users / Practitioners ────────────────────────────────────────────────────
@@ -110,6 +113,8 @@ model User {
   outlookCalendarToken Json?
   notificationsEnabled Boolean       @default(true)
   notificationsSeenAt  DateTime?
+  smsForwardNumber     String?
+  theme                String        @default("lavender")
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
 
@@ -118,6 +123,7 @@ model User {
   appointments Appointment[]
   soapNotes    SoapNote[]
   sentMessages Message[]     @relation("SentMessages")
+  tasks        Task[]
 }
 
 // ─── Clients / Patients ───────────────────────────────────────────────────────
@@ -257,11 +263,15 @@ model SoapNote {
   template       NoteTemplate? @relation(fields: [templateId], references: [id])
   sessionDate    DateTime
   status         NoteStatus    @default(DRAFT)
+  noteFormat     String        @default("SOAP") // SOAP | SESSION
 
   subjective String? @db.Text
   objective  String? @db.Text
   assessment String? @db.Text
   plan       String? @db.Text
+
+  // Session notes fields (alternative to SOAP)
+  sessionNotes String? @db.Text
 
   transcript    String?  @db.Text
   aiSuggestions Json?
@@ -371,4 +381,35 @@ model Message {
   status         String       @default("SENT")     // SENT | DELIVERED | FAILED
   externalId     String?
   createdAt      DateTime     @default(now())
+}
+
+// ─── Tasks ────────────────────────────────────────────────────────────────────
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Task {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  assigneeId     String?
+  assignee       User?        @relation(fields: [assigneeId], references: [id])
+  title          String
+  description    String?      @db.Text
+  status         TaskStatus   @default(TODO)
+  priority       TaskPriority @default(MEDIUM)
+  dueDate        DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }

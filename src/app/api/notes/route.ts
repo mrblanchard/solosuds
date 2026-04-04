@@ -30,6 +30,12 @@ export async function POST(req: Request) {
   const client = await db.client.findFirst({ where: { id: clientId, organizationId: orgId } });
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
+  // Get org's default note format
+  const org = await db.organization.findUnique({
+    where: { id: orgId },
+    select: { noteType: true },
+  });
+
   let duplicateData: Record<string, unknown> = {};
   if (duplicateFromId) {
     const source = await db.soapNote.findFirst({
@@ -41,8 +47,28 @@ export async function POST(req: Request) {
         objective: source.objective,
         assessment: source.assessment,
         plan: source.plan,
+        sessionNotes: source.sessionNotes,
+        noteFormat: source.noteFormat,
         diagnosisCodes: source.diagnosisCodes,
         procedureCodes: source.procedureCodes,
+      };
+    }
+  }
+
+  // Pre-fill from template if selected and not duplicating
+  let templateData: Record<string, unknown> = {};
+  if (templateId && !duplicateFromId) {
+    const template = await db.noteTemplate.findFirst({
+      where: { id: templateId, organizationId: orgId },
+    });
+    if (template) {
+      templateData = {
+        subjective: template.subjectivePrompt || undefined,
+        objective: template.objectivePrompt || undefined,
+        assessment: template.assessmentPrompt || undefined,
+        plan: template.planPrompt || undefined,
+        diagnosisCodes: template.defaultDiagnosisCodes.length > 0 ? template.defaultDiagnosisCodes : undefined,
+        procedureCodes: template.defaultProcedureCodes.length > 0 ? template.defaultProcedureCodes : undefined,
       };
     }
   }
@@ -56,6 +82,8 @@ export async function POST(req: Request) {
       templateId: templateId || undefined,
       appointmentId: appointmentId || undefined,
       status: "DRAFT",
+      noteFormat: duplicateData.noteFormat as string ?? org?.noteType ?? "SOAP",
+      ...templateData,
       ...duplicateData,
     },
   });

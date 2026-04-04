@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, phone, email, address, website, timezone } = body;
+    const { name, phone, email, address, website, timezone, practiceType, noteType, defaultIntakeFormId } = body;
 
     if (name !== undefined && name.trim() === "") {
       return NextResponse.json({ error: "Organization name cannot be empty" }, { status: 400 });
@@ -31,6 +31,15 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
     }
 
+    const validPracticeTypes = ["THERAPY", "SALON", "MEDICAL", "FITNESS", "OTHER"];
+    if (practiceType !== undefined && !validPracticeTypes.includes(practiceType)) {
+      return NextResponse.json({ error: "Invalid practice type" }, { status: 400 });
+    }
+
+    if (noteType !== undefined && noteType !== "SOAP" && noteType !== "SESSION") {
+      return NextResponse.json({ error: "Invalid note type" }, { status: 400 });
+    }
+
     const updated = await db.organization.update({
       where: { id: session.user.organizationId },
       data: {
@@ -40,6 +49,9 @@ export async function PATCH(request: NextRequest) {
         ...(address !== undefined && { address: address || null }),
         ...(website !== undefined && { website: website || null }),
         ...(timezone !== undefined && { timezone: timezone || null }),
+        ...(practiceType !== undefined && { practiceType }),
+        ...(noteType !== undefined && { noteType }),
+        ...(defaultIntakeFormId !== undefined && { defaultIntakeFormId: defaultIntakeFormId || null }),
       },
     });
 

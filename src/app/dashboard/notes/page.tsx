@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import TableSearch from "@/components/ui/table-search";
 import SortHeader from "@/components/ui/sort-header";
-import { FileText, Plus } from "lucide-react";
+import { FileText, Plus, LayoutTemplate } from "lucide-react";
 import { Prisma } from "@prisma/client";
 
 const SORT_MAP: Record<string, Prisma.SoapNoteOrderByWithRelationInput | Prisma.SoapNoteOrderByWithRelationInput[]> = {
@@ -55,15 +55,23 @@ export default async function NotesPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">SOAP Notes</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Notes</h1>
           <p className="mt-1 text-sm text-gray-500">{notes.length} notes found</p>
         </div>
-        <Link href="/dashboard/notes/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            New Note
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/dashboard/notes/templates">
+            <Button variant="outline">
+              <LayoutTemplate className="h-4 w-4 mr-2" />
+              Templates
+            </Button>
+          </Link>
+          <Link href="/dashboard/notes/new">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              New Note
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search */}

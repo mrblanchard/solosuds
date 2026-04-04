@@ -45,9 +45,11 @@ interface Props {
 function SortableCard({
   form,
   onDuplicated,
+  onDeleted,
 }: {
   form: IntakeFormItem;
   onDuplicated: (newForm: IntakeFormItem) => void;
+  onDeleted: (formId: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: form.id });
@@ -89,7 +91,7 @@ function SortableCard({
           <Badge variant={form.isActive ? "success" : "secondary"}>
             {form.isActive ? "Active" : "Inactive"}
           </Badge>
-          <DeleteFormButton formId={form.id} formTitle={form.title} />
+          <DeleteFormButton formId={form.id} formTitle={form.title} onDeleted={() => onDeleted(form.id)} />
         </div>
       </div>
       <div className="mt-3 text-xs text-gray-400">
@@ -135,6 +137,10 @@ export default function IntakeFormGrid({ forms: initialForms }: Props) {
     setForms((prev) => [...prev, newForm]);
   }
 
+  function handleDeleted(formId: string) {
+    setForms((prev) => prev.filter((f) => f.id !== formId));
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -160,7 +166,7 @@ export default function IntakeFormGrid({ forms: initialForms }: Props) {
       <SortableContext items={forms.map((f) => f.id)} strategy={rectSortingStrategy}>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {forms.map((form) => (
-            <SortableCard key={form.id} form={form} onDuplicated={handleDuplicated} />
+            <SortableCard key={form.id} form={form} onDuplicated={handleDuplicated} onDeleted={handleDeleted} />
           ))}
         </div>
       </SortableContext>

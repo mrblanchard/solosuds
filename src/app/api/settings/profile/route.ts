@@ -12,7 +12,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, currentPassword, newPassword } = body;
+    const { name, currentPassword, newPassword, smsForwardNumber, theme } = body;
 
     const user = await db.user.findUnique({ where: { id: session.user.id } });
     if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -45,6 +45,8 @@ export async function PATCH(request: NextRequest) {
       data: {
         ...(name !== undefined && { name }),
         ...(hashedPassword !== undefined && { password: hashedPassword }),
+        ...(smsForwardNumber !== undefined && { smsForwardNumber: smsForwardNumber || null }),
+        ...(theme !== undefined && { theme }),
       },
       select: { id: true, name: true, email: true },
     });

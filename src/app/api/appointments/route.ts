@@ -77,6 +77,58 @@ export async function POST(req: Request) {
     }
   }
 
+  // Auto-create draft note for this appointment
+  try {
+    const org = await db.organization.findUnique({
+      where: { id: orgId },
+      select: { noteType: true, defaultIntakeFormId: true },
+    });
+
+    await db.soapNote.create({
+      data: {
+        organizationId: orgId,
+        clientId: data.clientId,
+        practitionerId: data.practitionerId,
+        appointmentId: appointment.id,
+        sessionDate: new Date(startTime),
+        status: "DRAFT",
+        noteFormat: org?.noteType ?? "SOAP",
+      },
+    });
+
+    // Auto-send intake form if org has a default one configured
+    if (org?.defaultIntakeFormId && client.email) {
+      const intakeForm = await db.intakeForm.findFirst({
+        where: { id: org.defaultIntakeFormId, organizationId: orgId, isActive: true },
+        select: { id: true, title: true },
+      });
+
+      if (intakeForm) {
+        const baseUrl = process.env.NEXTAUTH_URL ?? "https://soapsuds.app";
+        const intakeUrl = `${baseUrl}/intake/${intakeForm.id}?clientId=${data.clientId}`;
+
+        try {
+          const { sendEmail } = await import("@/lib/email");
+          await sendEmail({
+            to: client.email,
+            subject: `Please complete: ${intakeForm.title}`,
+            html: `
+              <p>Hi ${client.firstName},</p>
+              <p>You have an upcoming appointment scheduled for ${formatDate(appointment.startTime, "MMMM d, yyyy")} at ${formatDate(appointment.startTime, "h:mm a")}.</p>
+              <p>Please take a moment to fill out the following form before your visit:</p>
+              <p><a href="${intakeUrl}" style="display:inline-block;padding:10px 20px;background-color:#6366f1;color:white;border-radius:8px;text-decoration:none;font-weight:500;">Complete ${intakeForm.title}</a></p>
+              <p>Thank you!</p>
+            `,
+          });
+        } catch (emailErr) {
+          console.error("Failed to send intake form email:", emailErr);
+        }
+      }
+    }
+  } catch (noteErr) {
+    console.error("Failed to auto-create draft note:", noteErr);
+  }
+
   return NextResponse.json(appointment, { status: 201 });
 }
 

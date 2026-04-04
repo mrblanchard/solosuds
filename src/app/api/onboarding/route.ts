@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { name, practiceType } = body;
+  const { name, practiceType, noteType } = body;
 
   if (!name?.trim()) {
     return NextResponse.json({ error: "Practice name is required" }, { status: 400 });
@@ -61,6 +61,7 @@ export async function POST(req: Request) {
       name: name.trim(),
       slug,
       practiceType: type,
+      noteType: noteType === "SESSION" ? "SESSION" : "SOAP",
     },
   });
 

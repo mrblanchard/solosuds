@@ -85,10 +85,11 @@ export default async function NotePage({
           objective: note.objective ?? "",
           assessment: note.assessment ?? "",
           plan: note.plan ?? "",
+          sessionNotes: note.sessionNotes ?? "",
+          noteFormat: note.noteFormat ?? "SOAP",
           diagnosisCodes: note.diagnosisCodes.join(", "),
           procedureCodes: note.procedureCodes.join(", "),
           status: note.status,
-          transcript: note.transcript ?? "",
         }}
       />
     </div>

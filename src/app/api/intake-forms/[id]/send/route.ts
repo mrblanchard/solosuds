@@ -37,7 +37,7 @@ export async function POST(
   if (!form) return NextResponse.json({ error: "Form not found" }, { status: 404 });
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
-  const formUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/intake/${form.id}`;
+  const formUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/intake/${form.id}?clientId=${client.id}`;
   const clientName = `${client.firstName} ${client.lastName}`;
 
   if (type === "email") {

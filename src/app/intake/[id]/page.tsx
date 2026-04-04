@@ -5,10 +5,12 @@ import { AppFooter } from "@/components/layout/app-footer";
 
 interface Props {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ clientId?: string }>;
 }
 
-export default async function PublicIntakePage({ params }: Props) {
+export default async function PublicIntakePage({ params, searchParams }: Props) {
   const { id } = await params;
+  const { clientId } = await searchParams;
   const form = await db.intakeForm.findUnique({
     where: { id },
     include: { organization: { select: { name: true } } },
@@ -26,7 +28,7 @@ export default async function PublicIntakePage({ params }: Props) {
             <p className="mt-2 text-sm text-gray-600">{form.description}</p>
           )}
         </div>
-        <PublicIntakeForm formId={form.id} fields={form.fields as any[]} />
+        <PublicIntakeForm formId={form.id} fields={form.fields as any[]} clientId={clientId} />
       </div>
       <AppFooter />
     </div>

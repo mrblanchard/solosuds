@@ -17,13 +17,22 @@ interface OrgData {
   address: string | null;
   website: string | null;
   timezone: string | null;
+  practiceType: string;
+  noteType: string;
+  defaultIntakeFormId: string | null;
+}
+
+interface IntakeForm {
+  id: string;
+  title: string;
 }
 
 interface Props {
   org: OrgData;
+  intakeForms?: IntakeForm[];
 }
 
-export default function OrgSettings({ org }: Props) {
+export default function OrgSettings({ org, intakeForms = [] }: Props) {
   const router = useRouter();
   const [form, setForm] = useState({
     name: org.name,
@@ -32,6 +41,9 @@ export default function OrgSettings({ org }: Props) {
     address: org.address ?? "",
     website: org.website ?? "",
     timezone: org.timezone ?? "America/New_York",
+    practiceType: org.practiceType ?? "OTHER",
+    noteType: org.noteType ?? "SOAP",
+    defaultIntakeFormId: org.defaultIntakeFormId ?? "",
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -148,6 +160,83 @@ export default function OrgSettings({ org }: Props) {
             {message}
           </p>
         )}
+        <div className="mb-4 pt-4 border-t">
+          <Label>Practice Type</Label>
+          <p className="text-xs text-gray-500 mt-0.5 mb-2">
+            This adjusts the sidebar navigation and terminology for your practice
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {([
+              { value: "THERAPY", label: "Therapy", desc: "Massage, PT, chiro, bodywork" },
+              { value: "SALON", label: "Salon", desc: "Hair, nail, beauty" },
+              { value: "MEDICAL", label: "Medical", desc: "Doctors, clinics" },
+              { value: "FITNESS", label: "Fitness", desc: "Training, yoga, pilates" },
+              { value: "OTHER", label: "General", desc: "Generic practice" },
+            ] as const).map((t) => (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => set("practiceType", t.value)}
+                className={`rounded-lg border-2 p-3 text-center text-sm font-medium transition-colors ${
+                  form.practiceType === t.value
+                    ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                {t.label}
+                <span className="block text-xs font-normal mt-0.5 text-gray-400">{t.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="mb-4 pt-4 border-t">
+          <Label>Note Format</Label>
+          <p className="text-xs text-gray-500 mt-0.5 mb-2">
+            Choose the default note format for your practice
+          </p>
+          <div className="flex gap-2">
+            {(["SOAP", "SESSION"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => set("noteType", t)}
+                className={`flex-1 rounded-lg border-2 p-3 text-center text-sm font-medium transition-colors ${
+                  form.noteType === t
+                    ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                    : "border-gray-200 text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                {t === "SOAP" ? "SOAP Notes" : "Session Notes"}
+                <span className="block text-xs font-normal mt-0.5 text-gray-400">
+                  {t === "SOAP"
+                    ? "Subjective, Objective, Assessment, Plan"
+                    : "Free-form session notes"}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {intakeForms.length > 0 && (
+          <div className="mb-4">
+            <Label htmlFor="defaultIntakeFormId">Default Intake Form</Label>
+            <p className="text-xs text-gray-500 mt-0.5 mb-2">
+              Automatically send this form when a new appointment is created
+            </p>
+            <select
+              id="defaultIntakeFormId"
+              value={form.defaultIntakeFormId}
+              onChange={(e) => set("defaultIntakeFormId", e.target.value)}
+              className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
+            >
+              <option value="">None (don't auto-send)</option>
+              {intakeForms.map((f) => (
+                <option key={f.id} value={f.id}>{f.title}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <Button type="submit" disabled={saving}>
           {saving ? "Saving…" : "Save Organization"}
         </Button>

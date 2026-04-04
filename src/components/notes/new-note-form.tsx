@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 const schema = z.object({
   clientId: z.string().min(1, "Please select a client"),
@@ -21,7 +22,7 @@ type FormValues = z.infer<typeof schema>;
 
 interface NewNoteFormProps {
   clients: { id: string; firstName: string; lastName: string }[];
-  templates: { id: string; name: string }[];
+  templates: { id: string; name: string; isDefault: boolean }[];
   defaultClientId?: string;
   defaultAppointmentId?: string;
   duplicateFromId?: string;
@@ -48,6 +49,7 @@ export default function NewNoteForm({
     defaultValues: {
       clientId: defaultClientId ?? "",
       sessionDate: new Date().toISOString().split("T")[0],
+      templateId: templates.find((t) => t.isDefault)?.id ?? "",
       appointmentId: defaultAppointmentId ?? "",
     },
   });
@@ -104,7 +106,12 @@ export default function NewNoteForm({
       </div>
 
       <div>
-        <Label htmlFor="templateId">Template (optional)</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="templateId">Template (optional)</Label>
+          <Link href="/dashboard/notes/templates" className="text-xs text-indigo-600 hover:text-indigo-700">
+            Manage templates
+          </Link>
+        </div>
         <select
           id="templateId"
           {...register("templateId")}
@@ -113,7 +120,7 @@ export default function NewNoteForm({
           <option value="">No template</option>
           {templates.map((t) => (
             <option key={t.id} value={t.id}>
-              {t.name}
+              {t.name}{t.isDefault ? " ★" : ""}
             </option>
           ))}
         </select>

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import TableSearch from "@/components/ui/table-search";
 import SortHeader from "@/components/ui/sort-header";
-import { Users, Plus } from "lucide-react";
+import { Users, Plus, Upload } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import ClientRowActions from "@/components/clients/client-row-actions";
 import { Prisma } from "@prisma/client";
@@ -57,12 +57,20 @@ export default async function ClientsPage({
           <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
           <p className="mt-1 text-sm text-gray-500">{clients.length} clients</p>
         </div>
-        <Link href="/dashboard/clients/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Client
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/dashboard/clients/import">
+            <Button variant="outline">
+              <Upload className="h-4 w-4 mr-2" />
+              Import CSV
+            </Button>
+          </Link>
+          <Link href="/dashboard/clients/new">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Client
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search + filters */}

@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   ClipboardList,
+  HelpCircle,
   X,
   PanelLeftClose,
   PanelLeftOpen,
@@ -25,37 +26,39 @@ interface NavItem {
   href: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
+  disabled?: boolean;
 }
 
 const ALL_NAV: Record<string, NavItem> = {
   dashboard:  { href: "/dashboard",          label: "Dashboard",    icon: LayoutDashboard },
   schedule:   { href: "/dashboard/schedule", label: "Schedule",     icon: CalendarDays },
   clients:    { href: "/dashboard/clients",  label: "Clients",      icon: Users },
-  notes:      { href: "/dashboard/notes",    label: "SOAP Notes",   icon: FileText },
+  notes:      { href: "/dashboard/notes",    label: "Notes",        icon: FileText },
   intake:     { href: "/dashboard/intake",   label: "Intake Forms", icon: ClipboardList },
-  messages:   { href: "/dashboard/messages", label: "Messages",     icon: MessageSquare },
+  messages:   { href: "/dashboard/messages", label: "Messages",     icon: MessageSquare, disabled: true },
   billing:    { href: "/dashboard/billing",  label: "Billing",      icon: CreditCard },
   settings:   { href: "/dashboard/settings", label: "Settings",     icon: Settings },
+  faq:        { href: "/dashboard/faq",      label: "Help & FAQ",   icon: HelpCircle },
 };
 
 // Per-type nav order + optional label overrides
 const NAV_CONFIG: Record<NonNullable<PracticeType>, { order: string[]; labels?: Partial<Record<string, string>> }> = {
   THERAPY: {
-    order: ["dashboard", "schedule", "clients", "notes", "intake", "messages", "billing", "settings"],
+    order: ["dashboard", "schedule", "clients", "notes", "intake", "billing", "settings", "faq", "messages"],
   },
   SALON: {
-    order: ["dashboard", "schedule", "clients", "billing", "messages", "notes", "intake", "settings"],
+    order: ["dashboard", "schedule", "clients", "billing", "notes", "intake", "settings", "faq", "messages"],
     labels: { notes: "Session Notes" },
   },
   MEDICAL: {
-    order: ["dashboard", "clients", "intake", "notes", "schedule", "messages", "billing", "settings"],
+    order: ["dashboard", "clients", "intake", "notes", "schedule", "billing", "settings", "faq", "messages"],
   },
   FITNESS: {
-    order: ["dashboard", "schedule", "clients", "billing", "messages", "notes", "intake", "settings"],
+    order: ["dashboard", "schedule", "clients", "billing", "notes", "intake", "settings", "faq", "messages"],
     labels: { notes: "Session Notes", intake: "Health Forms" },
   },
   OTHER: {
-    order: ["dashboard", "schedule", "clients", "notes", "intake", "messages", "billing", "settings"],
+    order: ["dashboard", "schedule", "clients", "notes", "intake", "billing", "settings", "faq", "messages"],
   },
 };
 
@@ -158,8 +161,24 @@ export function Sidebar({
           "flex-1 space-y-1 overflow-y-auto py-4",
           isCollapsed ? "px-2" : "px-3"
         )}>
-          {navItems.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || pathname.startsWith(href + "/");
+          {navItems.map(({ href, label, icon: Icon, disabled }) => {
+            const active = !disabled && (pathname === href || pathname.startsWith(href + "/"));
+            if (disabled) {
+              return (
+                <span
+                  key={href}
+                  title={isCollapsed ? `${label} - Coming Soon` : undefined}
+                  className={cn(
+                    "flex items-center rounded-lg text-sm font-medium cursor-default opacity-50",
+                    isCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2",
+                    "text-gray-400"
+                  )}
+                >
+                  <Icon className="h-5 w-5 shrink-0 text-gray-300" />
+                  {!isCollapsed && <span>{label} <span className="text-xs">- Coming Soon</span></span>}
+                </span>
+              );
+            }
             return (
               <Link
                 key={href}

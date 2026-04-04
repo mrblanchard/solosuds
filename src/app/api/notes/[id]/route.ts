@@ -8,6 +8,8 @@ const patchSchema = z.object({
   objective: z.string().optional(),
   assessment: z.string().optional(),
   plan: z.string().optional(),
+  sessionNotes: z.string().optional(),
+  noteFormat: z.enum(["SOAP", "SESSION"]).optional(),
   diagnosisCodes: z.string().optional(),
   procedureCodes: z.string().optional(),
   transcript: z.string().optional(),

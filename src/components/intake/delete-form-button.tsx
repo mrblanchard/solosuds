@@ -10,6 +10,7 @@ interface Props {
   formTitle: string;
   /** Render as a full button with text instead of icon-only */
   variant?: "icon" | "button";
+  onDeleted?: () => void;
 }
 
 function ConfirmModal({
@@ -71,7 +72,7 @@ function ConfirmModal({
   );
 }
 
-export default function DeleteFormButton({ formId, formTitle, variant = "icon" }: Props) {
+export default function DeleteFormButton({ formId, formTitle, variant = "icon", onDeleted }: Props) {
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -82,8 +83,12 @@ export default function DeleteFormButton({ formId, formTitle, variant = "icon" }
     if (res.ok) {
       setShowConfirm(false);
       setDeleting(false);
-      router.push("/dashboard/intake");
-      router.refresh();
+      if (onDeleted) {
+        onDeleted();
+      } else {
+        router.push("/dashboard/intake");
+        router.refresh();
+      }
     } else {
       setDeleting(false);
       setShowConfirm(false);

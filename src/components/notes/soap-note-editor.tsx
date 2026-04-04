@@ -20,11 +20,18 @@ const soapSchema = z.object({
   procedureCodes: z.string().max(500, "Too many codes").optional(),
 });
 
+const sessionSchema = z.object({
+  sessionNotes: z.string().min(1, "Session notes are required").max(100000, "Text is too long"),
+  diagnosisCodes: z.string().max(500, "Too many codes").optional(),
+  procedureCodes: z.string().max(500, "Too many codes").optional(),
+});
+
 type SoapFormValues = z.infer<typeof soapSchema>;
+type SessionFormValues = z.infer<typeof sessionSchema>;
 
 interface SoapNoteEditorProps {
   noteId: string;
-  initialData: Partial<SoapFormValues & { status: string }>;
+  initialData: Partial<SoapFormValues & SessionFormValues & { status: string; noteFormat: string }>;
   clientName: string;
 }
 
@@ -35,12 +42,10 @@ export default function SoapNoteEditor({
 }: SoapNoteEditorProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
+  const noteFormat = initialData.noteFormat ?? "SOAP";
+  const isSession = noteFormat === "SESSION";
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isDirty },
-  } = useForm<SoapFormValues>({
+  const soapForm = useForm<SoapFormValues>({
     resolver: zodResolver(soapSchema),
     defaultValues: {
       subjective: initialData.subjective ?? "",
@@ -52,17 +57,27 @@ export default function SoapNoteEditor({
     },
   });
 
+  const sessionForm = useForm<SessionFormValues>({
+    resolver: zodResolver(sessionSchema),
+    defaultValues: {
+      sessionNotes: initialData.sessionNotes ?? "",
+      diagnosisCodes: initialData.diagnosisCodes ?? "",
+      procedureCodes: initialData.procedureCodes ?? "",
+    },
+  });
+
+  const activeRegister = isSession ? sessionForm.register : soapForm.register;
+  const activeHandleSubmit = isSession ? sessionForm.handleSubmit : soapForm.handleSubmit;
+  const isDirty = isSession ? sessionForm.formState.isDirty : soapForm.formState.isDirty;
   const isLocked = initialData.status === "LOCKED";
 
-  // ── Save / Sign ────────────────────────────────────────────────────────────
-
-  async function onSave(data: SoapFormValues, action: "save" | "sign") {
+  async function onSave(data: SoapFormValues | SessionFormValues, action: "save" | "sign") {
     setIsSaving(true);
     try {
       const res = await fetch(`/api/notes/${noteId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, action }),
+        body: JSON.stringify({ ...data, noteFormat, action }),
       });
 
       if (!res.ok) throw new Error("Save failed");
@@ -76,38 +91,68 @@ export default function SoapNoteEditor({
   }
 
   return (
-    <form onSubmit={handleSubmit((d) => onSave(d, "save"))} className="space-y-6">
-      {/* SOAP Sections */}
-      <div className="grid grid-cols-1 gap-6">
-        {soapSections.map(({ key, label, description, color }) => (
-          <div key={key} className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-            <div className={`flex items-center gap-3 border-b border-gray-100 px-6 py-3 ${color}`}>
-              <span className="text-lg font-bold">
-                {key.charAt(0).toUpperCase()}
-              </span>
-              <div>
-                <p className="font-semibold text-gray-900">{label}</p>
-                <p className="text-xs text-gray-500">{description}</p>
-              </div>
-            </div>
-            <div className="p-4">
-              <Textarea
-                id={key}
-                aria-label={label}
-                {...register(key as keyof SoapFormValues)}
-                placeholder={`Enter ${label.toLowerCase()} notes…`}
-                className="min-h-[120px] border-0 focus:ring-0 p-0 resize-none text-sm leading-relaxed"
-                disabled={isLocked}
-              />
-              {errors[key as keyof SoapFormValues] && (
-                <p className="mt-1 text-xs text-red-500">
-                  {errors[key as keyof SoapFormValues]?.message}
-                </p>
-              )}
+    <form onSubmit={activeHandleSubmit((d) => onSave(d, "save"))} className="space-y-6">
+      {isSession ? (
+        /* ── Session Notes ─────────────────────────────────────────────── */
+        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+          <div className="flex items-center gap-3 border-b border-gray-100 px-6 py-3 bg-indigo-50">
+            <span className="text-lg font-bold">📝</span>
+            <div>
+              <p className="font-semibold text-gray-900">Session Notes</p>
+              <p className="text-xs text-gray-500">
+                Free-form notes for this session
+              </p>
             </div>
           </div>
-        ))}
-      </div>
+          <div className="p-4">
+            <Textarea
+              id="sessionNotes"
+              aria-label="Session Notes"
+              {...sessionForm.register("sessionNotes")}
+              placeholder="Enter your session notes…"
+              className="min-h-[300px] border-0 focus:ring-0 p-0 resize-none text-sm leading-relaxed"
+              disabled={isLocked}
+            />
+            {(sessionForm.formState.errors as Record<string, { message?: string }>).sessionNotes && (
+              <p className="mt-1 text-xs text-red-500">
+                {(sessionForm.formState.errors as Record<string, { message?: string }>).sessionNotes?.message}
+              </p>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* ── SOAP Sections ─────────────────────────────────────────────── */
+        <div className="grid grid-cols-1 gap-6">
+          {soapSections.map(({ key, label, description, color }) => (
+            <div key={key} className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+              <div className={`flex items-center gap-3 border-b border-gray-100 px-6 py-3 ${color}`}>
+                <span className="text-lg font-bold">
+                  {key.charAt(0).toUpperCase()}
+                </span>
+                <div>
+                  <p className="font-semibold text-gray-900">{label}</p>
+                  <p className="text-xs text-gray-500">{description}</p>
+                </div>
+              </div>
+              <div className="p-4">
+                <Textarea
+                  id={key}
+                  aria-label={label}
+                  {...soapForm.register(key as keyof SoapFormValues)}
+                  placeholder={`Enter ${label.toLowerCase()} notes…`}
+                  className="min-h-[120px] border-0 focus:ring-0 p-0 resize-none text-sm leading-relaxed"
+                  disabled={isLocked}
+                />
+                {(soapForm.formState.errors as Record<string, { message?: string }>)[key] && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {(soapForm.formState.errors as Record<string, { message?: string }>)[key]?.message}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Billing codes */}
       <div className="rounded-xl border border-gray-200 bg-white p-6">
@@ -117,7 +162,7 @@ export default function SoapNoteEditor({
             <Label htmlFor="diagnosisCodes">ICD-10 Diagnosis Codes</Label>
             <input
               id="diagnosisCodes"
-              {...register("diagnosisCodes")}
+              {...(isSession ? sessionForm.register("diagnosisCodes") : soapForm.register("diagnosisCodes"))}
               placeholder="e.g. M54.5, F32.1"
               className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               disabled={isLocked}
@@ -128,7 +173,7 @@ export default function SoapNoteEditor({
             <Label htmlFor="procedureCodes">CPT Procedure Codes</Label>
             <input
               id="procedureCodes"
-              {...register("procedureCodes")}
+              {...(isSession ? sessionForm.register("procedureCodes") : soapForm.register("procedureCodes"))}
               placeholder="e.g. 97110, 90837"
               className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               disabled={isLocked}
@@ -164,7 +209,7 @@ export default function SoapNoteEditor({
             </Button>
             <Button
               type="button"
-              onClick={handleSubmit((d) => onSave(d, "sign"))}
+              onClick={activeHandleSubmit((d) => onSave(d, "sign"))}
               disabled={isSaving}
             >
               <CheckCircle className="h-4 w-4 mr-1" />

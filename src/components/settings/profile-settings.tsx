@@ -6,15 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { validatePassword, PASSWORD_RULES } from "@/lib/utils";
+import { validatePassword, PASSWORD_RULES, formatPhone, stripPhone } from "@/lib/utils";
 
 interface Props {
-  user: { id: string; name: string | null; email: string | null; role: string };
+  user: { id: string; name: string | null; email: string | null; role: string; smsForwardNumber: string | null };
 }
 
 export default function ProfileSettings({ user }: Props) {
   const router = useRouter();
   const [name, setName] = useState(user.name ?? "");
+  const [smsForwardNumber, setSmsForwardNumber] = useState(user.smsForwardNumber ?? "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
@@ -43,7 +44,7 @@ export default function ProfileSettings({ user }: Props) {
       }
     }
 
-    const body: Record<string, string> = { name };
+    const body: Record<string, string> = { name, smsForwardNumber: stripPhone(smsForwardNumber) };
     if (newPassword) {
       body.currentPassword = currentPassword;
       body.newPassword = newPassword;
@@ -80,6 +81,21 @@ export default function ProfileSettings({ user }: Props) {
           <Label htmlFor="email">Email</Label>
           <Input id="email" value={user.email ?? ""} disabled className="mt-1 bg-gray-50" />
           <p className="mt-1 text-xs text-gray-400">Contact support to change your email.</p>
+        </div>
+        <div className="pt-2 border-t border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">SMS Notifications</h3>
+          <div>
+            <Label htmlFor="smsForwardNumber">Forward SMS replies to</Label>
+            <Input
+              id="smsForwardNumber"
+              type="tel"
+              value={smsForwardNumber}
+              onChange={(e) => setSmsForwardNumber(formatPhone(e.target.value))}
+              className="mt-1"
+              placeholder="802-258-0000"
+            />
+            <p className="mt-1 text-xs text-gray-400">When clients reply via text, forward the message to this number and email you a notification.</p>
+          </div>
         </div>
         <div className="pt-2 border-t border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">Change password</h3>
