@@ -9,6 +9,11 @@ export const metadata: Metadata = {
   title: "SoapSuds — Clinical Documentation for Modern Practices",
   description:
     "SOAP notes, scheduling, client management, and billing for healthcare SMBs.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

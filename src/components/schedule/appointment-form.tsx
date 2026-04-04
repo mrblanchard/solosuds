@@ -16,8 +16,11 @@ const schema = z.object({
   serviceId: z.string().optional(),
   startTime: z.string().min(1, "Start time is required"),
   endTime: z.string().min(1, "End time is required"),
-  notes: z.string().optional(),
+  notes: z.string().max(5000, "Notes are too long").optional(),
   sendReminder: z.boolean().optional(),
+}).refine((d) => !d.startTime || !d.endTime || new Date(d.endTime) > new Date(d.startTime), {
+  message: "End time must be after start time",
+  path: ["endTime"],
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -32,7 +35,7 @@ interface AppointmentFormProps {
   defaultValues?: Partial<FormValues>;
 }
 
-export function AppointmentForm({
+export default function AppointmentForm({
   clients,
   practitioners,
   services,
@@ -115,6 +118,7 @@ export function AppointmentForm({
         <div className="sm:col-span-2">
           <Label htmlFor="clientId">Client *</Label>
           <select
+            id="clientId"
             {...register("clientId")}
             className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
@@ -133,6 +137,7 @@ export function AppointmentForm({
         <div>
           <Label htmlFor="practitionerId">Practitioner *</Label>
           <select
+            id="practitionerId"
             {...register("practitionerId")}
             className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
@@ -151,6 +156,7 @@ export function AppointmentForm({
         <div>
           <Label htmlFor="serviceId">Service</Label>
           <select
+            id="serviceId"
             {...register("serviceId")}
             onChange={handleServiceChange}
             className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -167,6 +173,7 @@ export function AppointmentForm({
         <div>
           <Label htmlFor="startTime">Start Time *</Label>
           <input
+            id="startTime"
             type="datetime-local"
             {...register("startTime")}
             className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -179,6 +186,7 @@ export function AppointmentForm({
         <div>
           <Label htmlFor="endTime">End Time *</Label>
           <input
+            id="endTime"
             type="datetime-local"
             {...register("endTime")}
             className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -191,6 +199,7 @@ export function AppointmentForm({
         <div className="sm:col-span-2">
           <Label htmlFor="notes">Notes (internal)</Label>
           <Textarea
+            id="notes"
             {...register("notes")}
             placeholder="Any notes about this appointment…"
             className="mt-1.5"

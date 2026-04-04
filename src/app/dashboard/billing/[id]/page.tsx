@@ -121,7 +121,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
                   </td>
                   <td className="px-4 py-3 text-right text-gray-600">{item.quantity}</td>
                   <td className="px-4 py-3 text-right text-gray-600">{formatCurrency(item.unitPrice)}</td>
-                  <td className="px-4 py-3 text-right font-medium text-gray-900">{formatCurrency(item.total)}</td>
+                  <td className="px-4 py-3 text-right font-medium text-gray-900">{formatCurrency(item.total ?? item.quantity * item.unitPrice)}</td>
                 </tr>
               ))
             ) : (

@@ -1,31 +1,156 @@
 @import "tailwindcss";
+@import "react-grid-layout/css/styles.css";
+
+/* react-grid-layout theme overrides */
+.react-grid-item.react-grid-placeholder {
+  background: #bfb3e8;
+  border-radius: 12px;
+}
+.react-grid-item > .react-resizable-handle::after {
+  border-color: #7c6fac;
+}
 
 @theme {
-  /* Sage green replaces the default indigo — calming, therapeutic, earthy */
-  --color-indigo-50: #f0f5f0;
-  --color-indigo-100: #dceadd;
-  --color-indigo-200: #b7d4b9;
-  --color-indigo-300: #8bb88e;
-  --color-indigo-400: #619865;
-  --color-indigo-500: #4a804f;
-  --color-indigo-600: #3a6b41;
-  --color-indigo-700: #2d5433;
-  --color-indigo-800: #234228;
-  --color-indigo-900: #1a321f;
+  /* Dusty lavender — calming, therapeutic, distinctive */
+  --color-indigo-50: #f5f2fb;
+  --color-indigo-100: #ede9f8;
+  --color-indigo-200: #d9d0f2;
+  --color-indigo-300: #bfb3e8;
+  --color-indigo-400: #9d8fca;
+  --color-indigo-500: #7c6fac;
+  --color-indigo-600: #5a4f8a;
+  --color-indigo-700: #453c6d;
+  --color-indigo-800: #342d52;
+  --color-indigo-900: #231e37;
 
-  /* Warm neutral backgrounds */
-  --color-gray-50: #fafaf7;
-  --color-gray-100: #f3f3ee;
-  --color-gray-200: #e8e8e1;
+  /* Neutral backgrounds with subtle lavender tint */
+  --color-gray-50: #f8f7fb;
+  --color-gray-100: #f0eef7;
+  --color-gray-200: #e2dff0;
 }
 
 :root {
-  --background: #fafaf7;
-  --foreground: #2a2a25;
+  --background: #faf9fc;
+  --foreground: #1e1b2e;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Saved toast animation */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px) translateX(-50%); }
+  to { opacity: 1; transform: translateY(0) translateX(-50%); }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* FullCalendar mobile toolbar — stack sections vertically */
+@media (max-width: 639px) {
+  .fc .fc-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .fc .fc-toolbar-title {
+    width: 100%;
+    order: -1;
+    text-align: center;
+    font-size: 1.1rem;
+  }
+
+  .fc .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+  }
+
+  .fc .fc-toolbar-chunk:first-child,
+  .fc .fc-toolbar-chunk:last-child {
+    flex: 1;
+  }
+
+  .fc .fc-toolbar-chunk:first-child {
+    justify-content: flex-start;
+  }
+
+  .fc .fc-toolbar-chunk:last-child {
+    justify-content: flex-end;
+  }
+
+  .fc .fc-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* FullCalendar button theme — match app purple */
+.fc .fc-button-primary {
+  background-color: var(--color-indigo-600);
+  border-color: var(--color-indigo-600);
+}
+
+.fc .fc-button-primary:hover {
+  background-color: var(--color-indigo-700);
+  border-color: var(--color-indigo-700);
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background-color: var(--color-indigo-800);
+  border-color: var(--color-indigo-800);
+}
+
+.fc .fc-button-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(90, 79, 138, 0.4);
+}
+
+.fc .fc-button-primary:disabled {
+  background-color: var(--color-indigo-400);
+  border-color: var(--color-indigo-400);
+}
+
+/* FullCalendar event colors — darker backgrounds for readability */
+.fc .fc-event,
+.fc .fc-timegrid-event,
+.fc .fc-daygrid-event {
+  background-color: var(--color-indigo-600) !important;
+  border-color: var(--color-indigo-700) !important;
+  color: #fff !important;
+}
+
+.fc .fc-event .fc-event-main {
+  color: #fff;
+}
+
+.fc .fc-event .fc-event-time,
+.fc .fc-event .fc-event-title {
+  color: #fff;
+}
+
+/* FullCalendar today column — light violet instead of yellow */
+.fc .fc-day-today {
+  background-color: var(--color-indigo-50) !important;
+}
+
+/* FullCalendar non-business hours — light violet instead of grey */
+.fc .fc-non-business {
+  background-color: rgba(245, 242, 251, 0.7) !important;
+}
+
+/* FullCalendar grid lines — deep purple */
+.fc td,
+.fc th {
+  border-color: var(--color-indigo-300) !important;
+}
+
+.fc .fc-scrollgrid {
+  border-color: var(--color-indigo-300) !important;
+}
+
+.fc .fc-timegrid-slot {
+  border-color: var(--color-indigo-300) !important;
 }

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import PublicIntakeForm from "@/components/intake/public-intake-form";
+import { AppFooter } from "@/components/layout/app-footer";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -16,7 +17,7 @@ export default async function PublicIntakePage({ params }: Props) {
   if (!form || !form.isActive) notFound();
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-12">
+    <div className="min-h-dvh bg-gray-50 px-4 py-12">
       <div className="mx-auto max-w-xl">
         <div className="mb-8 text-center">
           <p className="text-sm text-gray-500">{form.organization.name}</p>
@@ -27,6 +28,7 @@ export default async function PublicIntakePage({ params }: Props) {
         </div>
         <PublicIntakeForm formId={form.id} fields={form.fields as any[]} />
       </div>
+      <AppFooter />
     </div>
   );
 }

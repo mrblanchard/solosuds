@@ -40,10 +40,12 @@ export async function POST(req: Request) {
   });
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
-  const subtotal = lineItems.reduce(
-    (sum, item) => sum + item.quantity * item.unitPrice,
-    0
-  );
+  const enrichedItems = lineItems.map((item) => ({
+    ...item,
+    total: item.quantity * item.unitPrice,
+  }));
+
+  const subtotal = enrichedItems.reduce((sum, item) => sum + item.total, 0);
   const total = subtotal + tax;
 
   // Generate invoice number
@@ -59,7 +61,7 @@ export async function POST(req: Request) {
       tax,
       total,
       dueDate: dueDate ? new Date(dueDate) : undefined,
-      lineItems: lineItems as never,
+      lineItems: enrichedItems as never,
       status: "DRAFT",
     },
   });

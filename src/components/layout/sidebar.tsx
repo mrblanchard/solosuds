@@ -14,63 +14,221 @@ import {
   Settings,
   LogOut,
   ClipboardList,
-  Leaf,
+  X,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/schedule", label: "Schedule", icon: CalendarDays },
-  { href: "/dashboard/clients", label: "Clients", icon: Users },
-  { href: "/dashboard/notes", label: "SOAP Notes", icon: FileText },
-  { href: "/dashboard/intake", label: "Intake Forms", icon: ClipboardList },
-  { href: "/dashboard/messages", label: "Messages", icon: MessageSquare },
-  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
-];
+type PracticeType = "THERAPY" | "SALON" | "MEDICAL" | "FITNESS" | "OTHER" | undefined;
 
-export function Sidebar() {
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const ALL_NAV: Record<string, NavItem> = {
+  dashboard:  { href: "/dashboard",          label: "Dashboard",    icon: LayoutDashboard },
+  schedule:   { href: "/dashboard/schedule", label: "Schedule",     icon: CalendarDays },
+  clients:    { href: "/dashboard/clients",  label: "Clients",      icon: Users },
+  notes:      { href: "/dashboard/notes",    label: "SOAP Notes",   icon: FileText },
+  intake:     { href: "/dashboard/intake",   label: "Intake Forms", icon: ClipboardList },
+  messages:   { href: "/dashboard/messages", label: "Messages",     icon: MessageSquare },
+  billing:    { href: "/dashboard/billing",  label: "Billing",      icon: CreditCard },
+  settings:   { href: "/dashboard/settings", label: "Settings",     icon: Settings },
+};
+
+// Per-type nav order + optional label overrides
+const NAV_CONFIG: Record<NonNullable<PracticeType>, { order: string[]; labels?: Partial<Record<string, string>> }> = {
+  THERAPY: {
+    order: ["dashboard", "schedule", "clients", "notes", "intake", "messages", "billing", "settings"],
+  },
+  SALON: {
+    order: ["dashboard", "schedule", "clients", "billing", "messages", "notes", "intake", "settings"],
+    labels: { notes: "Session Notes" },
+  },
+  MEDICAL: {
+    order: ["dashboard", "clients", "intake", "notes", "schedule", "messages", "billing", "settings"],
+  },
+  FITNESS: {
+    order: ["dashboard", "schedule", "clients", "billing", "messages", "notes", "intake", "settings"],
+    labels: { notes: "Session Notes", intake: "Health Forms" },
+  },
+  OTHER: {
+    order: ["dashboard", "schedule", "clients", "notes", "intake", "messages", "billing", "settings"],
+  },
+};
+
+const PRACTICE_LABELS: Record<NonNullable<PracticeType>, string> = {
+  THERAPY: "Therapy & Bodywork",
+  SALON:   "Salon & Beauty",
+  MEDICAL: "Medical Practice",
+  FITNESS: "Fitness & Wellness",
+  OTHER:   "General Practice",
+};
+
+function buildNav(practiceType: PracticeType): NavItem[] {
+  const config = NAV_CONFIG[practiceType ?? "OTHER"];
+  return config.order.map((key) => {
+    const item = ALL_NAV[key];
+    const labelOverride = config.labels?.[key];
+    return labelOverride ? { ...item, label: labelOverride } : item;
+  });
+}
+
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
+  practiceType?: PracticeType;
+}
+
+export function Sidebar({
+  mobileOpen = false,
+  onMobileClose,
+  collapsed = false,
+  onToggleCollapse,
+  practiceType,
+}: SidebarProps) {
   const pathname = usePathname();
+  const navItems = buildNav(practiceType);
+
+  function sidebarContent({ mobile }: { mobile: boolean }) {
+    const isCollapsed = !mobile && collapsed;
+    return (
+      <>
+        {/* Logo */}
+        <div className={cn(
+          "flex h-16 items-center border-b border-gray-200",
+          isCollapsed ? "justify-center px-2" : "px-6"
+        )}>
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <img
+              src="/icon.svg"
+              alt="SoapSuds"
+              style={{ height: isCollapsed ? "32px" : "48px", width: "auto" }}
+            />
+            {!isCollapsed && (
+              <span className="text-xs font-medium text-gray-400 italic">Soap Suds</span>
+            )}
+          </Link>
+        </div>
+
+        {/* Practice type badge + close (mobile) / collapse (desktop) toggle */}
+        {!isCollapsed ? (
+          <div className="flex items-center justify-between px-5 py-2 border-b border-gray-100">
+            {practiceType && (
+              <span className="text-xs font-medium text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">
+                {PRACTICE_LABELS[practiceType]}
+              </span>
+            )}
+            {mobile ? (
+              <button
+                onClick={onMobileClose}
+                className="ml-auto rounded-lg p-1 text-gray-400 hover:bg-gray-100 transition-colors"
+                aria-label="Close menu"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            ) : (
+              <button
+                onClick={onToggleCollapse}
+                className="ml-auto rounded-lg p-1 text-gray-400 hover:bg-gray-100 transition-colors"
+                title="Collapse sidebar"
+              >
+                <PanelLeftClose className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        ) : !mobile && (
+          <div className="flex justify-center py-2 border-b border-gray-100">
+            <button
+              onClick={onToggleCollapse}
+              className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 transition-colors"
+              title="Expand sidebar"
+            >
+              <PanelLeftOpen className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Navigation */}
+        <nav className={cn(
+          "flex-1 space-y-1 overflow-y-auto py-4",
+          isCollapsed ? "px-2" : "px-3"
+        )}>
+          {navItems.map(({ href, label, icon: Icon }) => {
+            const active = pathname === href || pathname.startsWith(href + "/");
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={mobile ? onMobileClose : undefined}
+                title={isCollapsed ? label : undefined}
+                className={cn(
+                  "flex items-center rounded-lg text-sm font-medium transition-colors",
+                  isCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2",
+                  active
+                    ? "bg-indigo-50 text-indigo-700"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                )}
+              >
+                <Icon className={cn("h-5 w-5 shrink-0", active ? "text-indigo-600" : "text-gray-400")} />
+                {!isCollapsed && <span>{label}</span>}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Sign out */}
+        <div className="border-t border-gray-200 p-3 space-y-1">
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className={cn(
+              "flex w-full items-center rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors",
+              isCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2"
+            )}
+            title={isCollapsed ? "Sign out" : undefined}
+          >
+            <LogOut className="h-5 w-5 text-gray-400" />
+            {!isCollapsed && <span>Sign out</span>}
+          </button>
+        </div>
+      </>
+    );
+  }
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-gray-200 bg-white">
-      {/* Logo */}
-      <div className="flex h-16 items-center gap-2 border-b border-gray-200 px-6">
-        <Leaf className="h-7 w-7 text-indigo-600" />
-        <span className="text-xl font-bold text-gray-900">SoapSuds</span>
-      </div>
+    <>
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 lg:hidden bg-black/30"
+          onClick={onMobileClose}
+          aria-hidden="true"
+        />
+      )}
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + "/");
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                active
-                  ? "bg-indigo-50 text-indigo-700"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              )}
-            >
-              <Icon className={cn("h-5 w-5", active ? "text-indigo-600" : "text-gray-400")} />
-              {label}
-            </Link>
-          );
-        })}
-      </nav>
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex h-full w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-200 lg:hidden",
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {sidebarContent({ mobile: true })}
+      </aside>
 
-      {/* Sign out */}
-      <div className="border-t border-gray-200 p-3">
-        <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-        >
-          <LogOut className="h-5 w-5 text-gray-400" />
-          Sign out
-        </button>
-      </div>
-    </aside>
+      {/* Desktop sidebar — collapsible */}
+      <aside
+        className={cn(
+          "hidden lg:flex h-full flex-col border-r border-gray-200 bg-white transition-[width] duration-200 shrink-0",
+          collapsed ? "w-16" : "w-64"
+        )}
+      >
+        {sidebarContent({ mobile: false })}
+      </aside>
+    </>
   );
 }
+

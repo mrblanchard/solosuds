@@ -2,10 +2,9 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Copy, Trash2, Send } from "lucide-react";
+import { Plus } from "lucide-react";
+import IntakeFormGrid from "@/components/intake/intake-form-grid";
 
 export default async function IntakeFormsPage() {
   const session = await auth();
@@ -16,7 +15,7 @@ export default async function IntakeFormsPage() {
     include: {
       _count: { select: { submissions: true } },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
   });
 
   return (
@@ -44,45 +43,16 @@ export default async function IntakeFormsPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {forms.map((form) => (
-            <div
-              key={form.id}
-              className="rounded-xl border border-gray-100 p-5 hover:border-indigo-200 hover:shadow-sm transition-all"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-semibold text-gray-900">{form.title}</h3>
-                  {form.description && (
-                    <p className="mt-1 text-sm text-gray-500 line-clamp-2">{form.description}</p>
-                  )}
-                </div>
-                <Badge variant={form.isActive ? "success" : "secondary"}>
-                  {form.isActive ? "Active" : "Inactive"}
-                </Badge>
-              </div>
-              <div className="mt-3 text-xs text-gray-400">
-                {form._count.submissions} submission{form._count.submissions !== 1 ? "s" : ""} ·
-                Created {formatDate(form.createdAt)}
-              </div>
-              <div className="mt-4 flex items-center gap-2">
-                <Link href={`/dashboard/intake/${form.id}`}>
-                  <Button size="sm" variant="outline">Edit</Button>
-                </Link>
-                <Link href={`/dashboard/intake/${form.id}/submissions`}>
-                  <Button size="sm" variant="ghost">Submissions</Button>
-                </Link>
-                <button
-                  title="Copy link"
-                  className="ml-auto text-gray-400 hover:text-indigo-600 transition-colors"
-                  onClick={() => navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_APP_URL}/intake/${form.id}`)}
-                >
-                  <Copy className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <IntakeFormGrid
+          forms={forms.map((f) => ({
+            id: f.id,
+            title: f.title,
+            description: f.description,
+            isActive: f.isActive,
+            createdAt: f.createdAt.toISOString(),
+            _count: f._count,
+          }))}
+        />
       )}
     </div>
   );

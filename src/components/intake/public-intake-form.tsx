@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
+import { formatPhone, normalizeEmail } from "@/lib/utils";
 
 interface Field {
   id: string;
-  type: "text" | "textarea" | "select" | "checkbox" | "date" | "heading";
+  type: "text" | "textarea" | "select" | "checkbox" | "date" | "heading" | "phone" | "email";
   label: string;
   placeholder?: string;
   required: boolean;
@@ -92,20 +95,43 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
 
         return (
           <div key={field.id}>
-            <Label>
+            <Label htmlFor={field.id}>
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             {field.type === "text" && (
               <Input
+                id={field.id}
                 value={(values[field.id] as string) ?? ""}
                 onChange={(e) => set(field.id, e.target.value)}
                 placeholder={field.placeholder}
                 className="mt-1"
               />
             )}
+            {field.type === "phone" && (
+              <Input
+                id={field.id}
+                type="tel"
+                value={(values[field.id] as string) ?? ""}
+                onChange={(e) => set(field.id, formatPhone(e.target.value))}
+                placeholder={field.placeholder ?? "802-258-0000"}
+                className="mt-1"
+              />
+            )}
+            {field.type === "email" && (
+              <Input
+                id={field.id}
+                type="email"
+                value={(values[field.id] as string) ?? ""}
+                onChange={(e) => set(field.id, e.target.value)}
+                onBlur={(e) => set(field.id, normalizeEmail(e.target.value))}
+                placeholder={field.placeholder ?? "jane@example.com"}
+                className="mt-1"
+              />
+            )}
             {field.type === "textarea" && (
               <Textarea
+                id={field.id}
                 value={(values[field.id] as string) ?? ""}
                 onChange={(e) => set(field.id, e.target.value)}
                 placeholder={field.placeholder}
@@ -114,12 +140,14 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
             )}
             {field.type === "date" && (
               <DateWheelPicker
+                id={field.id}
                 value={(values[field.id] as string) ?? ""}
                 onChange={(v) => set(field.id, v)}
               />
             )}
             {field.type === "select" && (
               <select
+                id={field.id}
                 value={(values[field.id] as string) ?? ""}
                 onChange={(e) => set(field.id, e.target.value)}
                 className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"

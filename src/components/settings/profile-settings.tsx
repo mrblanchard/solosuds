@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { validatePassword, PASSWORD_RULES } from "@/lib/utils";
 
 interface Props {
   user: { id: string; name: string | null; email: string | null; role: string };
@@ -22,6 +23,26 @@ export default function ProfileSettings({ user }: Props) {
   async function saveProfile() {
     setSaving(true);
     setMessage(null);
+
+    if (!name.trim()) {
+      setMessage("Name is required.");
+      setSaving(false);
+      return;
+    }
+    if (name.length > 200) {
+      setMessage("Name is too long.");
+      setSaving(false);
+      return;
+    }
+    if (newPassword) {
+      const pwError = validatePassword(newPassword);
+      if (pwError) {
+        setMessage(pwError);
+        setSaving(false);
+        return;
+      }
+    }
+
     const body: Record<string, string> = { name };
     if (newPassword) {
       body.currentPassword = currentPassword;
@@ -49,22 +70,24 @@ export default function ProfileSettings({ user }: Props) {
       <CardHeader>
         <CardTitle>Your Profile</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
+        <form onSubmit={(e) => { e.preventDefault(); saveProfile(); }} className="space-y-4">
         <div>
-          <Label>Full name</Label>
-          <Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1" />
+          <Label htmlFor="fullName">Full name</Label>
+          <Input id="fullName" value={name} onChange={(e) => setName(e.target.value)} className="mt-1" />
         </div>
         <div>
-          <Label>Email</Label>
-          <Input value={user.email ?? ""} disabled className="mt-1 bg-gray-50" />
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" value={user.email ?? ""} disabled className="mt-1 bg-gray-50" />
           <p className="mt-1 text-xs text-gray-400">Contact support to change your email.</p>
         </div>
         <div className="pt-2 border-t border-gray-100">
-          <p className="text-sm font-medium text-gray-700 mb-3">Change password</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Change password</h3>
           <div className="space-y-3">
             <div>
-              <Label>Current password</Label>
+              <Label htmlFor="currentPassword">Current password</Label>
               <Input
+                id="currentPassword"
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
@@ -73,14 +96,16 @@ export default function ProfileSettings({ user }: Props) {
               />
             </div>
             <div>
-              <Label>New password</Label>
+              <Label htmlFor="newPassword">New password</Label>
               <Input
+                id="newPassword"
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="mt-1"
-                placeholder="Minimum 8 characters"
+                placeholder="Minimum 12 characters"
               />
+              <p className="mt-1 text-xs text-gray-400">{PASSWORD_RULES}</p>
             </div>
           </div>
         </div>
@@ -89,9 +114,10 @@ export default function ProfileSettings({ user }: Props) {
             {message}
           </p>
         )}
-        <Button onClick={saveProfile} disabled={saving}>
+        <Button type="submit" disabled={saving}>
           {saving ? "Saving…" : "Save Profile"}
         </Button>
+        </form>
       </CardContent>
     </Card>
   );

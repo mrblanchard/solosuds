@@ -1,6 +1,34 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { PracticeType } from "@prisma/client";
+
+// Starter services seeded per practice type (price in cents)
+const STARTER_SERVICES: Record<PracticeType, { name: string; durationMinutes: number; price: number }[]> = {
+  THERAPY: [
+    { name: "Swedish Massage (60 min)", durationMinutes: 60, price: 9000 },
+    { name: "Deep Tissue (90 min)", durationMinutes: 90, price: 12000 },
+    { name: "Initial Assessment", durationMinutes: 60, price: 15000 },
+    { name: "Follow-up Session", durationMinutes: 45, price: 8000 },
+  ],
+  SALON: [
+    { name: "Haircut", durationMinutes: 45, price: 5000 },
+    { name: "Color & Style", durationMinutes: 120, price: 12000 },
+    { name: "Blowout", durationMinutes: 45, price: 4000 },
+    { name: "Full Set Nails", durationMinutes: 60, price: 6500 },
+  ],
+  MEDICAL: [
+    { name: "New Patient Consultation", durationMinutes: 60, price: 25000 },
+    { name: "Follow-up Visit", durationMinutes: 30, price: 15000 },
+    { name: "Annual Wellness Exam", durationMinutes: 60, price: 20000 },
+  ],
+  FITNESS: [
+    { name: "Personal Training (60 min)", durationMinutes: 60, price: 8000 },
+    { name: "Group Class", durationMinutes: 60, price: 2500 },
+    { name: "Fitness Assessment", durationMinutes: 60, price: 7500 },
+  ],
+  OTHER: [],
+};
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -12,10 +40,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Organization already exists" }, { status: 400 });
   }
 
-  const { name } = await req.json();
+  const body = await req.json();
+  const { name, practiceType } = body;
+
   if (!name?.trim()) {
     return NextResponse.json({ error: "Practice name is required" }, { status: 400 });
   }
+
+  const type: PracticeType = Object.values(PracticeType).includes(practiceType)
+    ? practiceType
+    : PracticeType.OTHER;
 
   // Generate a unique slug from the name
   const baseSlug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -26,6 +60,7 @@ export async function POST(req: Request) {
     data: {
       name: name.trim(),
       slug,
+      practiceType: type,
     },
   });
 
@@ -34,5 +69,14 @@ export async function POST(req: Request) {
     data: { organizationId: org.id, role: "OWNER" },
   });
 
+  // Seed starter services for the chosen practice type
+  const starterServices = STARTER_SERVICES[type];
+  if (starterServices.length > 0) {
+    await db.service.createMany({
+      data: starterServices.map((s) => ({ ...s, organizationId: org.id })),
+    });
+  }
+
   return NextResponse.json({ success: true });
 }
+

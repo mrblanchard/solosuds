@@ -6,7 +6,12 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createPrismaClient() {
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+  const adapter = new PrismaPg({
+    connectionString: process.env.DATABASE_URL!,
+    // Keep a pool of connections alive so Neon doesn't cold-start on every request.
+    // max=3 is safe for Neon's free tier; bump to 10 on paid plans.
+    max: process.env.NODE_ENV === "production" ? 10 : 3,
+  });
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],

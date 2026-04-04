@@ -3,26 +3,48 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import TableSearch from "@/components/ui/table-search";
+import SortHeader from "@/components/ui/sort-header";
 import { CreditCard, Plus } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import { Prisma } from "@prisma/client";
+
+const SORT_MAP: Record<string, Prisma.InvoiceOrderByWithRelationInput> = {
+  client_asc:  { client: { lastName: "asc" } },
+  client_desc: { client: { lastName: "desc" } },
+  amount_asc:  { total: "asc" },
+  amount_desc: { total: "desc" },
+  date_asc:    { createdAt: "asc" },
+  date_desc:   { createdAt: "desc" },
+};
 
 export default async function BillingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; sort?: string }>;
 }) {
   const session = await auth();
   const orgId = session?.user?.organizationId!;
   const params = await searchParams;
+
+  const orderBy = SORT_MAP[params.sort ?? ""] ?? { createdAt: "desc" };
 
   const [invoices, summary] = await Promise.all([
     db.invoice.findMany({
       where: {
         organizationId: orgId,
         ...(params.status ? { status: params.status as never } : {}),
+        ...(params.q
+          ? {
+              OR: [
+                { client: { firstName: { contains: params.q, mode: "insensitive" } } },
+                { client: { lastName:  { contains: params.q, mode: "insensitive" } } },
+              ],
+            }
+          : {}),
       },
       include: { client: { select: { firstName: true, lastName: true } } },
-      orderBy: { createdAt: "desc" },
+      orderBy,
       take: 50,
     }),
     db.invoice.groupBy({
@@ -72,21 +94,30 @@ export default async function BillingPage({
         ))}
       </div>
 
+      {/* Search */}
+      <TableSearch placeholder="Search by client name…" className="max-w-sm" />
+
       {/* Status filter */}
       <div className="flex gap-2 border-b border-gray-200">
-        {["", "DRAFT", "SENT", "PAID", "OVERDUE", "VOID"].map((s) => (
-          <Link
-            key={s}
-            href={`/dashboard/billing${s ? `?status=${s}` : ""}`}
-            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-              (params.status ?? "") === s
-                ? "border-indigo-600 text-indigo-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {s || "All"}
-          </Link>
-        ))}
+        {["", "DRAFT", "SENT", "PAID", "OVERDUE", "VOID"].map((s) => {
+          const base = new URLSearchParams();
+          if (s) base.set("status", s);
+          if (params.q) base.set("q", params.q);
+          if (params.sort) base.set("sort", params.sort);
+          return (
+            <Link
+              key={s}
+              href={`/dashboard/billing${base.toString() ? `?${base.toString()}` : ""}`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                (params.status ?? "") === s
+                  ? "border-indigo-600 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {s || "All"}
+            </Link>
+          );
+        })}
       </div>
 
       {invoices.length === 0 ? (
@@ -103,14 +134,15 @@ export default async function BillingPage({
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+          <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Invoice</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Client</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Date</th>
+                <SortHeader field="client" label="Client" />
+                <SortHeader field="date" label="Date" />
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Due</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Amount</th>
+                <SortHeader field="amount" label="Amount" />
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Status</th>
                 <th className="relative px-6 py-3" />
               </tr>
@@ -146,6 +178,7 @@ export default async function BillingPage({
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

@@ -27,7 +27,7 @@ interface NewNoteFormProps {
   duplicateFromId?: string;
 }
 
-export function NewNoteForm({
+export default function NewNoteForm({
   clients,
   templates,
   defaultClientId,
@@ -75,6 +75,7 @@ export function NewNoteForm({
       <div>
         <Label htmlFor="clientId">Client *</Label>
         <select
+          id="clientId"
           {...register("clientId")}
           className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
@@ -93,6 +94,7 @@ export function NewNoteForm({
       <div>
         <Label htmlFor="sessionDate">Session Date *</Label>
         <DateWheelPicker
+          id="sessionDate"
           value={watch("sessionDate") ?? ""}
           onChange={(v) => setValue("sessionDate", v, { shouldValidate: true })}
         />
@@ -104,6 +106,7 @@ export function NewNoteForm({
       <div>
         <Label htmlFor="templateId">Template (optional)</Label>
         <select
+          id="templateId"
           {...register("templateId")}
           className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -9,12 +9,13 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Leaf, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { AppFooter } from "@/components/layout/app-footer";
 
 const schema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.string().email("Invalid email address").max(254, "Email is too long"),
+  password: z.string().min(1, "Password is required"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -37,8 +38,28 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"));
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [urlErrorMessage, setUrlErrorMessage] = useState<string | null>(null);
+
+  // Read URL error only after mount to avoid server/client hydration mismatch
+  useEffect(() => {
+    const urlError = searchParams.get("error");
+    if (!urlError) return;
+    const messages: Record<string, string> = {
+      OAuthAccountNotLinked:
+        "No account found for this Google address. Please sign up for a free trial first.",
+      OAuthSignin:
+        "No account found for this Google address. Please sign up for a free trial first.",
+      OAuthCallback:
+        "No account found for this Google address. Please sign up for a free trial first.",
+      CredentialsSignin: "Invalid email or password.",
+    };
+    setUrlErrorMessage(messages[urlError] ?? "Sign-in failed. Please try again.");
+  }, [searchParams]);
+
+  const urlError = searchParams.get("error");
+  const error = formError ?? urlErrorMessage;
 
   const {
     register,
@@ -48,7 +69,7 @@ function LoginForm() {
 
   async function onSubmit(data: FormValues) {
     setIsLoading(true);
-    setError(null);
+    setFormError(null);
     try {
       const result = await signIn("credentials", {
         email: data.email,
@@ -57,7 +78,7 @@ function LoginForm() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password.");
+        setFormError("Invalid email or password.");
         return;
       }
 
@@ -74,16 +95,14 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md">
+    <div className="flex min-h-dvh flex-col bg-gray-50">
+      <div className="flex flex-1 items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 shadow-lg mb-3">
-            <Leaf className="h-8 w-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">SoapSuds</h1>
+          <img src="/icon.svg" alt="SoapSuds" style={{height:"60px",width:"auto"}} className="mb-2" />
           <p className="mt-1 text-sm text-gray-500">
-            Clinical documentation made simple
+            Care without the chaos
           </p>
         </div>
 
@@ -93,6 +112,14 @@ function LoginForm() {
           {error && (
             <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
               {error}
+              {urlError === "OAuthAccountNotLinked" && (
+                <Link
+                  href="/register"
+                  className="block mt-2 font-medium text-indigo-600 hover:text-indigo-700"
+                >
+                  → Start your free trial
+                </Link>
+              )}
             </div>
           )}
 
@@ -187,14 +214,16 @@ function LoginForm() {
         <p className="mt-4 text-center text-xs text-gray-400">
           HIPAA-compliant · End-to-end encrypted · SOC 2 Type II
         </p>
+        </div>
       </div>
+      <AppFooter />
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-gray-50" />}>
+    <Suspense fallback={<div className="flex min-h-dvh items-center justify-center bg-gray-50" />}>
       <LoginForm />
     </Suspense>
   );

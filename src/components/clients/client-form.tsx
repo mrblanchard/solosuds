@@ -11,24 +11,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
+import { AddressAutocomplete, type ParsedAddress } from "@/components/ui/address-autocomplete";
+import { Loader2 } from "lucide-react";
+import { formatPhone, stripPhone, titleCase, normalizeEmail, formatZip, normalizeWhitespace } from "@/lib/utils";
+
+const optionalPhone = z.string().regex(/^[+]?[\d-]{7,20}$/, "Invalid phone number").or(z.literal("")).optional();
 
 const schema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
-  phone: z.string().optional(),
-  dateOfBirth: z.string().optional(),
-  gender: z.string().optional(),
-  pronouns: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  zip: z.string().optional(),
-  country: z.string().optional(),
-  emergencyName: z.string().optional(),
-  emergencyPhone: z.string().optional(),
-  referralSource: z.string().optional(),
-  internalNotes: z.string().optional(),
+  firstName: z.string().min(1, "First name is required").max(100, "First name is too long"),
+  lastName: z.string().min(1, "Last name is required").max(100, "Last name is too long"),
+  email: z.string().email("Invalid email").max(254).optional().or(z.literal("")),
+  phone: optionalPhone,
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD format").or(z.literal("")).optional(),
+  gender: z.string().max(50).optional(),
+  pronouns: z.string().max(50).optional(),
+  address: z.string().max(500).optional(),
+  city: z.string().max(100).optional(),
+  state: z.string().max(100).optional(),
+  zip: z.string().regex(/^[A-Za-z0-9\s-]{3,10}$/, "Invalid postal code").or(z.literal("")).optional(),
+  country: z.string().max(100).optional(),
+  emergencyName: z.string().max(200).optional(),
+  emergencyPhone: optionalPhone,
+  referralSource: z.string().max(200).optional(),
+  internalNotes: z.string().max(5000).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -38,7 +43,7 @@ interface ClientFormProps {
   clientId?: string;
 }
 
-export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
+export default function ClientForm({ defaultValues, clientId }: ClientFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -53,8 +58,17 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
     defaultValues: defaultValues ?? { country: "US" },
   });
 
-  async function onSubmit(data: FormValues) {
+  async function onSubmit(raw: FormValues) {
     setIsLoading(true);
+    const data = {
+      ...raw,
+      firstName: normalizeWhitespace(raw.firstName),
+      lastName: normalizeWhitespace(raw.lastName),
+      email: raw.email ? normalizeEmail(raw.email) : raw.email,
+      phone: raw.phone ? stripPhone(raw.phone) : raw.phone,
+      emergencyPhone: raw.emergencyPhone ? stripPhone(raw.emergencyPhone) : raw.emergencyPhone,
+      emergencyName: raw.emergencyName ? normalizeWhitespace(raw.emergencyName) : raw.emergencyName,
+    };
     try {
       const url = clientId ? `/api/clients/${clientId}` : "/api/clients";
       const method = clientId ? "PATCH" : "POST";
@@ -83,26 +97,37 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
           <CardTitle>Personal Information</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="First Name *" error={errors.firstName?.message}>
-            <Input {...register("firstName")} placeholder="Jane" />
+          <FormField label="First Name *" fieldId="firstName" error={errors.firstName?.message}>
+            <Input
+              id="firstName"
+              {...register("firstName")}
+              placeholder="Jane"
+              onBlur={(e) => setValue("firstName", titleCase(e.target.value.trim()))}
+            />
           </FormField>
-          <FormField label="Last Name *" error={errors.lastName?.message}>
-            <Input {...register("lastName")} placeholder="Smith" />
+          <FormField label="Last Name *" fieldId="lastName" error={errors.lastName?.message}>
+            <Input
+              id="lastName"
+              {...register("lastName")}
+              placeholder="Smith"
+              onBlur={(e) => setValue("lastName", titleCase(e.target.value.trim()))}
+            />
           </FormField>
-          <FormField label="Date of Birth" error={errors.dateOfBirth?.message}>
+          <FormField label="Date of Birth" fieldId="dob" error={errors.dateOfBirth?.message}>
             <DateWheelPicker
+              id="dob"
               value={watch("dateOfBirth") ?? ""}
               onChange={(v) => setValue("dateOfBirth", v, { shouldValidate: true })}
             />
           </FormField>
-          <FormField label="Gender">
-            <Input {...register("gender")} placeholder="e.g. Female, Male, Non-binary" />
+          <FormField label="Gender" fieldId="gender">
+            <Input id="gender" {...register("gender")} placeholder="e.g. Female, Male, Non-binary" />
           </FormField>
-          <FormField label="Pronouns">
-            <Input {...register("pronouns")} placeholder="e.g. she/her, they/them" />
+          <FormField label="Pronouns" fieldId="pronouns">
+            <Input id="pronouns" {...register("pronouns")} placeholder="e.g. she/her, they/them" />
           </FormField>
-          <FormField label="Referral Source">
-            <Input {...register("referralSource")} placeholder="e.g. Google, Friend" />
+          <FormField label="Referral Source" fieldId="referralSource">
+            <Input id="referralSource" {...register("referralSource")} placeholder="e.g. Google, Friend" />
           </FormField>
         </CardContent>
       </Card>
@@ -113,26 +138,57 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
           <CardTitle>Contact Information</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="Email" error={errors.email?.message}>
-            <Input type="email" {...register("email")} placeholder="jane@example.com" />
+          <FormField label="Email" fieldId="email" error={errors.email?.message}>
+            <Input
+              id="email"
+              type="email"
+              {...register("email")}
+              placeholder="jane@example.com"
+              onBlur={(e) => setValue("email", normalizeEmail(e.target.value))}
+            />
           </FormField>
-          <FormField label="Phone">
-            <Input type="tel" {...register("phone")} placeholder="+1 (555) 000-0000" />
+          <FormField label="Phone" fieldId="phone">
+            <Input
+              id="phone"
+              type="tel"
+              name="phone"
+              value={watch("phone") ?? ""}
+              onChange={(e) => setValue("phone", formatPhone(e.target.value))}
+              placeholder="802-258-0000"
+            />
           </FormField>
-          <FormField label="Address" className="sm:col-span-2">
-            <Input {...register("address")} placeholder="123 Main St" />
+          <FormField label="Address" fieldId="address" className="sm:col-span-2">
+            <AddressAutocomplete
+              id="address"
+              value={watch("address") ?? ""}
+              onChange={(v) => setValue("address", v)}
+              onSelect={(parsed: ParsedAddress) => {
+                setValue("address", parsed.address);
+                setValue("city", parsed.city);
+                setValue("state", parsed.state);
+                setValue("zip", parsed.zip, { shouldValidate: true });
+                setValue("country", parsed.country);
+              }}
+              placeholder="Start typing an address…"
+            />
           </FormField>
-          <FormField label="City">
-            <Input {...register("city")} placeholder="New York" />
+          <FormField label="City" fieldId="city">
+            <Input id="city" {...register("city")} placeholder="New York" />
           </FormField>
-          <FormField label="State">
-            <Input {...register("state")} placeholder="NY" />
+          <FormField label="State" fieldId="state">
+            <Input id="state" {...register("state")} placeholder="NY" />
           </FormField>
-          <FormField label="ZIP Code">
-            <Input {...register("zip")} placeholder="10001" />
+          <FormField label="ZIP Code" fieldId="zip" error={errors.zip?.message}>
+            <Input
+              id="zip"
+              name="zip"
+              value={watch("zip") ?? ""}
+              onChange={(e) => setValue("zip", formatZip(e.target.value))}
+              placeholder="10001"
+            />
           </FormField>
-          <FormField label="Country">
-            <Input {...register("country")} placeholder="US" />
+          <FormField label="Country" fieldId="country">
+            <Input id="country" {...register("country")} placeholder="US" />
           </FormField>
         </CardContent>
       </Card>
@@ -143,11 +199,23 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
           <CardTitle>Emergency Contact</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="Name">
-            <Input {...register("emergencyName")} placeholder="John Smith" />
+          <FormField label="Name" fieldId="emergencyName">
+            <Input
+              id="emergencyName"
+              {...register("emergencyName")}
+              placeholder="John Smith"
+              onBlur={(e) => setValue("emergencyName", titleCase(e.target.value.trim()))}
+            />
           </FormField>
-          <FormField label="Phone">
-            <Input type="tel" {...register("emergencyPhone")} placeholder="+1 (555) 000-0000" />
+          <FormField label="Phone" fieldId="emergencyPhone">
+            <Input
+              id="emergencyPhone"
+              type="tel"
+              name="emergencyPhone"
+              value={watch("emergencyPhone") ?? ""}
+              onChange={(e) => setValue("emergencyPhone", formatPhone(e.target.value))}
+              placeholder="802-258-0000"
+            />
           </FormField>
         </CardContent>
       </Card>
@@ -155,10 +223,13 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
       {/* Internal Notes */}
       <Card>
         <CardHeader>
-          <CardTitle>Internal Notes</CardTitle>
+          <CardTitle>
+            <label htmlFor="internalNotes">Internal Notes</label>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Textarea
+            id="internalNotes"
             {...register("internalNotes")}
             placeholder="Internal staff notes (not visible to client)…"
             className="min-h-[100px]"
@@ -185,18 +256,20 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
 
 function FormField({
   label,
+  fieldId,
   error,
   children,
   className,
 }: {
   label: string;
+  fieldId?: string;
   error?: string;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
     <div className={className}>
-      <Label className="mb-1.5">{label}</Label>
+      <Label htmlFor={fieldId} className="mb-1.5">{label}</Label>
       {children}
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>

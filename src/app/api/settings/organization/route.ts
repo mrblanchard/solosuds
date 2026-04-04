@@ -21,6 +21,15 @@ export async function PATCH(request: NextRequest) {
     if (name !== undefined && name.trim() === "") {
       return NextResponse.json({ error: "Organization name cannot be empty" }, { status: 400 });
     }
+    if (name !== undefined && name.length > 200) {
+      return NextResponse.json({ error: "Organization name is too long" }, { status: 400 });
+    }
+    if (email !== undefined && email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
+    }
+    if (phone !== undefined && phone && !/^[+]?[\d\s()-]{7,20}$/.test(phone)) {
+      return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
+    }
 
     const updated = await db.organization.update({
       where: { id: session.user.organizationId },

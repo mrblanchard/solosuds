@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { NewNoteForm } from "@/components/notes/new-note-form";
+import NewNoteForm from "@/components/notes/new-note-form";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 

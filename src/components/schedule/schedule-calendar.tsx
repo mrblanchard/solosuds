@@ -25,7 +25,7 @@ interface ScheduleCalendarProps {
   events: CalendarEvent[];
 }
 
-export function ScheduleCalendar({ events }: ScheduleCalendarProps) {
+export default function ScheduleCalendar({ events }: ScheduleCalendarProps) {
   const router = useRouter();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 

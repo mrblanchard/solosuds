@@ -11,12 +11,16 @@ Practice management software for healthcare practitioners. SOAP notes, schedulin
 
 - **SOAP Notes** — AI-powered clinical documentation with transcription, diagnosis/procedure codes, body charts, and reusable templates
 - **Scheduling** — Calendar-based appointment management with email/SMS reminders
-- **Client Management** — Patient records with demographics, tags, referral tracking, and emergency contacts
+- **Client Management** — Patient records with demographics, tags, referral tracking, emergency contacts, and draggable detail sections
 - **Billing** — Invoice generation with line items, CPT codes, tax, and Stripe payment processing
-- **Intake Forms** — Custom form builder with shareable public links and submission tracking
+- **Intake Forms** — Custom form builder with shareable public links, email/SMS delivery, submission tracking, drag-to-reorder, and one-click duplication
 - **Messaging** — Email-based client communication with read receipts
+- **Search** — Global search modal (⌘K / Ctrl+K) across clients, notes, and appointments
+- **Notifications** — In-app notification panel with unread badges
 - **Multi-user** — Role-based access (Owner, Admin, Practitioner, Front Desk)
-- **Dashboard** — Live stats for active clients, today's appointments, draft notes, and outstanding invoices
+- **Dashboard** — Live stats for active clients, today's appointments, draft notes, and outstanding invoices. Widgets are drag-to-rearrange and resizable (layout persisted per-user in localStorage)
+- **Membership** — Stripe-integrated subscriptions with pause/cancel/resume, 14-day free trial, and trial-expired paywall
+- **Legal** — Terms of Service and HIPAA compliance pages
 
 ## Pricing
 
@@ -28,13 +32,16 @@ Practice management software for healthcare practitioners. SOAP notes, schedulin
 
 ## Stack
 
-- **Framework**: Next.js 16 (App Router, webpack)
+- **Framework**: Next.js 16.2.2 (App Router, webpack)
+- **Language**: TypeScript, React 19
 - **Auth**: NextAuth v5 — Credentials + Google OAuth
-- **Database**: PostgreSQL via Neon, Prisma ORM
-- **Payments**: Stripe
+- **Database**: PostgreSQL via Neon, Prisma 7.6
+- **Payments**: Stripe (subscriptions, invoices, pause/resume)
 - **Email**: Resend
 - **SMS**: Twilio
-- **AI**: OpenAI (transcription + SOAP generation)
+- **UI**: Tailwind CSS v4, FullCalendar 6, react-grid-layout 2, @dnd-kit (drag-and-drop), Radix UI primitives
+- **Forms**: React Hook Form + Zod 4 validation
+- **Testing**: Vitest 4, Testing Library, happy-dom
 - **Hosting**: Linode (Ubuntu 24.04, PM2, Cloudflare Tunnel)
 
 ---

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { PricingSection } from "@/components/pricing-section";
+import PricingSection from "@/components/pricing-section";
+import LandingNav from "@/components/landing-nav";
+import { AppFooter } from "@/components/layout/app-footer";
 import {
-  Leaf,
   CalendarDays,
   Users,
   Shield,
@@ -14,27 +15,14 @@ import {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-dvh bg-white">
       {/* Nav */}
       <nav className="border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2">
-            <Leaf className="h-7 w-7 text-indigo-600" />
-            <span className="text-xl font-bold text-gray-900">SoapSuds</span>
+          <div className="flex items-center shrink-0">
+            <img src="/icon.svg" alt="SoapSuds" style={{height:"40px",width:"auto"}} />
           </div>
-          <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-            <a href="#features" className="hover:text-gray-900">Features</a>
-            <a href="#pricing" className="hover:text-gray-900">Pricing</a>
-            <a href="#security" className="hover:text-gray-900">Security</a>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost" size="sm">Sign in</Button>
-            </Link>
-            <Link href="/register">
-              <Button size="sm">Start Free Trial</Button>
-            </Link>
-          </div>
+          <LandingNav />
         </div>
       </nav>
 
@@ -198,20 +186,7 @@ export default function LandingPage() {
       <PricingSection />
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 py-12 px-4">
-        <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Leaf className="h-5 w-5 text-indigo-600" />
-            <span className="font-semibold text-gray-900">SoapSuds</span>
-          </div>
-          <p className="text-sm text-gray-400">© {new Date().getFullYear()} SoapSuds. All rights reserved.</p>
-          <div className="flex gap-4 text-sm text-gray-500">
-            <Link href="/privacy" className="hover:text-gray-700">Privacy</Link>
-            <Link href="/terms" className="hover:text-gray-700">Terms</Link>
-            <Link href="/hipaa" className="hover:text-gray-700">HIPAA</Link>
-          </div>
-        </div>
-      </footer>
+      <AppFooter />
     </div>
   );
 }

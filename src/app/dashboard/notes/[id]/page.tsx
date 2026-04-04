@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
-import { SoapNoteEditor } from "@/components/notes/soap-note-editor";
+import SoapNoteEditor from "@/components/notes/soap-note-editor";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";

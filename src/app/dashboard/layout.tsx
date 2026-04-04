@@ -1,7 +1,9 @@
-import { Sidebar } from "@/components/layout/sidebar";
-import { Topbar } from "@/components/layout/topbar";
+import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
+
+const TRIAL_DAYS = 14;
 
 export default async function DashboardLayout({
   children,
@@ -12,13 +14,27 @@ export default async function DashboardLayout({
   if (!session?.user) redirect("/login");
   if (!session.user.organizationId) redirect("/onboarding");
 
-  return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
-      </div>
-    </div>
-  );
+  // Check trial expiry
+  const org = await db.organization.findUnique({
+    where: { id: session.user.organizationId },
+    select: { subscriptionStatus: true, createdAt: true },
+  });
+
+  if (org?.subscriptionStatus === "trialing") {
+    const trialEnd = new Date(org.createdAt.getTime() + TRIAL_DAYS * 86400000);
+    if (Date.now() > trialEnd.getTime()) {
+      // Update status so they don't keep hitting this check
+      await db.organization.update({
+        where: { id: session.user.organizationId },
+        data: { subscriptionStatus: "canceled" },
+      });
+      redirect("/trial-expired");
+    }
+  }
+
+  if (org?.subscriptionStatus === "canceled" || org?.subscriptionStatus === "paused") {
+    redirect("/trial-expired");
+  }
+
+  return <DashboardShell>{children}</DashboardShell>;
 }

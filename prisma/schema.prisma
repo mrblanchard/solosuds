@@ -44,10 +44,19 @@ model VerificationToken {
 
 // ─── Organizations / Practices ───────────────────────────────────────────────
 
+enum PracticeType {
+  THERAPY   // Massage, PT, chiro, body work — SOAP notes heavy
+  SALON     // Hair, nail, beauty — booking & payments heavy
+  MEDICAL   // Doctors, clinics — HIPAA & intake heavy
+  FITNESS   // Personal training, yoga, pilates — scheduling heavy
+  OTHER     // Generic
+}
+
 model Organization {
-  id                   String    @id @default(cuid())
+  id                   String       @id @default(cuid())
   name                 String
-  slug                 String    @unique
+  slug                 String       @unique
+  practiceType         PracticeType @default(OTHER)
   phone                String?
   email                String?
   address              String?
@@ -99,6 +108,8 @@ model User {
   calendarColor        String?
   googleCalendarToken  Json?
   outlookCalendarToken Json?
+  notificationsEnabled Boolean       @default(true)
+  notificationsSeenAt  DateTime?
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
 
@@ -294,6 +305,7 @@ model IntakeForm {
   description    String?
   fields         Json
   isActive       Boolean      @default(true)
+  sortOrder      Int          @default(0)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -349,12 +361,14 @@ model Message {
   id             String       @id @default(cuid())
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
-  senderId       String
-  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
+  senderId       String?
+  sender         User?        @relation("SentMessages", fields: [senderId], references: [id])
   clientId       String?
   client         Client?      @relation(fields: [clientId], references: [id])
-  subject        String?
-  body           String       @db.Text
-  isRead         Boolean      @default(false)
-  sentAt         DateTime     @default(now())
+  channel        String       @default("EMAIL")    // EMAIL | SMS
+  direction      String       @default("OUTBOUND") // OUTBOUND | INBOUND
+  content        String       @db.Text
+  status         String       @default("SENT")     // SENT | DELIVERED | FAILED
+  externalId     String?
+  createdAt      DateTime     @default(now())
 }

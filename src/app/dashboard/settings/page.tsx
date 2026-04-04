@@ -3,12 +3,13 @@ import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import ProfileSettings from "@/components/settings/profile-settings";
 import OrgSettings from "@/components/settings/org-settings";
+import ServicesSettings from "@/components/settings/services-settings";
 
 export default async function SettingsPage() {
   const session = await auth();
   if (!session?.user?.id || !session?.user?.organizationId) redirect("/dashboard");
 
-  const [user, org] = await Promise.all([
+  const [user, org, services] = await Promise.all([
     db.user.findUnique({
       where: { id: session.user.id },
       select: { id: true, name: true, email: true, role: true },
@@ -16,6 +17,11 @@ export default async function SettingsPage() {
     db.organization.findUnique({
       where: { id: session.user.organizationId },
       select: { id: true, name: true, phone: true, email: true, address: true, website: true, timezone: true },
+    }),
+    db.service.findMany({
+      where: { organizationId: session.user.organizationId, isActive: true },
+      select: { id: true, name: true, description: true, durationMinutes: true, price: true, color: true, isActive: true },
+      orderBy: { name: "asc" },
     }),
   ]);
 
@@ -31,7 +37,10 @@ export default async function SettingsPage() {
       <ProfileSettings user={user} />
 
       {(user.role === "OWNER" || user.role === "ADMIN") && (
-        <OrgSettings org={org} />
+        <>
+          <OrgSettings org={org} />
+          <ServicesSettings initialServices={services} />
+        </>
       )}
     </div>
   );

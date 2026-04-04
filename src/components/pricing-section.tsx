@@ -54,7 +54,7 @@ const pricingPlans = [
   },
 ];
 
-export function PricingSection() {
+export default function PricingSection() {
   const [yearly, setYearly] = useState(false);
 
   return (
