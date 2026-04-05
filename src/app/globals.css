@@ -6,8 +6,19 @@
   background: #bfb3e8;
   border-radius: 12px;
 }
+.react-grid-item > .react-resizable-handle {
+  width: 24px;
+  height: 24px;
+  bottom: 2px;
+  right: 2px;
+}
 .react-grid-item > .react-resizable-handle::after {
-  border-color: #7c6fac;
+  width: 10px;
+  height: 10px;
+  right: 4px;
+  bottom: 4px;
+  border-color: #9d8fca;
+  border-width: 0 3px 3px 0;
 }
 
 @theme {

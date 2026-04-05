@@ -20,6 +20,7 @@ import {
   X,
   EyeOff,
   GripVertical,
+  Maximize2,
 } from "lucide-react";
 import { formatCurrency, formatDateTime, formatDate } from "@/lib/utils";
 import SavedToast from "@/components/ui/saved-toast";
@@ -100,48 +101,48 @@ const DEFAULT_LAYOUTS: ResponsiveLayouts = {
     { i: "stat-appointments", x: 3,  y: 0,  w: 3,  h: 3, minW: 2, minH: 2, maxH: 4 },
     { i: "stat-notes",        x: 6,  y: 0,  w: 3,  h: 3, minW: 2, minH: 2, maxH: 4 },
     { i: "stat-invoices",     x: 9,  y: 0,  w: 3,  h: 3, minW: 2, minH: 2, maxH: 4 },
-    { i: "schedule",          x: 0,  y: 3,  w: 6,  h: 9, minW: 3, minH: 4 },
-    { i: "quick-actions",     x: 6,  y: 3,  w: 6,  h: 9, minW: 3, minH: 4 },
-    { i: "tasks",             x: 0,  y: 12, w: 6,  h: 11, minW: 3, minH: 6 },
-    { i: "recent-notes",      x: 6,  y: 12, w: 6,  h: 9, minW: 3, minH: 4 },
-    { i: "upcoming",          x: 0,  y: 23, w: 6,  h: 9, minW: 3, minH: 4 },
-    { i: "messages",          x: 6,  y: 23, w: 6, h: 8, minW: 3, minH: 4 },
+    { i: "schedule",          x: 0,  y: 3,  w: 4,  h: 6, minW: 3, minH: 4 },
+    { i: "quick-actions",     x: 4,  y: 3,  w: 4,  h: 6, minW: 3, minH: 4 },
+    { i: "tasks",             x: 8,  y: 3,  w: 4,  h: 6, minW: 3, minH: 4 },
+    { i: "recent-notes",      x: 0,  y: 9,  w: 4,  h: 6, minW: 3, minH: 4 },
+    { i: "upcoming",          x: 4,  y: 9,  w: 4,  h: 6, minW: 3, minH: 4 },
+    { i: "messages",          x: 8,  y: 9,  w: 4,  h: 6, minW: 3, minH: 4 },
   ],
   md: [
     { i: "stat-clients",      x: 0, y: 0,  w: 4, h: 3, minW: 2, minH: 2, maxH: 4 },
     { i: "stat-appointments", x: 4, y: 0,  w: 4, h: 3, minW: 2, minH: 2, maxH: 4 },
     { i: "stat-notes",        x: 0, y: 3,  w: 4, h: 3, minW: 2, minH: 2, maxH: 4 },
     { i: "stat-invoices",     x: 4, y: 3,  w: 4, h: 3, minW: 2, minH: 2, maxH: 4 },
-    { i: "schedule",          x: 0, y: 6,  w: 8, h: 9, minW: 3, minH: 4 },
-    { i: "quick-actions",     x: 0, y: 15, w: 8, h: 8, minW: 3, minH: 4 },
-    { i: "tasks",             x: 0, y: 23, w: 8, h: 11, minW: 3, minH: 6 },
-    { i: "recent-notes",      x: 0, y: 34, w: 8, h: 9, minW: 3, minH: 4 },
-    { i: "upcoming",          x: 0, y: 43, w: 8, h: 9, minW: 3, minH: 4 },
-    { i: "messages",          x: 0, y: 52, w: 8, h: 8, minW: 3, minH: 4 },
+    { i: "schedule",          x: 0, y: 6,  w: 4, h: 6, minW: 3, minH: 4 },
+    { i: "quick-actions",     x: 4, y: 6,  w: 4, h: 6, minW: 3, minH: 4 },
+    { i: "tasks",             x: 0, y: 12, w: 4, h: 6, minW: 3, minH: 4 },
+    { i: "recent-notes",      x: 4, y: 12, w: 4, h: 6, minW: 3, minH: 4 },
+    { i: "upcoming",          x: 0, y: 18, w: 4, h: 6, minW: 3, minH: 4 },
+    { i: "messages",          x: 4, y: 18, w: 4, h: 6, minW: 3, minH: 4 },
   ],
   sm: [
     { i: "stat-clients",      x: 0, y: 0,  w: 2, h: 3, minW: 1, minH: 2, maxH: 4 },
     { i: "stat-appointments", x: 2, y: 0,  w: 2, h: 3, minW: 1, minH: 2, maxH: 4 },
     { i: "stat-notes",        x: 0, y: 3,  w: 2, h: 3, minW: 1, minH: 2, maxH: 4 },
     { i: "stat-invoices",     x: 2, y: 3,  w: 2, h: 3, minW: 1, minH: 2, maxH: 4 },
-    { i: "schedule",          x: 0, y: 6,  w: 4, h: 9, minW: 2, minH: 4 },
-    { i: "quick-actions",     x: 0, y: 15, w: 4, h: 8, minW: 2, minH: 4 },
-    { i: "tasks",             x: 0, y: 23, w: 4, h: 11, minW: 2, minH: 6 },
-    { i: "recent-notes",      x: 0, y: 34, w: 4, h: 9, minW: 2, minH: 4 },
-    { i: "upcoming",          x: 0, y: 43, w: 4, h: 9, minW: 2, minH: 4 },
-    { i: "messages",          x: 0, y: 52, w: 4, h: 8, minW: 2, minH: 4 },
+    { i: "schedule",          x: 0, y: 6,  w: 4, h: 6, minW: 2, minH: 4 },
+    { i: "quick-actions",     x: 0, y: 12, w: 4, h: 6, minW: 2, minH: 4 },
+    { i: "tasks",             x: 0, y: 18, w: 4, h: 6, minW: 2, minH: 4 },
+    { i: "recent-notes",      x: 0, y: 24, w: 4, h: 6, minW: 2, minH: 4 },
+    { i: "upcoming",          x: 0, y: 30, w: 4, h: 6, minW: 2, minH: 4 },
+    { i: "messages",          x: 0, y: 36, w: 4, h: 6, minW: 2, minH: 4 },
   ],
   xs: [
     { i: "stat-clients",      x: 0, y: 0,  w: 2, h: 3, minW: 1, minH: 2, maxH: 4 },
     { i: "stat-appointments", x: 2, y: 0,  w: 2, h: 3, minW: 1, minH: 2, maxH: 4 },
     { i: "stat-notes",        x: 0, y: 3,  w: 2, h: 3, minW: 1, minH: 2, maxH: 4 },
     { i: "stat-invoices",     x: 2, y: 3,  w: 2, h: 3, minW: 1, minH: 2, maxH: 4 },
-    { i: "schedule",          x: 0, y: 6,  w: 4, h: 9, minW: 2, minH: 4 },
-    { i: "quick-actions",     x: 0, y: 15, w: 4, h: 8, minW: 2, minH: 4 },
-    { i: "tasks",             x: 0, y: 23, w: 4, h: 11, minW: 2, minH: 6 },
-    { i: "recent-notes",      x: 0, y: 34, w: 4, h: 9, minW: 2, minH: 4 },
-    { i: "upcoming",          x: 0, y: 43, w: 4, h: 9, minW: 2, minH: 4 },
-    { i: "messages",          x: 0, y: 52, w: 4, h: 8, minW: 2, minH: 4 },
+    { i: "schedule",          x: 0, y: 6,  w: 4, h: 6, minW: 2, minH: 4 },
+    { i: "quick-actions",     x: 0, y: 12, w: 4, h: 6, minW: 2, minH: 4 },
+    { i: "tasks",             x: 0, y: 18, w: 4, h: 6, minW: 2, minH: 4 },
+    { i: "recent-notes",      x: 0, y: 24, w: 4, h: 6, minW: 2, minH: 4 },
+    { i: "upcoming",          x: 0, y: 30, w: 4, h: 6, minW: 2, minH: 4 },
+    { i: "messages",          x: 0, y: 36, w: 4, h: 6, minW: 2, minH: 4 },
   ],
 };
 
@@ -153,7 +154,7 @@ interface StoredState {
 }
 
 function storageKey(userId: string) {
-  return `dashboard-layout-v2:${userId}`;
+  return `dashboard-layout-v3:${userId}`;
 }
 
 function loadState(userId: string): StoredState {
@@ -692,6 +693,11 @@ export default function DashboardWidgets({
             </button>
 
             <div className="h-full">{sections[id]}</div>
+
+            {/* Resize indicator — always visible */}
+            <div className="absolute bottom-1 right-1 z-10 pointer-events-none">
+              <Maximize2 className="h-3.5 w-3.5 text-gray-300" />
+            </div>
           </div>
         ))}
       </ResponsiveGridLayout>
