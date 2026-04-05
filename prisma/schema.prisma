@@ -405,6 +405,7 @@ model Email {
   textBody       String?      @db.Text
   attachments    Json?        // [{filename, contentType, size}]
   resendId       String?
+  read           Boolean      @default(false)
   createdAt      DateTime     @default(now())
 }
 

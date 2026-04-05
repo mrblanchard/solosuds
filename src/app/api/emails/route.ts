@@ -144,6 +144,7 @@ export async function POST(request: NextRequest) {
         htmlBody,
         attachments: attachmentMeta.length > 0 ? attachmentMeta : undefined,
         resendId: (result as { data?: { id?: string } })?.data?.id || null,
+        read: true,
       },
     });
 
