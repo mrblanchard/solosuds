@@ -381,3 +381,52 @@ All 4 drag implementations now use consistent handles:
 #### Footer cleanup
 - Removed phone number from `app-footer.tsx`, keeping only the support email.
 
+---
+
+### 2026-04-04 – 2026-04-05
+
+#### Team invite link with email invitations
+- `POST /api/settings/organization/invite` — generates a unique invite token stored on the Organization model.
+- `POST /api/settings/organization/invite-email` — sends invite email via Resend with a registration link containing the token.
+- `GET /api/auth/invite-info?token=...` — returns org name for the invite token (used by register page).
+- `src/app/register/page.tsx` — detects `?invite=` param, auto-fills org name, links new user to the existing organization on registration.
+- `src/components/settings/org-settings.tsx` — "Team" tab with generate/copy invite link and send invite email form.
+
+#### Email client system
+- `src/app/api/emails/route.ts` — `GET` (list) and `POST` (send via Resend) endpoints.
+- `src/app/api/emails/[id]/route.ts` — `GET` single email and `DELETE`.
+- Email model in Prisma schema with `direction` (OUTBOUND/INBOUND), `fromEmail`, `textBody`, `read` fields; `senderId` is optional for inbound.
+- `src/lib/permissions.ts` (new) — `requireOwnerOrAdmin()` helper for role-based access checks.
+
+#### DELETE permission enforcement
+Added PRACTITIONER/FRONT_DESK role blocking to all DELETE routes:
+- `src/app/api/clients/[id]/route.ts`
+- `src/app/api/notes/[id]/route.ts`
+- `src/app/api/appointments/[id]/route.ts`
+- `src/app/api/intake-forms/[id]/route.ts`
+- `src/app/api/notes/templates/[id]/route.ts`
+- `src/app/api/tasks/[id]/route.ts`
+
+#### CKEditor 5 swap (from TinyMCE)
+- Replaced `@tinymce/tinymce-react` + `tinymce` with `@ckeditor/ckeditor5-react` + `ckeditor5` (GPL license, no API key required).
+- `src/components/email/ckeditor-wrapper.tsx` (new): Standalone CKEditor 5 ClassicEditor wrapper with `licenseKey: "GPL"`. Plugins: Essentials, Bold, Italic, Underline, Strikethrough, Heading, Alignment, Link, List, Indent, BlockQuote, Table, MediaEmbed, Font, Paragraph.
+- `src/components/email/compose-email.tsx` — loads CKEditor via `dynamic(() => import("./ckeditor-wrapper"), { ssr: false })` to avoid SSR `window`/`document` errors.
+
+#### Inbound email via Resend webhook
+- `src/app/api/webhooks/resend/route.ts` (new): Handles `email.received` webhook events. Fetches full email via `resend.emails.receiving.get()`, matches sender to client by email (case-insensitive), stores as INBOUND email with `read: false`.
+- Requires Resend MX record on `soapsuds.app` domain for inbound routing.
+
+#### Conversational email threads
+- `src/components/email/conversation-list.tsx` (new): Conversations grouped by client with initials avatar, unread count badge (indigo), last message preview.
+- `src/components/email/email-thread.tsx` (new): Chat-style thread view — outbound messages as indigo bubbles (right-aligned), inbound as gray bubbles (left-aligned). Each bubble shows subject, HTML body, attachments, and timestamp.
+- Inline reply at bottom of thread with CKEditor, subject auto-prefilled with "Re: ...".
+- Auto-marks inbound emails as read when opening thread (`updateMany`).
+- `src/app/dashboard/email/page.tsx` — rewritten to query conversations grouped by client with unread counts.
+- `src/app/dashboard/email/[id]/page.tsx` — `[id]` is now `clientId`; shows full email thread.
+
+#### Dashboard grid layout update
+- Content sections resized to `w:4, h:6` on lg (3 compact cards per row), `w:4, h:6` on md (2 per row), full-width on sm/xs.
+- Always-visible `Maximize2` resize icon in bottom-right of every grid card.
+- CSS: react-grid-layout resize handle enlarged to 24×24px with 3px border in indigo-400.
+- Storage key bumped from `v2` to `v3` to force layout reset for all users.
+

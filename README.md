@@ -14,11 +14,11 @@ Practice management software for healthcare practitioners. SOAP notes, schedulin
 - **Client Management** — Patient records with demographics, tags, referral tracking, emergency contacts, and draggable detail sections
 - **Billing** — Invoice generation with line items, CPT codes, tax, and Stripe payment processing
 - **Intake Forms** — Custom form builder with shareable public links, email/SMS delivery, submission tracking, drag-to-reorder, and one-click duplication
-- **Messaging** — Email-based client communication with read receipts
+- **Messaging** — Conversational email threads with chat-style UI, inline reply, CKEditor 5 rich text editor, and inbound email receiving via Resend webhook
 - **Search** — Global search modal (⌘K / Ctrl+K) across clients, notes, and appointments
 - **Notifications** — In-app notification panel with unread badges
-- **Multi-user** — Role-based access (Owner, Admin, Practitioner, Front Desk)
-- **Dashboard** — Live stats for active clients, today's appointments, draft notes, and outstanding invoices. Widgets are drag-to-rearrange and resizable (layout persisted per-user in localStorage)
+- **Multi-user** — Role-based access (Owner, Admin, Practitioner, Front Desk) with team invite links and email invitations
+- **Dashboard** — Live stats, task manager, schedule, quick actions, recent notes, upcoming appointments, and messages. Widgets are drag-to-rearrange and resizable with visible resize handles (layout persisted per-user in localStorage)
 - **Membership** — Stripe-integrated subscriptions with pause/cancel/resume, 14-day free trial, and trial-expired paywall
 - **Legal** — Terms of Service and HIPAA compliance pages
 
@@ -39,7 +39,7 @@ Practice management software for healthcare practitioners. SOAP notes, schedulin
 - **Payments**: Stripe (subscriptions, invoices, pause/resume)
 - **Email**: Resend
 - **SMS**: Twilio
-- **UI**: Tailwind CSS v4, FullCalendar 6, react-grid-layout 2, @dnd-kit (drag-and-drop), Radix UI primitives
+- **UI**: Tailwind CSS v4, FullCalendar 6, react-grid-layout 2, @dnd-kit (drag-and-drop), CKEditor 5 (GPL), Radix UI primitives
 - **Forms**: React Hook Form + Zod 4 validation
 - **Testing**: Vitest 4, Testing Library, happy-dom
 - **Hosting**: Linode (Ubuntu 24.04, PM2, Cloudflare Tunnel)
