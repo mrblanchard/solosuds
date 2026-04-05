@@ -393,13 +393,16 @@ model Email {
   id             String       @id @default(cuid())
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
-  senderId       String
-  sender         User         @relation("SentEmails", fields: [senderId], references: [id])
+  senderId       String?
+  sender         User?        @relation("SentEmails", fields: [senderId], references: [id])
   clientId       String?
   client         Client?      @relation(fields: [clientId], references: [id])
+  direction      String       @default("OUTBOUND") // OUTBOUND | INBOUND
+  fromEmail      String?
   toEmail        String
   subject        String
   htmlBody       String       @db.Text
+  textBody       String?      @db.Text
   attachments    Json?        // [{filename, contentType, size}]
   resendId       String?
   createdAt      DateTime     @default(now())

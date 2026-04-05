@@ -17,9 +17,12 @@ export async function GET(
     where: { id, organizationId: session.user.organizationId },
     select: {
       id: true,
+      direction: true,
+      fromEmail: true,
       toEmail: true,
       subject: true,
       htmlBody: true,
+      textBody: true,
       attachments: true,
       createdAt: true,
       client: { select: { id: true, firstName: true, lastName: true, email: true } },

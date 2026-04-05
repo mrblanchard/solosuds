@@ -14,6 +14,8 @@ export default async function EmailPage() {
     where: { organizationId: session.user.organizationId },
     select: {
       id: true,
+      direction: true,
+      fromEmail: true,
       toEmail: true,
       subject: true,
       createdAt: true,

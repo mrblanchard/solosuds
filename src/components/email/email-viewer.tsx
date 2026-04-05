@@ -13,9 +13,12 @@ interface Attachment {
 
 interface EmailDetail {
   id: string;
+  direction: string;
+  fromEmail: string | null;
   toEmail: string;
   subject: string;
   htmlBody: string;
+  textBody: string | null;
   attachments: Attachment[] | null;
   createdAt: string;
   client: { id: string; firstName: string; lastName: string; email: string | null } | null;
@@ -34,11 +37,21 @@ function formatSize(bytes: number) {
 
 export default function EmailViewer({ email }: Props) {
   const router = useRouter();
+  const isInbound = email.direction === "INBOUND";
 
   const replyParams = new URLSearchParams();
   if (email.client?.id) replyParams.set("clientId", email.client.id);
-  replyParams.set("toEmail", email.toEmail);
+  // For inbound, reply goes to the sender; for outbound, reply to original recipient
+  replyParams.set("toEmail", isInbound ? (email.fromEmail || email.client?.email || "") : email.toEmail);
   replyParams.set("subject", email.subject);
+
+  const fromDisplay = isInbound
+    ? (email.client ? `${email.client.firstName} ${email.client.lastName} <${email.fromEmail}>` : email.fromEmail || "Unknown")
+    : (email.sender?.name ?? "Unknown");
+
+  const toDisplay = isInbound
+    ? email.toEmail
+    : (email.client ? `${email.client.firstName} ${email.client.lastName} <${email.toEmail}>` : email.toEmail);
 
   return (
     <div className="space-y-6">
@@ -62,20 +75,25 @@ export default function EmailViewer({ email }: Props) {
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         {/* Subject bar */}
         <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">{email.subject}</h2>
+          <div className="flex items-center gap-2">
+            {isInbound && (
+              <span className="text-xs font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-green-100 text-green-700">
+                Received
+              </span>
+            )}
+            <h2 className="text-lg font-semibold text-gray-900">{email.subject}</h2>
+          </div>
         </div>
 
         {/* Meta */}
         <div className="px-6 py-3 border-b border-gray-50 bg-gray-50/50 flex flex-wrap gap-x-6 gap-y-1 text-sm">
           <div>
             <span className="text-gray-500">From:</span>{" "}
-            <span className="text-gray-900">{email.sender?.name ?? "Unknown"}</span>
+            <span className="text-gray-900">{fromDisplay}</span>
           </div>
           <div>
             <span className="text-gray-500">To:</span>{" "}
-            <span className="text-gray-900">
-              {email.client ? `${email.client.firstName} ${email.client.lastName} <${email.toEmail}>` : email.toEmail}
-            </span>
+            <span className="text-gray-900">{toDisplay}</span>
           </div>
           <div>
             <span className="text-gray-500">Date:</span>{" "}

@@ -2,11 +2,16 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Editor } from "@tinymce/tinymce-react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Paperclip, X, Send } from "lucide-react";
+
+const CKEditorWrapper = dynamic(
+  () => import("@/components/email/ckeditor-wrapper"),
+  { ssr: false, loading: () => <div className="h-[250px] bg-gray-50 animate-pulse rounded" /> }
+);
 
 interface ClientOption {
   id: string;
@@ -28,7 +33,7 @@ const ALLOWED_EXTENSIONS = ".pdf,.csv,.xlsx,.xls,.zip,.png,.jpg,.jpeg,.gif,.webp
 
 export default function ComposeEmail({ clients, replyTo }: Props) {
   const router = useRouter();
-  const editorRef = useRef<{ getContent: () => string } | null>(null);
+  const editorContentRef = useRef<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedClientId, setSelectedClientId] = useState(replyTo?.clientId ?? "");
   const [toEmail, setToEmail] = useState(replyTo?.toEmail ?? "");
@@ -62,7 +67,7 @@ export default function ComposeEmail({ clients, replyTo }: Props) {
   }
 
   async function handleSend() {
-    const htmlBody = editorRef.current?.getContent() ?? "";
+    const htmlBody = editorContentRef.current;
     if (!toEmail || !subject || !htmlBody.trim()) {
       setError("Email address, subject, and body are required");
       return;
@@ -141,26 +146,8 @@ export default function ComposeEmail({ clients, replyTo }: Props) {
       <div>
         <Label>Message</Label>
         <div className="mt-1 border border-gray-200 rounded-md overflow-hidden">
-          <Editor
-            onInit={(_evt, editor) => { editorRef.current = editor as unknown as { getContent: () => string }; }}
-            apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY || "no-api-key"}
-            init={{
-              height: 350,
-              menubar: false,
-              plugins: [
-                "autolink", "lists", "link", "image", "charmap",
-                "searchreplace", "visualblocks", "code",
-                "insertdatetime", "media", "table", "wordcount",
-              ],
-              toolbar:
-                "undo redo | blocks | bold italic underline strikethrough | " +
-                "alignleft aligncenter alignright alignjustify | " +
-                "bullist numlist outdent indent | link image | removeformat",
-              content_style: "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; }",
-              branding: false,
-              promotion: false,
-              skin: "oxide",
-            }}
+          <CKEditorWrapper
+            onChange={(html) => { editorContentRef.current = html; }}
           />
         </div>
       </div>

@@ -34,6 +34,8 @@ export async function GET(request: NextRequest) {
     where,
     select: {
       id: true,
+      direction: true,
+      fromEmail: true,
       toEmail: true,
       subject: true,
       createdAt: true,
@@ -135,6 +137,8 @@ export async function POST(request: NextRequest) {
         organizationId: session.user.organizationId,
         senderId: session.user.id,
         clientId: clientId || null,
+        direction: "OUTBOUND",
+        fromEmail: process.env.FROM_EMAIL || "noreply@soapsuds.app",
         toEmail,
         subject,
         htmlBody,
