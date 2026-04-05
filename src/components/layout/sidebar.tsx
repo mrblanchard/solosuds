@@ -10,6 +10,7 @@ import {
   CalendarDays,
   FileText,
   MessageSquare,
+  Mail,
   CreditCard,
   Settings,
   LogOut,
@@ -35,6 +36,7 @@ const ALL_NAV: Record<string, NavItem> = {
   clients:    { href: "/dashboard/clients",  label: "Clients",      icon: Users },
   notes:      { href: "/dashboard/notes",    label: "Notes",        icon: FileText },
   intake:     { href: "/dashboard/intake",   label: "Intake Forms", icon: ClipboardList },
+  email:      { href: "/dashboard/email",    label: "Email",        icon: Mail },
   messages:   { href: "/dashboard/messages", label: "Messages",     icon: MessageSquare, disabled: true },
   billing:    { href: "/dashboard/billing",  label: "Billing",      icon: CreditCard },
   settings:   { href: "/dashboard/settings", label: "Settings",     icon: Settings },
@@ -44,21 +46,21 @@ const ALL_NAV: Record<string, NavItem> = {
 // Per-type nav order + optional label overrides
 const NAV_CONFIG: Record<NonNullable<PracticeType>, { order: string[]; labels?: Partial<Record<string, string>> }> = {
   THERAPY: {
-    order: ["dashboard", "schedule", "clients", "notes", "intake", "billing", "settings", "faq", "messages"],
+    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "billing", "settings", "faq", "messages"],
   },
   SALON: {
-    order: ["dashboard", "schedule", "clients", "billing", "notes", "intake", "settings", "faq", "messages"],
+    order: ["dashboard", "schedule", "clients", "billing", "notes", "intake", "email", "settings", "faq", "messages"],
     labels: { notes: "Session Notes" },
   },
   MEDICAL: {
-    order: ["dashboard", "clients", "intake", "notes", "schedule", "billing", "settings", "faq", "messages"],
+    order: ["dashboard", "clients", "intake", "notes", "schedule", "email", "billing", "settings", "faq", "messages"],
   },
   FITNESS: {
-    order: ["dashboard", "schedule", "clients", "billing", "notes", "intake", "settings", "faq", "messages"],
+    order: ["dashboard", "schedule", "clients", "billing", "notes", "intake", "email", "settings", "faq", "messages"],
     labels: { notes: "Session Notes", intake: "Health Forms" },
   },
   OTHER: {
-    order: ["dashboard", "schedule", "clients", "notes", "intake", "billing", "settings", "faq", "messages"],
+    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "billing", "settings", "faq", "messages"],
   },
 };
 
@@ -70,13 +72,24 @@ const PRACTICE_LABELS: Record<NonNullable<PracticeType>, string> = {
   OTHER:   "General Practice",
 };
 
-function buildNav(practiceType: PracticeType): NavItem[] {
+type UserRole = "OWNER" | "ADMIN" | "PRACTITIONER" | "FRONT_DESK" | undefined;
+
+// Items hidden per role (FRONT_DESK = Staff, PRACTITIONER = Editor)
+const ROLE_HIDDEN: Record<string, string[]> = {
+  FRONT_DESK: ["billing", "settings", "schedule"],
+  // PRACTITIONER and above see everything
+};
+
+function buildNav(practiceType: PracticeType, userRole?: UserRole): NavItem[] {
   const config = NAV_CONFIG[practiceType ?? "OTHER"];
-  return config.order.map((key) => {
-    const item = ALL_NAV[key];
-    const labelOverride = config.labels?.[key];
-    return labelOverride ? { ...item, label: labelOverride } : item;
-  });
+  const hidden = ROLE_HIDDEN[userRole ?? ""] ?? [];
+  return config.order
+    .filter((key) => !hidden.includes(key))
+    .map((key) => {
+      const item = ALL_NAV[key];
+      const labelOverride = config.labels?.[key];
+      return labelOverride ? { ...item, label: labelOverride } : item;
+    });
 }
 
 interface SidebarProps {
@@ -85,6 +98,7 @@ interface SidebarProps {
   collapsed?: boolean;
   onToggleCollapse?: () => void;
   practiceType?: PracticeType;
+  userRole?: UserRole;
 }
 
 export function Sidebar({
@@ -93,9 +107,10 @@ export function Sidebar({
   collapsed = false,
   onToggleCollapse,
   practiceType,
+  userRole,
 }: SidebarProps) {
   const pathname = usePathname();
-  const navItems = buildNav(practiceType);
+  const navItems = buildNav(practiceType, userRole);
 
   function sidebarContent({ mobile }: { mobile: boolean }) {
     const isCollapsed = !mobile && collapsed;

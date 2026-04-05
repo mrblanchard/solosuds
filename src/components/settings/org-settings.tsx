@@ -54,6 +54,7 @@ export default function OrgSettings({ org, intakeForms = [] }: Props) {
   const [regenerating, setRegenerating] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("PRACTITIONER");
   const [sendingInvite, setSendingInvite] = useState(false);
   const [inviteMessage, setInviteMessage] = useState<string | null>(null);
 
@@ -351,7 +352,7 @@ export default function OrgSettings({ org, intakeForms = [] }: Props) {
               const res = await fetch("/api/settings/organization/invite-email", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: inviteEmail.trim() }),
+                body: JSON.stringify({ email: inviteEmail.trim(), role: inviteRole }),
               });
               setSendingInvite(false);
               if (res.ok) {
@@ -373,6 +374,17 @@ export default function OrgSettings({ org, intakeForms = [] }: Props) {
                 autoFocus
                 required
               />
+              <Label htmlFor="invite-role">Role</Label>
+              <select
+                id="invite-role"
+                value={inviteRole}
+                onChange={(e) => setInviteRole(e.target.value)}
+                className="mt-1 mb-4 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
+              >
+                <option value="ADMIN">Admin — Full access</option>
+                <option value="PRACTITIONER">Editor — Can add &amp; edit, cannot delete</option>
+                <option value="FRONT_DESK">Staff — Clients, intake, notes &amp; email only</option>
+              </select>
               {inviteMessage && (
                 <p className={`text-sm mb-3 ${inviteMessage === "Invitation sent!" ? "text-green-600" : "text-red-600"}`}>
                   {inviteMessage}

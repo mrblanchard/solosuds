@@ -85,6 +85,7 @@ model Organization {
   invoices      Invoice[]
   messages      Message[]
   tasks         Task[]
+  emails        Email[]
 }
 
 // ─── Users / Practitioners ────────────────────────────────────────────────────
@@ -124,6 +125,7 @@ model User {
   appointments Appointment[]
   soapNotes    SoapNote[]
   sentMessages Message[]     @relation("SentMessages")
+  sentEmails   Email[]       @relation("SentEmails")
   tasks        Task[]
 }
 
@@ -166,6 +168,7 @@ model Client {
   invoices          Invoice[]
   messages          Message[]
   tags              ClientTag[]
+  emails            Email[]
 }
 
 model ClientTag {
@@ -381,6 +384,24 @@ model Message {
   content        String       @db.Text
   status         String       @default("SENT")     // SENT | DELIVERED | FAILED
   externalId     String?
+  createdAt      DateTime     @default(now())
+}
+
+// ─── Emails ───────────────────────────────────────────────────────────────────
+
+model Email {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  senderId       String
+  sender         User         @relation("SentEmails", fields: [senderId], references: [id])
+  clientId       String?
+  client         Client?      @relation(fields: [clientId], references: [id])
+  toEmail        String
+  subject        String
+  htmlBody       String       @db.Text
+  attachments    Json?        // [{filename, contentType, size}]
+  resendId       String?
   createdAt      DateTime     @default(now())
 }
 

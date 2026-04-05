@@ -90,6 +90,11 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const delUser = await db.user.findUnique({ where: { id: session.user.id }, select: { role: true } });
+  if (delUser?.role === "PRACTITIONER" || delUser?.role === "FRONT_DESK") {
+    return NextResponse.json({ error: "You do not have permission to delete" }, { status: 403 });
+  }
+
   const { id } = await params;
   const existing = await db.noteTemplate.findFirst({
     where: { id, organizationId: session.user.organizationId },

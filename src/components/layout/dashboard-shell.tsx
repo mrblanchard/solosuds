@@ -13,6 +13,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const { data: session } = useSession();
   const practiceType = session?.user?.practiceType;
+  const userRole = session?.user?.role;
 
   // Hydrate collapsed preference from localStorage
   useEffect(() => {
@@ -38,6 +39,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         collapsed={collapsed}
         onToggleCollapse={toggleCollapsed}
         practiceType={practiceType}
+        userRole={userRole}
       />
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <Topbar onMenuClick={() => setMobileOpen(true)} />

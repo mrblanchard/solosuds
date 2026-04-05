@@ -7,7 +7,7 @@ import { validatePassword } from "@/lib/utils";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { organizationName, name, email, password, fromGoogle, inviteCode } = body;
+    const { organizationName, name, email, password, fromGoogle, inviteCode, role: requestedRole } = body;
 
     if (!name || !email) {
       return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
@@ -58,10 +58,13 @@ export async function POST(request: NextRequest) {
           throw new Error("INVALID_INVITE");
         }
 
+        const allowedRoles = ["ADMIN", "PRACTITIONER", "FRONT_DESK"] as const;
+        const inviteRole = allowedRoles.includes(requestedRole) ? requestedRole : "PRACTITIONER";
+
         if (existingUser) {
           return tx.user.update({
             where: { id: existingUser.id },
-            data: { name, organizationId: org.id, role: "PRACTITIONER", ...(hashedPassword ? { hashedPassword } : {}) },
+            data: { name, organizationId: org.id, role: inviteRole, ...(hashedPassword ? { hashedPassword } : {}) },
           });
         }
 
@@ -70,7 +73,7 @@ export async function POST(request: NextRequest) {
             name,
             email,
             hashedPassword,
-            role: "PRACTITIONER",
+            role: inviteRole,
             organizationId: org.id,
           },
         });

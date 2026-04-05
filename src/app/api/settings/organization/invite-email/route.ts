@@ -18,11 +18,14 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { email } = body;
+  const { email, role } = body;
 
   if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: "Valid email address is required" }, { status: 400 });
   }
+
+  const allowedRoles = ["ADMIN", "PRACTITIONER", "FRONT_DESK"];
+  const inviteRole = allowedRoles.includes(role) ? role : "PRACTITIONER";
 
   const org = await db.organization.findUnique({
     where: { id: session.user.organizationId },
@@ -34,7 +37,7 @@ export async function POST(request: NextRequest) {
   }
 
   const origin = request.headers.get("origin") || request.nextUrl.origin;
-  const inviteUrl = `${origin}/register?invite=${org.inviteCode}`;
+  const inviteUrl = `${origin}/register?invite=${org.inviteCode}&role=${inviteRole}`;
 
   try {
     const result = await sendEmail({

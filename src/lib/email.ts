@@ -65,15 +65,18 @@ export async function sendEmail({
   to,
   subject,
   html,
+  attachments,
 }: {
   to: string;
   subject: string;
   html: string;
+  attachments?: Array<{ filename: string; content: Buffer }>;
 }) {
   return getResend().emails.send({
     from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
     to,
     subject,
     html,
+    ...(attachments ? { attachments } : {}),
   });
 }
