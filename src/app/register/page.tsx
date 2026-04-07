@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { passwordSchema, PASSWORD_RULES } from "@/lib/utils";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const registerSchema = z.object({
   organizationName: z.string().min(2, "Organization name is required").max(200, "Organization name is too long"),
@@ -37,6 +38,7 @@ function RegisterContent() {
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [inviteOrgName, setInviteOrgName] = useState<string | null>(null);
   const [inviteRole, setInviteRole] = useState<string | null>(null);
+  const [cfToken, setCfToken] = useState<string | null>(null);
 
   const schema = fromGoogle
     ? registerSchema.extend({ password: z.string().optional() })
@@ -93,7 +95,7 @@ function RegisterContent() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, fromGoogle, inviteCode, role: inviteRole }),
+        body: JSON.stringify({ ...data, fromGoogle, inviteCode, role: inviteRole, cfToken }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -118,7 +120,7 @@ function RegisterContent() {
         <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <img src="/icon.svg" alt="SoapSuds" style={{height:"48px",width:"auto"}} />
+            <img src="/logo.png" alt="SoapSuds" className="h-12 w-auto" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">
             {inviteCode ? "Join your team" : "Create your account"}
@@ -229,7 +231,21 @@ function RegisterContent() {
               <p className="text-xs text-red-600">{errors.acceptBaa.message}</p>
             )}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {!fromGoogle && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                onSuccess={(token) => setCfToken(token)}
+                onExpire={() => setCfToken(null)}
+                onError={() => setCfToken(null)}
+                options={{ theme: "light" }}
+              />
+            )}
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting || (!fromGoogle && !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !cfToken)}
+            >
               {isSubmitting
                 ? fromGoogle ? "Creating account…" : "Creating account..."
                 : fromGoogle ? "Create account & sign in with Google" : "Create account"}

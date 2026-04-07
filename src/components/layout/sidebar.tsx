@@ -118,33 +118,21 @@ export function Sidebar({
       <>
         {/* Logo */}
         <div className={cn(
-          "flex h-16 items-center border-b border-gray-200",
-          isCollapsed ? "justify-center px-2" : "px-6"
+          "flex h-16 items-center border-b-primary",
+          isCollapsed ? "justify-center px-2" : "justify-between px-4"
         )}>
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
             <img
-              src="/icon.svg"
+              src="/logo.png"
               alt="SoapSuds"
-              style={{ height: isCollapsed ? "32px" : "48px", width: "auto" }}
+              className={isCollapsed ? "h-8 w-auto" : "h-12 w-auto"}
             />
-            {!isCollapsed && (
-              <span className="text-xs font-medium text-gray-400 italic">Soap Suds</span>
-            )}
           </Link>
-        </div>
-
-        {/* Practice type badge + close (mobile) / collapse (desktop) toggle */}
-        {!isCollapsed ? (
-          <div className="flex items-center justify-between px-5 py-2 border-b border-gray-100">
-            {practiceType && (
-              <span className="text-xs font-medium text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">
-                {PRACTICE_LABELS[practiceType]}
-              </span>
-            )}
-            {mobile ? (
+          {!isCollapsed && (
+            mobile ? (
               <button
                 onClick={onMobileClose}
-                className="ml-auto rounded-lg p-1 text-gray-400 hover:bg-gray-100 transition-colors"
+                className="shrink-0 rounded-lg p-1 text-gray-400 hover:bg-gray-100 transition-colors"
                 aria-label="Close menu"
               >
                 <X className="h-4 w-4" />
@@ -152,15 +140,14 @@ export function Sidebar({
             ) : (
               <button
                 onClick={onToggleCollapse}
-                className="ml-auto rounded-lg p-1 text-gray-400 hover:bg-gray-100 transition-colors"
+                className="shrink-0 rounded-lg p-1 text-gray-400 hover:bg-gray-100 transition-colors"
                 title="Collapse sidebar"
               >
                 <PanelLeftClose className="h-4 w-4" />
               </button>
-            )}
-          </div>
-        ) : !mobile && (
-          <div className="flex justify-center py-2 border-b border-gray-100">
+            )
+          )}
+          {isCollapsed && !mobile && (
             <button
               onClick={onToggleCollapse}
               className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 transition-colors"
@@ -168,8 +155,8 @@ export function Sidebar({
             >
               <PanelLeftOpen className="h-4 w-4" />
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Navigation */}
         <nav className={cn(

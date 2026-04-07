@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   description:
     "SOAP notes, scheduling, client management, and billing for healthcare SMBs.",
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
 };
 
@@ -39,7 +39,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="h-full" data-theme={theme === "lavender" ? undefined : theme}>
-      <body className={`${nunito.className} min-h-full`} style={{ background: "var(--background)" }}>
+      <body
+        className={`${nunito.className} min-h-full bg-cover bg-center bg-no-repeat bg-fixed bg-banner`}
+      >
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>

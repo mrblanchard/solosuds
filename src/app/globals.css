@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @import "react-grid-layout/css/styles.css";
 
+/* ── Custom utilities ─────────────────────────────────────────────── */
+@utility border-b-primary {
+  border-bottom: 5px solid var(--color-indigo-600);
+}
+
+@utility bg-banner {
+  background-image: url('/care-without-the-mess.webp');
+}
+
 /* react-grid-layout theme overrides */
 .react-grid-item.react-grid-placeholder {
   background: #bfb3e8;
@@ -191,7 +200,7 @@
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
 }

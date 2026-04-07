@@ -28,7 +28,13 @@ export default async function PublicIntakePage({ params, searchParams }: Props) 
             <p className="mt-2 text-sm text-gray-600">{form.description}</p>
           )}
         </div>
-        <PublicIntakeForm formId={form.id} fields={form.fields as any[]} clientId={clientId} />
+        <PublicIntakeForm
+          formId={form.id}
+          fields={form.fields as any[]}
+          clientId={clientId}
+          isEmailConsent={form.isEmailConsent}
+          practiceName={form.organization.name}
+        />
       </div>
       <AppFooter />
     </div>

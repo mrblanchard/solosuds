@@ -11,7 +11,7 @@ export default async function TermsPage() {
       <div className="mx-auto max-w-3xl">
         <div className="mb-8 flex items-center gap-2">
           <Link href="/" className="flex items-center">
-            <img src="/icon.svg" alt="SoapSuds" style={{height:"40px",width:"auto"}} />
+            <img src="/logo.png" alt="SoapSuds" className="h-10 w-auto" />
           </Link>
         </div>
 

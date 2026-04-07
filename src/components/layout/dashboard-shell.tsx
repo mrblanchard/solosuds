@@ -32,7 +32,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-gray-50">
+    <div className="flex h-dvh overflow-hidden bg-gray-50/80">
       <Sidebar
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
@@ -43,7 +43,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       />
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <Topbar onMenuClick={() => setMobileOpen(true)} />
-        <main className="flex flex-1 flex-col overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+        <main className="flex flex-1 flex-col overflow-y-auto overscroll-contain touch-auto">
           <div className="flex-1 pt-8 px-4 sm:px-6">
             {children}
           </div>

@@ -86,6 +86,7 @@ model Organization {
   messages      Message[]
   tasks         Task[]
   emails        Email[]
+  documents     Document[]
 }
 
 // ─── Users / Practitioners ────────────────────────────────────────────────────
@@ -137,6 +138,13 @@ enum ClientStatus {
   ARCHIVED
 }
 
+enum EmailConsentStatus {
+  NONE      // No consent form sent yet
+  PENDING   // Consent form sent, awaiting client response
+  CONSENTED // Client has signed the consent form
+  REVOKED   // Practitioner has revoked email access
+}
+
 model Client {
   id               String       @id @default(cuid())
   organizationId   String
@@ -157,10 +165,11 @@ model Client {
   emergencyPhone   String?
   referralSource   String?
   internalNotes    String?      @db.Text
-  status           ClientStatus @default(ACTIVE)
-  stripeCustomerId String?      @unique
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  status              ClientStatus       @default(ACTIVE)
+  emailConsentStatus  EmailConsentStatus @default(NONE)
+  stripeCustomerId    String?            @unique
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
   appointments      Appointment[]
   soapNotes         SoapNote[]
@@ -169,6 +178,7 @@ model Client {
   messages          Message[]
   tags              ClientTag[]
   emails            Email[]
+  documents         Document[]
 }
 
 model ClientTag {
@@ -319,6 +329,7 @@ model IntakeForm {
   description    String?
   fields         Json
   isActive       Boolean      @default(true)
+  isEmailConsent Boolean      @default(false)
   sortOrder      Int          @default(0)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -333,6 +344,7 @@ model IntakeSubmission {
   clientId    String?
   client      Client?    @relation(fields: [clientId], references: [id])
   responses   Json
+  isProtected Boolean    @default(false)
   submittedAt DateTime   @default(now())
   createdAt   DateTime   @default(now())
 }
@@ -406,6 +418,7 @@ model Email {
   attachments    Json?        // [{filename, contentType, size}]
   resendId       String?
   read           Boolean      @default(false)
+  archived       Boolean      @default(false)
   createdAt      DateTime     @default(now())
 }
 
@@ -438,4 +451,48 @@ model Task {
   completedAt    DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+}
+
+// ─── Document Portal ──────────────────────────────────────────────────────────
+
+enum DocumentDirection {
+  CLIENT_TO_PRACTICE  // client uploaded to practice
+  PRACTICE_TO_CLIENT  // practice shared with client
+}
+
+model Document {
+  id             String            @id @default(cuid())
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id])
+  clientId       String?
+  client         Client?           @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  name           String
+  mimeType       String
+  sizeBytes      Int
+  storageKey     String            // R2 object key
+  direction      DocumentDirection @default(CLIENT_TO_PRACTICE)
+  uploadedBy     String?           // "client" | User.id
+  createdAt      DateTime          @default(now())
+
+  auditLogs DocumentAuditLog[]
+}
+
+model DocumentAuditLog {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  action     String   // "uploaded" | "downloaded" | "deleted" | "shared"
+  actor      String   // "client" | userId
+  ip         String?
+  at         DateTime @default(now())
+}
+
+model ClientPortalOTP {
+  id        String   @id @default(cuid())
+  clientId  String
+  orgId     String
+  codeHash  String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

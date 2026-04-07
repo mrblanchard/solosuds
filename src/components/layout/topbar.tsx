@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { Search, Menu } from "lucide-react";
 import SearchModal from "@/components/layout/search-modal";
 import NotificationsPanel from "@/components/layout/notifications-panel";
@@ -10,8 +11,18 @@ interface TopbarProps {
   onMenuClick?: () => void;
 }
 
+const PRACTICE_LABELS: Record<string, string> = {
+  THERAPY: "Therapy & Bodywork",
+  SALON:   "Salon & Beauty",
+  MEDICAL: "Medical Practice",
+  FITNESS: "Fitness & Wellness",
+  OTHER:   "General Practice",
+};
+
 export function Topbar({ onMenuClick }: TopbarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const { data: session } = useSession();
+  const practiceType = session?.user?.practiceType;
 
   // ⌘K / Ctrl+K opens search
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -28,7 +39,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
   return (
     <>
-      <header className="flex h-16 items-center border-b border-gray-200 bg-white px-4 sm:px-6">
+      <header className="flex h-16 items-center bg-white px-4 sm:px-6 border-b-primary">
         {/* Hamburger - mobile only */}
         <button
           onClick={onMenuClick}
@@ -37,6 +48,13 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         >
           <Menu className="h-5 w-5" />
         </button>
+
+        {/* Practice type */}
+        {practiceType && PRACTICE_LABELS[practiceType] && (
+          <span className="text-xl font-bold text-indigo-600 truncate">
+            {PRACTICE_LABELS[practiceType]}
+          </span>
+        )}
 
         <div className="flex items-center gap-4 ml-auto">
           {/* Search trigger */}

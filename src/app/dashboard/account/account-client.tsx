@@ -143,7 +143,7 @@ export default function AccountClient({ user, org }: Props) {
       </div>
 
       {/* Profile info */}
-      <section className="rounded-2xl border border-gray-100 p-6 space-y-4">
+      <section className="rounded-2xl border border-gray-100 bg-white p-6 space-y-4">
         <h2 className="text-base font-semibold text-gray-900">Profile</h2>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
@@ -171,7 +171,7 @@ export default function AccountClient({ user, org }: Props) {
       </section>
 
       {/* Notification preferences */}
-      <section className="rounded-2xl border border-gray-100 p-6 space-y-4">
+      <section className="rounded-2xl border border-gray-100 bg-white p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Bell className="h-5 w-5 text-gray-400" />
           <h2 className="text-base font-semibold text-gray-900">Notifications</h2>
@@ -199,7 +199,7 @@ export default function AccountClient({ user, org }: Props) {
 
       {/* Subscription */}
       {isOwnerOrAdmin && (
-        <section className="rounded-2xl border border-gray-100 p-6 space-y-4">
+        <section className="rounded-2xl border border-gray-100 bg-white p-6 space-y-4">
           <div className="flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-gray-400" />
             <h2 className="text-base font-semibold text-gray-900">Subscription</h2>
@@ -353,7 +353,7 @@ export default function AccountClient({ user, org }: Props) {
 
       {/* Delete account */}
       {user.role === "OWNER" && (
-        <section className="rounded-2xl border border-red-100 p-6 space-y-4">
+        <section className="rounded-2xl border border-red-100 bg-white p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Trash2 className="h-5 w-5 text-red-400" />
             <h2 className="text-base font-semibold text-red-700">Danger Zone</h2>

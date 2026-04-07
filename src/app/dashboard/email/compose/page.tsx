@@ -15,7 +15,7 @@ export default async function ComposeEmailPage({
 
   const clients = await db.client.findMany({
     where: { organizationId: session.user.organizationId, status: "ACTIVE" },
-    select: { id: true, firstName: true, lastName: true, email: true },
+    select: { id: true, firstName: true, lastName: true, email: true, emailConsentStatus: true },
     orderBy: [{ firstName: "asc" }, { lastName: "asc" }],
   });
 

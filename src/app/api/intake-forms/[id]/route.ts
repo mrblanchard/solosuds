@@ -60,8 +60,16 @@ export async function DELETE(
 
     const form = await db.intakeForm.findFirst({
       where: { id, organizationId: session.user.organizationId },
+      select: { id: true, isEmailConsent: true },
     });
     if (!form) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    if (form.isEmailConsent) {
+      return NextResponse.json(
+        { error: "The Email Communication Consent form cannot be deleted. It is a permanent record for your organization." },
+        { status: 403 }
+      );
+    }
 
     await db.intakeForm.delete({ where: { id } });
     return new NextResponse(null, { status: 204 });

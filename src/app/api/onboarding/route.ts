@@ -78,6 +78,72 @@ export async function POST(req: Request) {
     });
   }
 
+  // Create the email communication consent intake form for this org
+  await db.intakeForm.create({
+    data: {
+      organizationId: org.id,
+      title: "Email Communication Consent",
+      description:
+        "Before we communicate with you via email, we need your consent. Standard email is not fully encrypted and may not be HIPAA-secure. Please read and sign below.",
+      isEmailConsent: true,
+      isActive: true,
+      sortOrder: 0,
+      fields: [
+        {
+          id: "ec_heading",
+          type: "heading",
+          label: "Email Communication Consent",
+          required: false,
+        },
+        {
+          id: "ec_risk_info",
+          type: "info",
+          label: "Please read before signing",
+          required: false,
+          content: [
+            {
+              heading: "How email works",
+              body: "When you send an email, it travels across the internet through many different computer systems before it reaches its destination — a bit like a postcard being passed from person to person. Unlike a sealed letter, a standard email can potentially be read by others along the way.",
+            },
+            {
+              heading: "What this means for your health information",
+              body: "Your provider may want to email you things like appointment reminders, billing questions, or general health information. Because standard email is not fully secure, there is a small chance that someone other than you could read those messages. Your personal health details could be exposed.",
+            },
+            {
+              heading: "What is HIPAA?",
+              body: "HIPAA is a federal law that protects your private health information. Fully secure messaging systems use strong encryption (think of it as a combination lock that only you and your provider can open). Standard email — like Gmail, Yahoo, or Outlook — does not always guarantee that same level of protection.",
+            },
+            {
+              heading: "You are in control",
+              body: "You do not have to consent. Saying no will not affect your care in any way. If you do consent, you can change your mind at any time — just let your provider know and they will stop sending emails immediately.",
+            },
+          ],
+        },
+        {
+          id: "ec_name",
+          type: "text",
+          label: "Your Full Name",
+          placeholder: "First and Last Name",
+          required: true,
+        },
+        {
+          id: "ec_understand_risk",
+          type: "checkbox",
+          label:
+            "I understand that standard email is not fully encrypted and may not be fully HIPAA-secure. I accept this risk and consent to receiving email communications from this practice.",
+          required: true,
+        },
+        {
+          id: "ec_can_revoke",
+          type: "checkbox",
+          label:
+            "I understand that I can ask my provider to stop sending me emails at any time.",
+          required: true,
+        },
+      ],
+    },
+  });
+
   return NextResponse.json({ success: true });
 }
 

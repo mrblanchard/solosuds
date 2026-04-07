@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Trash2, Loader2, MoreVertical, FileText, CalendarDays, Pencil } from "lucide-react";
+import { Trash2, Archive, Loader2, MoreVertical, FileText, CalendarDays, Pencil } from "lucide-react";
 
 interface ClientActionsProps {
   clientId: string;
@@ -13,6 +13,7 @@ interface ClientActionsProps {
 
 export default function ClientActions({ clientId, clientName }: ClientActionsProps) {
   const router = useRouter();
+  const [isArchiving, setIsArchiving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -27,10 +28,12 @@ export default function ClientActions({ clientId, clientName }: ClientActionsPro
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  async function handleDelete() {
+  const busy = isArchiving || isDeleting;
+
+  async function handleArchive() {
     if (!confirm(`Archive "${clientName}"? This will hide them from active lists but preserve all their records.`)) return;
 
-    setIsDeleting(true);
+    setIsArchiving(true);
     try {
       const res = await fetch(`/api/clients/${clientId}`, { method: "DELETE" });
       if (!res.ok) {
@@ -42,6 +45,26 @@ export default function ClientActions({ clientId, clientName }: ClientActionsPro
       router.refresh();
     } catch {
       alert("Failed to archive client. Please try again.");
+    } finally {
+      setIsArchiving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!confirm(`Permanently delete "${clientName}"? This will remove ALL their records (notes, appointments, invoices, etc.) and CANNOT be undone.`)) return;
+
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/clients/${clientId}?permanent=true`, { method: "DELETE" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(`Failed to delete client: ${err?.error ?? "Unknown error"}`);
+        return;
+      }
+      router.push("/dashboard/clients");
+      router.refresh();
+    } catch {
+      alert("Failed to delete client. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -69,8 +92,22 @@ export default function ClientActions({ clientId, clientName }: ClientActionsPro
         <Button
           variant="outline"
           size="sm"
+          onClick={handleArchive}
+          disabled={busy}
+          className="text-amber-700 border-amber-200 hover:bg-amber-50 hover:border-amber-300"
+        >
+          {isArchiving ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-1" />
+          ) : (
+            <Archive className="h-4 w-4 mr-1" />
+          )}
+          Archive
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
           onClick={handleDelete}
-          disabled={isDeleting}
+          disabled={busy}
           className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
         >
           {isDeleting ? (
@@ -78,7 +115,7 @@ export default function ClientActions({ clientId, clientName }: ClientActionsPro
           ) : (
             <Trash2 className="h-4 w-4 mr-1" />
           )}
-          Archive
+          Delete
         </Button>
       </div>
 
@@ -120,8 +157,20 @@ export default function ClientActions({ clientId, clientName }: ClientActionsPro
             </Link>
             <div className="border-t border-gray-100 my-1" />
             <button
+              onClick={() => { setMenuOpen(false); handleArchive(); }}
+              disabled={busy}
+              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-amber-700 hover:bg-amber-50"
+            >
+              {isArchiving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Archive className="h-4 w-4" />
+              )}
+              Archive
+            </button>
+            <button
               onClick={() => { setMenuOpen(false); handleDelete(); }}
-              disabled={isDeleting}
+              disabled={busy}
               className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
             >
               {isDeleting ? (
@@ -129,7 +178,7 @@ export default function ClientActions({ clientId, clientName }: ClientActionsPro
               ) : (
                 <Trash2 className="h-4 w-4" />
               )}
-              Archive
+              Delete Permanently
             </button>
           </div>
         )}

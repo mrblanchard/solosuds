@@ -3,11 +3,20 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { db } from "@/lib/db";
 import { validatePassword } from "@/lib/utils";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { organizationName, name, email, password, fromGoogle, inviteCode, role: requestedRole } = body;
+    const { organizationName, name, email, password, fromGoogle, inviteCode, role: requestedRole, cfToken } = body;
+
+    // Verify CAPTCHA for non-Google credential registrations
+    if (!fromGoogle) {
+      const captchaOk = await verifyTurnstile(cfToken);
+      if (!captchaOk) {
+        return NextResponse.json({ error: "CAPTCHA verification failed. Please try again." }, { status: 400 });
+      }
+    }
 
     if (!name || !email) {
       return NextResponse.json({ error: "Name and email are required" }, { status: 400 });

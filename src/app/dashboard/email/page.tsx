@@ -6,17 +6,23 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ConversationList from "@/components/email/conversation-list";
 
-export default async function EmailPage() {
+export default async function EmailPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
   const session = await auth();
   if (!session?.user?.id || !session?.user?.organizationId) redirect("/dashboard");
 
   const orgId = session.user.organizationId;
+  const { view } = await searchParams;
+  const showArchived = view === "archived";
 
-  // Get all clients that have emails, with their latest email and unread count
+  // Get all clients that have emails matching the current view
   const clients = await db.client.findMany({
     where: {
       organizationId: orgId,
-      emails: { some: {} },
+      emails: { some: { archived: showArchived } },
     },
     select: {
       id: true,
@@ -24,6 +30,7 @@ export default async function EmailPage() {
       lastName: true,
       email: true,
       emails: {
+        where: { archived: showArchived },
         select: {
           id: true,
           direction: true,
@@ -37,7 +44,7 @@ export default async function EmailPage() {
       _count: {
         select: {
           emails: {
-            where: { direction: "INBOUND", read: false },
+            where: { direction: "INBOUND", read: false, archived: false },
           },
         },
       },
@@ -74,9 +81,34 @@ export default async function EmailPage() {
         </Link>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-1 mb-4 border-b border-gray-200">
+        <Link
+          href="/dashboard/email"
+          className={`px-4 py-2 text-sm font-medium rounded-t-md transition-colors ${
+            !showArchived
+              ? "bg-white border border-b-white border-gray-200 text-gray-900 -mb-px"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          Inbox
+        </Link>
+        <Link
+          href="/dashboard/email?view=archived"
+          className={`px-4 py-2 text-sm font-medium rounded-t-md transition-colors ${
+            showArchived
+              ? "bg-white border border-b-white border-gray-200 text-gray-900 -mb-px"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          Archived
+        </Link>
+      </div>
+
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <ConversationList conversations={JSON.parse(JSON.stringify(conversations))} />
       </div>
     </div>
   );
 }
+

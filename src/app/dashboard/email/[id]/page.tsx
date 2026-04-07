@@ -17,10 +17,16 @@ export default async function ConversationPage({
   // Verify client belongs to this org
   const client = await db.client.findFirst({
     where: { id: clientId, organizationId: orgId },
-    select: { id: true, firstName: true, lastName: true, email: true },
+    select: { id: true, firstName: true, lastName: true, email: true, emailConsentStatus: true },
   });
 
   if (!client) notFound();
+
+  // Find the org's email consent form (so we can link to it from the thread view)
+  const consentForm = await db.intakeForm.findFirst({
+    where: { organizationId: orgId, isEmailConsent: true, isActive: true },
+    select: { id: true },
+  });
 
   // Get all emails in this conversation
   const emails = await db.email.findMany({
@@ -55,6 +61,7 @@ export default async function ConversationPage({
       <EmailThread
         client={JSON.parse(JSON.stringify(client))}
         emails={JSON.parse(JSON.stringify(emails))}
+        consentFormId={consentForm?.id ?? null}
       />
     </div>
   );

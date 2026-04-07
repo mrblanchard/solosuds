@@ -1,0 +1,31 @@
+feat: client document portal, email consent, CAPTCHA, form validation
+
+- Client document portal (Cloudflare R2, OTP auth, bidirectional sharing)
+  - Portal pages: /portal/[orgSlug], /verify, /files
+  - Passwordless access via 6-digit OTP (bcrypt, 15min expiry)
+  - JWT session cookie (jose, 24hr TTL)
+  - Presigned download URLs (15min), AES-256 at rest
+  - Audit log on every upload/download/delete
+  - Client-facing document UI + practitioner document card on client profile
+
+- Email communication consent system
+  - NONE / PENDING / CONSENTED / REVOKED lifecycle
+  - Plain-English HIPAA risk explanation (info field type)
+  - Consent form permanently protected from deletion
+  - Fixed silent Resend error handling
+
+- Cloudflare Turnstile CAPTCHA on login, register, and portal access
+  - Server-side token verification via /lib/turnstile.ts
+  - Skipped for Google OAuth flows
+
+- Form validation improvements
+  - Portal access: email/phone format validation with inline errors
+  - Login/register: Zod schemas in place, now CAPTCHA-gated
+
+- New tests (33 passing)
+  - portal-access-form, portal-verify-form, login-validation
+
+- README: R2 setup guide, scalability notes, feature list updates
+- FAQ: Email Consent and Client Document Portal sections added
+- R2 storage verified working (list, upload, delete)
+- DB fully synced (prisma db push confirmed clean)

@@ -18,6 +18,7 @@ interface ClientOption {
   firstName: string;
   lastName: string;
   email: string | null;
+  emailConsentStatus: "NONE" | "PENDING" | "CONSENTED" | "REVOKED";
 }
 
 interface Props {
@@ -41,6 +42,11 @@ export default function ComposeEmail({ clients, replyTo }: Props) {
   const [attachments, setAttachments] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const selectedClient = clients.find((c) => c.id === selectedClientId);
+  const consentBlocked =
+    selectedClient !== undefined &&
+    selectedClient.emailConsentStatus !== "CONSENTED";
 
   // Auto-fill email when client selected
   useEffect(() => {
@@ -112,9 +118,17 @@ export default function ComposeEmail({ clients, replyTo }: Props) {
           {clients.map((c) => (
             <option key={c.id} value={c.id}>
               {c.firstName} {c.lastName} {c.email ? `(${c.email})` : ""}
+              {c.emailConsentStatus !== "CONSENTED" ? " — no consent" : ""}
             </option>
           ))}
         </select>
+        {consentBlocked && (
+          <p className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+            {selectedClient?.emailConsentStatus === "PENDING"
+              ? `${selectedClient.firstName} has a consent form pending. Email will be available once they sign it.`
+              : `${selectedClient?.firstName} hasn't consented to email communication. Open their email thread to send a consent form first.`}
+          </p>
+        )}
       </div>
 
       {/* To email */}
@@ -198,9 +212,14 @@ export default function ComposeEmail({ clients, replyTo }: Props) {
         <p className="text-sm text-red-600">{error}</p>
       )}
 
+      {/* HIPAA Notice */}
+      <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+        <strong>HIPAA Notice:</strong> Standard email is not fully encrypted. Only send non-sensitive scheduling information, or confirm your client has consented to email communication and understands the risks.
+      </p>
+
       {/* Send */}
       <div className="flex justify-end">
-        <Button onClick={handleSend} disabled={sending}>
+        <Button onClick={handleSend} disabled={sending || consentBlocked}>
           <Send className="h-4 w-4 mr-2" />
           {sending ? "Sending…" : "Send Email"}
         </Button>

@@ -74,7 +74,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -95,6 +95,28 @@ export async function DELETE(
 
     if (!client) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const permanent = request.nextUrl.searchParams.get("permanent") === "true";
+
+    if (permanent) {
+      // Hard delete — remove related records then the client in a transaction
+      // Protected (consent) submissions are nullified rather than deleted — they are permanent records
+      await db.intakeSubmission.updateMany({
+        where: { clientId: id, isProtected: true },
+        data: { clientId: null },
+      });
+      await db.$transaction([
+        db.clientTag.deleteMany({ where: { clientId: id } }),
+        db.soapNote.deleteMany({ where: { clientId: id } }),
+        db.appointment.deleteMany({ where: { clientId: id } }),
+        db.intakeSubmission.deleteMany({ where: { clientId: id, isProtected: false } }),
+        db.invoice.deleteMany({ where: { clientId: id } }),
+        db.message.deleteMany({ where: { clientId: id } }),
+        db.email.deleteMany({ where: { clientId: id } }),
+        db.client.delete({ where: { id } }),
+      ]);
+      return NextResponse.json({ deleted: true });
     }
 
     // Soft-archive instead of hard delete to preserve data integrity

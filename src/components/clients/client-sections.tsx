@@ -26,11 +26,12 @@ import { Badge } from "@/components/ui/badge";
 import { GripVertical, FileText, CalendarDays, CreditCard, Plus } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { ClientContactCard } from "@/components/clients/client-contact-card";
+import ClientDocuments from "@/components/clients/client-documents";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type SectionId = "contact" | "notes" | "appointments" | "invoices";
-const DEFAULT_ORDER: SectionId[] = ["contact", "notes", "appointments", "invoices"];
+export type SectionId = "contact" | "notes" | "appointments" | "invoices" | "documents";
+const DEFAULT_ORDER: SectionId[] = ["contact", "notes", "appointments", "invoices", "documents"];
 
 interface SoapNote {
   id: string;
@@ -81,6 +82,16 @@ export interface ClientSectionsProps {
   soapNotes: SoapNote[];
   appointments: Appointment[];
   invoices: Invoice[];
+  orgSlug: string;
+  documents: {
+    id: string;
+    name: string;
+    mimeType: string;
+    sizeBytes: number;
+    direction: "CLIENT_TO_PRACTICE" | "PRACTICE_TO_CLIENT";
+    uploadedBy: string | null;
+    createdAt: string | Date;
+  }[];
 }
 
 // ─── Persistence ──────────────────────────────────────────────────────────────
@@ -197,6 +208,8 @@ export default function ClientSections({
   soapNotes,
   appointments,
   invoices,
+  orgSlug,
+  documents,
 }: ClientSectionsProps) {
   const [order, setOrder] = useState<SectionId[]>(DEFAULT_ORDER);
   const dndId = useId();
@@ -341,6 +354,14 @@ export default function ClientSections({
           )}
         </CardContent>
       </Card>
+    ),
+
+    documents: (
+      <ClientDocuments
+        clientId={clientId}
+        orgSlug={orgSlug}
+        initialDocs={documents}
+      />
     ),
 
     invoices: (

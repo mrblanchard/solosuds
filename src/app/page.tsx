@@ -17,18 +17,21 @@ export default function LandingPage() {
   return (
     <div className="min-h-dvh bg-white">
       {/* Nav */}
-      <nav className="border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+      <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b-primary">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center shrink-0">
-            <img src="/icon.svg" alt="SoapSuds" style={{height:"40px",width:"auto"}} />
+            <img src="/logo.png" alt="SoapSuds" className="h-10 w-auto" />
           </div>
           <LandingNav />
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-indigo-50 to-white px-4 py-24 text-center">
-        <div className="mx-auto max-w-3xl">
+      <section
+        className="relative overflow-hidden px-4 py-24 text-center bg-cover bg-center bg-no-repeat bg-banner"
+      >
+        <div className="absolute inset-0 bg-white/50" />
+        <div className="relative mx-auto max-w-3xl">
           <div className="mb-4 inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
             HIPAA-compliant · Built for SMBs
           </div>

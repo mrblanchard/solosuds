@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { AppFooter } from "@/components/layout/app-footer";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const schema = z.object({
   email: z.string().email("Invalid email address").max(254, "Email is too long"),
@@ -41,6 +42,8 @@ function LoginForm() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [urlErrorMessage, setUrlErrorMessage] = useState<string | null>(null);
+  const [cfToken, setCfToken] = useState<string | null>(null);
+  const turnstileRef = useRef<{ reset: () => void } | null>(null);
 
   // Read URL error only after mount to avoid server/client hydration mismatch
   useEffect(() => {
@@ -74,11 +77,15 @@ function LoginForm() {
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
+        cfToken: cfToken ?? "",
         redirect: false,
       });
 
       if (result?.error) {
         setFormError("Invalid email or password.");
+        // Reset CAPTCHA so user must solve it again
+        turnstileRef.current?.reset();
+        setCfToken(null);
         return;
       }
 
@@ -100,7 +107,7 @@ function LoginForm() {
         <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center text-center">
-          <img src="/icon.svg" alt="SoapSuds" style={{height:"60px",width:"auto"}} className="mb-2" />
+          <img src="/logo.png" alt="SoapSuds" className="h-15 w-auto mb-2" />
           <p className="mt-1 text-sm text-gray-500">
             Care without the chaos
           </p>
@@ -192,7 +199,22 @@ function LoginForm() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                onSuccess={(token) => setCfToken(token)}
+                onExpire={() => setCfToken(null)}
+                onError={() => setCfToken(null)}
+                options={{ theme: "light" }}
+              />
+            )}
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || (!!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !cfToken)}
+            >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}

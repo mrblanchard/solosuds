@@ -142,6 +142,76 @@ const sections = [
     ],
   },
   {
+    title: "Email Consent",
+    items: [
+      {
+        q: "What is email consent and why do I need it?",
+        a: "Standard email is not fully encrypted — it travels through multiple servers before reaching its destination, and could theoretically be read by others along the way. Under HIPAA, sending protected health information via standard email requires that the patient understands this risk and explicitly consents. SoapSuds enforces this by gating all email communication behind a signed consent form.",
+      },
+      {
+        q: "How does the email consent flow work?",
+        a: "When you first try to email a client, SoapSuds will show a prompt to send them a consent form. The client receives a branded email with a link to a plain-English form explaining the risks of email communication. Once they check the boxes and submit, their status updates to Consented and you can email them freely.",
+      },
+      {
+        q: "What are the consent statuses?",
+        a: "NONE: No consent form has been sent yet. PENDING: The consent form was sent and you're waiting for the client to sign it. CONSENTED: The client has signed — email is unlocked. REVOKED: You have revoked email access for this client (see below).",
+      },
+      {
+        q: "How do I send the consent form?",
+        a: "Open the email thread for a client (Dashboard → Email → select the client). If they haven't consented, you'll see a notice at the bottom with a \"Send Consent Form\" button. Click it — the client will receive an email with a link to the consent form. You can resend it at any time if they haven't responded.",
+      },
+      {
+        q: "Can I revoke a client's email consent?",
+        a: "Yes. Open the client's email thread and click \"Revoke Access\" in the header (only visible when the client is Consented). This immediately blocks email until you send them a new consent form and they sign it again. This is useful if a client requests to stop receiving emails.",
+      },
+      {
+        q: "Can I delete the consent form or a signed submission?",
+        a: "No — this is intentional. The Email Communication Consent form cannot be deleted from your intake forms list. Signed consent submissions are permanently protected and will never be removed, even if you permanently delete the client record. This is an important audit trail.",
+      },
+    ],
+  },
+  {
+    title: "Client Document Portal",
+    items: [
+      {
+        q: "What is the client document portal?",
+        a: "The client document portal is a secure, password-free web page where your clients can upload documents to you and download documents you've shared with them. It's accessible at your practice's portal link — for example: app.soapsuds.app/portal/your-practice-name.",
+      },
+      {
+        q: "How do clients access the portal without an account?",
+        a: "Clients don't need to create an account. They go to your portal link and enter the email address or phone number you have on file for them. SoapSuds sends a 6-digit verification code to that address. Once they enter the code, they're in. The code expires in 15 minutes and can only be used once.",
+      },
+      {
+        q: "How do I share the portal link with a client?",
+        a: "Go to the client's profile page and scroll to the Documents section. Click \"Copy portal link\" — this copies your practice's portal URL to your clipboard. You can paste it into an email, text, or any message to the client.",
+      },
+      {
+        q: "How do I share a document WITH a client?",
+        a: "In the Documents section on a client's profile page, click \"Share file\". Select the file from your computer. It will be uploaded to secure storage and the client will be able to download it the next time they log in to the portal.",
+      },
+      {
+        q: "How does a client upload a document to me?",
+        a: "The client visits your portal link, verifies their identity with a one-time code, and then sees an \"Upload a document\" section with a \"Choose file\" button. Files they upload appear in the Documents section on their profile in your dashboard, labelled \"From client\".",
+      },
+      {
+        q: "Are the documents secure and HIPAA-compliant?",
+        a: "Yes. All files are stored in Cloudflare R2 with AES-256 encryption at rest. All data is encrypted in transit with HTTPS/TLS. Files are never accessible via a permanent public URL — every download goes through the server, which verifies authorization and generates a signed URL that expires after 15 minutes. Every upload and download is recorded in an audit log.",
+      },
+      {
+        q: "What file types and sizes are supported?",
+        a: "The portal accepts PDF, Word documents (.doc, .docx), images (JPG, PNG, GIF, TIFF, HEIC), plain text, and CSV files. Maximum file size is 25 MB per file.",
+      },
+      {
+        q: "Can clients delete their own uploads?",
+        a: "Yes — clients can delete files they uploaded themselves from the portal. They cannot delete files that were shared with them by the practice. Practitioners can delete any document from the client profile in the dashboard.",
+      },
+      {
+        q: "Can I see a record of who accessed which files?",
+        a: "Every upload and download is logged with a timestamp and whether it was the client or a practitioner. This audit trail is stored permanently in the database and is available for compliance purposes.",
+      },
+    ],
+  },
+  {
     title: "Billing & Invoices",
     items: [
       {

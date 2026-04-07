@@ -18,26 +18,45 @@ export default async function ClientProfilePage({
   const userId = session?.user?.id ?? "unknown";
   const { id } = await params;
 
-  const client = await db.client.findFirst({
-    where: { id, organizationId: orgId },
-    include: {
-      tags: true,
-      soapNotes: {
-        orderBy: { sessionDate: "desc" },
-        take: 5,
-        include: { practitioner: { select: { name: true } } },
+  const [client, org, documents] = await Promise.all([
+    db.client.findFirst({
+      where: { id, organizationId: orgId },
+      include: {
+        tags: true,
+        soapNotes: {
+          orderBy: { sessionDate: "desc" },
+          take: 5,
+          include: { practitioner: { select: { name: true } } },
+        },
+        appointments: {
+          orderBy: { startTime: "desc" },
+          take: 5,
+          include: { service: true, practitioner: { select: { name: true } } },
+        },
+        invoices: {
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        },
       },
-      appointments: {
-        orderBy: { startTime: "desc" },
-        take: 5,
-        include: { service: true, practitioner: { select: { name: true } } },
+    }),
+    db.organization.findUnique({
+      where: { id: orgId },
+      select: { slug: true },
+    }),
+    db.document.findMany({
+      where: { clientId: id, organizationId: orgId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        mimeType: true,
+        sizeBytes: true,
+        direction: true,
+        uploadedBy: true,
+        createdAt: true,
       },
-      invoices: {
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      },
-    },
-  });
+    }),
+  ]);
 
   if (!client) notFound();
 
@@ -86,6 +105,8 @@ export default async function ClientProfilePage({
         soapNotes={client.soapNotes}
         appointments={client.appointments}
         invoices={client.invoices}
+        orgSlug={org?.slug ?? ""}
+        documents={documents}
       />
     </div>
   );

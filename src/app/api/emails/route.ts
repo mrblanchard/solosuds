@@ -154,3 +154,54 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
   }
 }
+
+// Archive or unarchive all emails for a client conversation
+export async function PATCH(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id || !session?.user?.organizationId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { searchParams } = request.nextUrl;
+  const clientId = searchParams.get("clientId");
+
+  if (!clientId) {
+    return NextResponse.json({ error: "clientId is required" }, { status: 400 });
+  }
+
+  const body = await request.json();
+  const { archived } = body;
+
+  if (typeof archived !== "boolean") {
+    return NextResponse.json({ error: "archived must be a boolean" }, { status: 400 });
+  }
+
+  await db.email.updateMany({
+    where: { organizationId: session.user.organizationId, clientId },
+    data: { archived },
+  });
+
+  return NextResponse.json({ ok: true });
+}
+
+// Delete all emails for a client conversation
+export async function DELETE(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id || !session?.user?.organizationId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { searchParams } = request.nextUrl;
+  const clientId = searchParams.get("clientId");
+
+  if (!clientId) {
+    return NextResponse.json({ error: "clientId is required" }, { status: 400 });
+  }
+
+  await db.email.deleteMany({
+    where: { organizationId: session.user.organizationId, clientId },
+  });
+
+  return new NextResponse(null, { status: 204 });
+}
+

@@ -11,9 +11,11 @@ Practice management software for healthcare practitioners. SOAP notes, schedulin
 
 - **SOAP Notes** — AI-powered clinical documentation with transcription, diagnosis/procedure codes, body charts, and reusable templates
 - **Scheduling** — Calendar-based appointment management with email/SMS reminders
-- **Client Management** — Patient records with demographics, tags, referral tracking, emergency contacts, and draggable detail sections
+- **Client Management** — Patient records with demographics, tags, referral tracking, emergency contacts, draggable detail sections, and a per-client document library
 - **Billing** — Invoice generation with line items, CPT codes, tax, and Stripe payment processing
 - **Intake Forms** — Custom form builder with shareable public links, email/SMS delivery, submission tracking, drag-to-reorder, and one-click duplication
+- **Email Consent** — HIPAA-aware consent flow: auto-generates a consent form per practice, sends a branded email with a plain-English risk explanation, gates all email communication behind a signed consent. Supports NONE → PENDING → CONSENTED → REVOKED lifecycle. Consent submissions are permanently protected from deletion.
+- **Client Document Portal** — Passwordless client-facing file portal at `/portal/[slug]`. Clients verify identity with a one-time code sent to their email or phone (no account required). Supports bidirectional document exchange (client uploads to practice; practice shares files with client). All files stored in Cloudflare R2 with AES-256 at-rest encryption and 15-minute expiring signed download URLs.
 - **Messaging** — Conversational email threads with chat-style UI, inline reply, CKEditor 5 rich text editor, and inbound email receiving via Resend webhook
 - **Search** — Global search modal (⌘K / Ctrl+K) across clients, notes, and appointments
 - **Notifications** — In-app notification panel with unread badges
@@ -66,6 +68,31 @@ NEXTAUTH_URL
 GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET
 ```
+
+### Cloudflare R2 (file storage)
+
+The client document portal requires Cloudflare R2. The bucket is already named `soapsuds` in the `.env`.
+
+**Getting credentials:**
+
+1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → **R2 Object Storage** (left sidebar)
+2. Your **Account ID** appears in the URL: `dash.cloudflare.com/<account-id>/r2/...`
+3. Click **Manage R2 API Tokens** (top right)
+4. Click **Create API Token** — name it `soapsuds-app`, set permissions to **Object Read & Write**, scope it to the `soapsuds` bucket
+5. Copy the credentials immediately — they are shown once
+
+**Fill in `.env`:**
+```
+STORAGE_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com"
+STORAGE_ACCESS_KEY_ID="<token access key id>"
+STORAGE_SECRET_ACCESS_KEY="<token secret access key>"
+STORAGE_BUCKET="soapsuds"
+STORAGE_PUBLIC_URL=""   # leave blank — never expose the bucket publicly
+```
+
+> **Do not enable public bucket access.** Files are served through 15-minute expiring signed URLs generated server-side after authorization. A public bucket URL would bypass all access controls and violate HIPAA.
+
+**On the production server**, update `/app/soapsuds/.env` with the same values and restart: `pm2 restart soapsuds`
 
 ### Database
 
@@ -120,4 +147,29 @@ Code is hosted on [Forgejo](https://v14.next.forgejo.org/soapsuds/soapsuds). The
 Both of these must be in Google Console → OAuth client → Authorized redirect URIs:
 - `https://dev.soapsuds.app/api/auth/callback/google`
 - `https://soapsuds.app/api/auth/callback/google`
+
+## Scalability Notes
+
+The stack is designed to scale to 1,000+ users without architectural changes — just tier upgrades as needed.
+
+### Neon (PostgreSQL)
+Neon separates compute from storage. It auto-suspends when idle and scales compute up instantly under load. Connection pooling is already active via the `-pooler` suffix in `DATABASE_URL` (Neon's built-in PgBouncer). To scale: upgrade the compute size in the Neon console — no migration or data move required.
+
+### Cloudflare R2 (file storage)
+No egress fees. Built for petabyte-scale. 1,000 users uploading documents is trivial. No action needed to scale.
+
+### Next.js / Vercel
+Serverless functions scale automatically. Each API route spins up on demand — no server management required. The main latency concern at very high concurrency is cold starts, which only becomes noticeable at thousands of *simultaneous* requests.
+
+### Service tier limits to watch
+
+| Service | Free / default limit | When to upgrade |
+|---|---|---|
+| Neon | 0.5 GB storage, 1 compute unit | ~500+ active clients with lots of data |
+| Resend | 3,000 emails/month | If clients actively use email features |
+| Twilio | Pay-as-you-go from day 1 | Already scales fine |
+| Stripe | 0.5% + standard fees | Revenue-based, not user-count-based |
+| Vercel | 100 GB bandwidth/month | High file download traffic |
+
+No services require a painful migration to scale — upgrade tiers as revenue grows.
 

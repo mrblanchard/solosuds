@@ -9,7 +9,7 @@ export function AppFooter() {
           {/* Brand */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <img src="/icon.svg" alt="SoapSuds" style={{ height: "28px", width: "auto" }} />
+              <img src="/logo.png" alt="SoapSuds" className="h-7 w-auto" />
               <span className="text-base font-semibold text-gray-800">SoapSuds</span>
             </div>
             <p className="max-w-xs text-xs text-gray-500 leading-relaxed">
