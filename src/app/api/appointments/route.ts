@@ -71,6 +71,8 @@ export async function POST(req: Request) {
         appointmentDate: formatDate(appointment.startTime, "MMMM d, yyyy"),
         appointmentTime: formatDate(appointment.startTime, "h:mm a"),
         serviceName: appointment.service?.name ?? "Session",
+        startDateTime: appointment.startTime.toISOString(),
+        endDateTime: appointment.endTime.toISOString(),
       });
     } catch (err) {
       console.error("Failed to send reminder:", err);

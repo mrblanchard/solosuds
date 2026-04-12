@@ -85,6 +85,8 @@ export async function POST(request: NextRequest) {
           appointmentDate: new Date(startTime).toLocaleDateString(),
           appointmentTime: new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           serviceName: service.name,
+          startDateTime: startTime,
+          endDateTime: endTime,
         });
       } catch {
         // Non-fatal — log but don't reject
