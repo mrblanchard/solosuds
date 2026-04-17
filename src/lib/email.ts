@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+﻿import { Resend } from "resend";
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY || "re_placeholder");
@@ -32,7 +32,7 @@ function buildIcsContent(title: string, description: string, start: Date, end: D
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//SoapSuds//EN",
+    "PRODID:-//SoloSuds//EN",
     "BEGIN:VEVENT",
     `DTSTART:${toIcsDate(start)}`,
     `DTEND:${toIcsDate(end)}`,

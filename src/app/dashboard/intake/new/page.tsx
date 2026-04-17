@@ -94,11 +94,11 @@ const COMMON_FIELD_TEMPLATES: { label: string; description: string; fields: Omit
   },
   {
     label: "Consent & Agreements",
-    description: "HIPAA, consent to treatment",
+    description: "Consent to treatment",
     fields: [
       { type: "heading", label: "Consent & Agreements", required: false },
       { type: "checkbox", label: "I consent to treatment as discussed with my provider", placeholder: "I agree", required: true },
-      { type: "checkbox", label: "I acknowledge the HIPAA Notice of Privacy Practices", placeholder: "I acknowledge", required: true },
+      { type: "checkbox", label: "I consent to the treatment and services described", placeholder: "I consent", required: true },
       { type: "checkbox", label: "I authorize the release of information to my insurance carrier", placeholder: "I authorize", required: false },
     ],
   },

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
@@ -22,7 +22,7 @@ async function requireOwnerOrAdmin() {
   return { session, org };
 }
 
-// POST — cancel subscription at period end
+// POST — cancel at end of current billing period (access until then)
 export async function POST() {
   const result = await requireOwnerOrAdmin();
   if ("error" in result && result.error) return result.error;
@@ -36,18 +36,17 @@ export async function POST() {
     cancel_at_period_end: true,
   });
 
+  const expiresAt = new Date((sub as unknown as { current_period_end: number }).current_period_end * 1000);
+
   await db.organization.update({
     where: { id: session!.user!.organizationId! },
-    data: { subscriptionStatus: "canceling" },
+    data: { subscriptionStatus: "canceling", subscriptionPeriodEnd: expiresAt },
   });
-
-  const subData = sub as unknown as { current_period_end: number };
-  const expiresAt = new Date((subData.current_period_end ?? 0) * 1000);
 
   return NextResponse.json({ ok: true, expiresAt: expiresAt.toISOString() });
 }
 
-// DELETE — reactivate a canceled subscription
+// DELETE — reactivate a canceling subscription (undo cancel)
 export async function DELETE() {
   const result = await requireOwnerOrAdmin();
   if ("error" in result && result.error) return result.error;
@@ -63,14 +62,14 @@ export async function DELETE() {
 
   await db.organization.update({
     where: { id: session!.user!.organizationId! },
-    data: { subscriptionStatus: "active" },
+    data: { subscriptionStatus: "active", subscriptionPeriodEnd: null },
   });
 
   return NextResponse.json({ ok: true });
 }
 
-// PATCH — pause subscription
-export async function PATCH() {
+// PATCH — pause: immediately blocks access, stops billing for chosen duration (1–12 months)
+export async function PATCH(req: NextRequest) {
   const result = await requireOwnerOrAdmin();
   if ("error" in result && result.error) return result.error;
   const { session, org } = result;
@@ -83,19 +82,30 @@ export async function PATCH() {
     return NextResponse.json({ error: "Subscription is already paused" }, { status: 400 });
   }
 
+  const { months } = (await req.json().catch(() => ({}))) as { months?: number };
+  const pauseMonths = Math.min(12, Math.max(1, Math.round(months ?? 1)));
+
+  const resumesAt = new Date();
+  resumesAt.setMonth(resumesAt.getMonth() + pauseMonths);
+  const resumesAtUnix = Math.floor(resumesAt.getTime() / 1000);
+
+  // Void invoices during pause; auto-resume billing at resumesAt
   await stripe.subscriptions.update(org.stripeSubscriptionId, {
-    pause_collection: { behavior: "void" },
+    pause_collection: { behavior: "void", resumes_at: resumesAtUnix },
   });
 
   await db.organization.update({
     where: { id: session!.user!.organizationId! },
-    data: { subscriptionStatus: "paused" },
+    data: {
+      subscriptionStatus: "paused",
+      subscriptionPeriodEnd: resumesAt,
+    },
   });
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, resumesAt: resumesAt.toISOString() });
 }
 
-// PUT — resume a paused subscription
+// PUT — resume a paused subscription (clears pause, billing restarts)
 export async function PUT() {
   const result = await requireOwnerOrAdmin();
   if ("error" in result && result.error) return result.error;
@@ -106,12 +116,12 @@ export async function PUT() {
   }
 
   await stripe.subscriptions.update(org.stripeSubscriptionId, {
-    pause_collection: "",
+    pause_collection: null as unknown as undefined,
   });
 
   await db.organization.update({
     where: { id: session!.user!.organizationId! },
-    data: { subscriptionStatus: "active" },
+    data: { subscriptionStatus: "active", subscriptionPeriodEnd: null },
   });
 
   return NextResponse.json({ ok: true });

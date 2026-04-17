@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+﻿import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -106,7 +106,7 @@ export async function POST(req: Request) {
       });
 
       if (intakeForm) {
-        const baseUrl = process.env.NEXTAUTH_URL ?? "https://soapsuds.app";
+        const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
         const intakeUrl = `${baseUrl}/intake/${intakeForm.id}?clientId=${data.clientId}`;
 
         try {

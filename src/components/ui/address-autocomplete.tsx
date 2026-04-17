@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
@@ -59,7 +59,7 @@ export function AddressAutocomplete({
     try {
       const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=us&q=${encodeURIComponent(query)}`;
       const res = await fetch(url, {
-        headers: { "User-Agent": "SoapSuds/1.0" },
+        headers: { "User-Agent": "SoloSuds/1.0" },
       });
       if (!res.ok) return;
       const data: AddressSuggestion[] = await res.json();

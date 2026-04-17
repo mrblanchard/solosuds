@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState, useEffect, useRef } from "react";
 import { signIn } from "next-auth/react";
@@ -107,7 +107,7 @@ function LoginForm() {
         <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center text-center">
-          <img src="/logo.png" alt="SoapSuds" className="h-15 w-auto mb-2" />
+          <img src="/logo.png" alt="SoloSuds" className="h-15 w-auto mb-2" />
           <p className="mt-1 text-sm text-gray-500">
             Care without the chaos
           </p>
@@ -234,7 +234,7 @@ function LoginForm() {
         </div>
 
         <p className="mt-4 text-center text-xs text-gray-400">
-          HIPAA-compliant · End-to-end encrypted · SOC 2 Type II
+          Your data is private and secure
         </p>
         </div>
       </div>

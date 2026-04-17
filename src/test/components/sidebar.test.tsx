@@ -1,4 +1,4 @@
-// @vitest-environment happy-dom
+﻿// @vitest-environment happy-dom
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Sidebar } from "@/components/layout/sidebar";
 
@@ -34,7 +34,7 @@ describe("Sidebar", () => {
   describe("rendering", () => {
     it("renders the logo", () => {
       render(<Sidebar />);
-      expect(screen.getAllByAltText("SoapSuds").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByAltText("SoloSuds").length).toBeGreaterThanOrEqual(1);
     });
 
     it("renders all navigation items", () => {

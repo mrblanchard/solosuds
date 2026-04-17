@@ -1,8 +1,8 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { AppFooter } from "@/components/layout/app-footer";
 import { auth } from "@/lib/auth";
 
-export const metadata = { title: "Business Associate Agreement — SoapSuds" };
+export const metadata = { title: "Business Associate Agreement — SoloSuds" };
 
 export default async function HipaaPage() {
   const session = await auth();
@@ -11,7 +11,7 @@ export default async function HipaaPage() {
       <div className="mx-auto max-w-3xl">
         <div className="mb-8 flex items-center gap-2">
           <Link href="/" className="flex items-center">
-            <img src="/logo.png" alt="SoapSuds" className="h-10 w-auto" />
+            <img src="/logo.png" alt="SoloSuds" className="h-10 w-auto" />
           </Link>
         </div>
 
@@ -22,10 +22,10 @@ export default async function HipaaPage() {
           <div className="prose prose-gray max-w-none text-sm leading-relaxed text-gray-700 space-y-6">
 
             <p>
-              This Business Associate Agreement (&ldquo;BAA&rdquo;) is entered into between SoapSuds, Inc.
+              This Business Associate Agreement (&ldquo;BAA&rdquo;) is entered into between SoloSuds, Inc.
               (&ldquo;Business Associate&rdquo;) and the healthcare provider or covered entity that creates an
               account (&ldquo;Covered Entity&rdquo;). This BAA is incorporated into and forms part of the
-              SoapSuds Terms of Service.
+              SoloSuds Terms of Service.
             </p>
 
             <section>
@@ -45,7 +45,7 @@ export default async function HipaaPage() {
 
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">2. Obligations of Business Associate</h2>
-              <p>SoapSuds agrees to:</p>
+              <p>SoloSuds agrees to:</p>
               <ul className="list-disc pl-5 mt-2 space-y-1">
                 <li>Not use or disclose PHI other than as permitted by this BAA or required by law.</li>
                 <li>Use appropriate safeguards, and comply with the HIPAA Security Rule with respect to ePHI, to prevent unauthorized use or disclosure of PHI.</li>
@@ -58,7 +58,7 @@ export default async function HipaaPage() {
 
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">3. Permitted Uses and Disclosures</h2>
-              <p>SoapSuds may use or disclose PHI only to:</p>
+              <p>SoloSuds may use or disclose PHI only to:</p>
               <ul className="list-disc pl-5 mt-2 space-y-1">
                 <li>Perform the services described in the Terms of Service on behalf of the Covered Entity.</li>
                 <li>Provide data aggregation services relating to the health care operations of the Covered Entity.</li>
@@ -70,8 +70,8 @@ export default async function HipaaPage() {
               <h2 className="text-base font-semibold text-gray-900 mb-2">4. Obligations of Covered Entity</h2>
               <p>The Covered Entity agrees to:</p>
               <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li>Notify SoapSuds of any restriction on the use or disclosure of PHI that the Covered Entity has agreed to with individuals.</li>
-                <li>Not request SoapSuds to use or disclose PHI in any manner that would violate the HIPAA Rules.</li>
+                <li>Notify SoloSuds of any restriction on the use or disclosure of PHI that the Covered Entity has agreed to with individuals.</li>
+                <li>Not request SoloSuds to use or disclose PHI in any manner that would violate the HIPAA Rules.</li>
                 <li>Obtain all necessary authorizations from patients before submitting PHI through the platform.</li>
               </ul>
             </section>
@@ -79,7 +79,7 @@ export default async function HipaaPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">5. Security Measures</h2>
               <p>
-                SoapSuds maintains industry-standard administrative, physical, and technical safeguards to protect
+                SoloSuds maintains industry-standard administrative, physical, and technical safeguards to protect
                 ePHI, including but not limited to: AES-256 encryption at rest, TLS 1.2+ in transit, role-based
                 access controls, audit logging, and regular security assessments. Data is hosted on SOC 2
                 Type II certified infrastructure.
@@ -89,10 +89,10 @@ export default async function HipaaPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">6. Breach Notification</h2>
               <p>
-                In the event of a breach of unsecured PHI, SoapSuds will notify the Covered Entity without
+                In the event of a breach of unsecured PHI, SoloSuds will notify the Covered Entity without
                 unreasonable delay and no later than 60 calendar days after discovery. Notification will include,
                 to the extent possible: the identification of affected individuals; a description of the breach;
-                types of PHI involved; steps individuals should take; and remediation steps taken by SoapSuds.
+                types of PHI involved; steps individuals should take; and remediation steps taken by SoloSuds.
               </p>
             </section>
 
@@ -101,7 +101,7 @@ export default async function HipaaPage() {
               <p>
                 This BAA is effective upon account creation and remains in effect for the duration of the
                 service relationship. Either party may terminate if the other party materially breaches this BAA
-                and fails to cure within 30 days of written notice. Upon termination, SoapSuds will return or
+                and fails to cure within 30 days of written notice. Upon termination, SoloSuds will return or
                 destroy all PHI in its possession within 30 days.
               </p>
             </section>
@@ -118,8 +118,8 @@ export default async function HipaaPage() {
               <h2 className="text-base font-semibold text-gray-900 mb-2">9. Contact</h2>
               <p>
                 Questions regarding this BAA may be directed to our Privacy Officer at{" "}
-                <a href="mailto:privacy@soapsuds.app" className="text-indigo-600 hover:underline">
-                  privacy@soapsuds.app
+                <a href="mailto:privacy@solosuds.com" className="text-indigo-600 hover:underline">
+                  privacy@solosuds.com
                 </a>.
               </p>
             </section>

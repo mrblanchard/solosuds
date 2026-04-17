@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -124,7 +124,7 @@ export function Sidebar({
           <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
             <img
               src="/logo.png"
-              alt="SoapSuds"
+              alt="SoloSuds"
               className={isCollapsed ? "h-8 w-auto" : "h-12 w-auto"}
             />
           </Link>

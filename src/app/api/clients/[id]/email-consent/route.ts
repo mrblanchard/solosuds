@@ -102,7 +102,7 @@ export async function POST(
     select: { name: true },
   });
 
-  const baseUrl = process.env.NEXTAUTH_URL || "https://app.soapsuds.app";
+  const baseUrl = process.env.NEXTAUTH_URL || "https://app.solosuds.com";
   const formLink = `${baseUrl}/intake/${consentForm.id}?clientId=${clientId}`;
 
   const html = `

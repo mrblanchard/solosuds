@@ -21,7 +21,7 @@ const PRACTICE_OPTIONS: PracticeOption[] = [
     emoji: "🫱",
     label: "Therapy & Bodywork",
     subtitle: "Massage, physical therapy, chiropractic, acupuncture",
-    features: ["SOAP notes & session tracking", "Client intake forms", "Appointment booking", "HIPAA-ready"],
+    features: ["SOAP notes & session tracking", "Client intake forms", "Appointment booking", "Secure messaging"],
   },
   {
     type: "SALON",
@@ -35,7 +35,7 @@ const PRACTICE_OPTIONS: PracticeOption[] = [
     emoji: "🩺",
     label: "Medical Practice",
     subtitle: "Doctor's office, clinic, mental health, specialist",
-    features: ["HIPAA compliance tools", "Patient intake forms", "Detailed clinical notes", "Secure messaging"],
+    features: ["Clinical notes", "Patient intake forms", "Detailed clinical notes", "Secure messaging"],
   },
   {
     type: "FITNESS",

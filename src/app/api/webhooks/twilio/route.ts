@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sendSms } from "@/lib/twilio";
 import { sendEmail } from "@/lib/email";
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
                 <blockquote style="border-left:3px solid #6366f1;padding:8px 16px;margin:16px 0;background:#f5f3ff;border-radius:4px;">
                   ${messageBody.replace(/\n/g, "<br>")}
                 </blockquote>
-                <p><a href="${process.env.NEXTAUTH_URL ?? "https://soapsuds.app"}/dashboard/messages">View in Dashboard</a></p>
+                <p><a href="${process.env.NEXTAUTH_URL ?? "https://solosuds.com"}/dashboard/messages">View in Dashboard</a></p>
               `,
             });
           } catch (emailErr) {

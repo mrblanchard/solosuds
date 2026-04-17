@@ -17,13 +17,12 @@ export default async function DashboardLayout({
   // Check trial expiry
   const org = await db.organization.findUnique({
     where: { id: session.user.organizationId },
-    select: { subscriptionStatus: true, createdAt: true },
+    select: { subscriptionStatus: true, createdAt: true, subscriptionPeriodEnd: true },
   });
 
   if (org?.subscriptionStatus === "trialing") {
     const trialEnd = new Date(org.createdAt.getTime() + TRIAL_DAYS * 86400000);
     if (Date.now() > trialEnd.getTime()) {
-      // Update status so they don't keep hitting this check
       await db.organization.update({
         where: { id: session.user.organizationId },
         data: { subscriptionStatus: "canceled" },
@@ -32,7 +31,20 @@ export default async function DashboardLayout({
     }
   }
 
-  if (org?.subscriptionStatus === "canceled" || org?.subscriptionStatus === "paused") {
+  // canceling: cancel_at_period_end — keep access until the period ends
+  if (org?.subscriptionStatus === "canceling" && org.subscriptionPeriodEnd) {
+    if (Date.now() > org.subscriptionPeriodEnd.getTime()) {
+      await db.organization.update({
+        where: { id: session.user.organizationId },
+        data: { subscriptionStatus: "canceled" },
+      });
+      redirect("/trial-expired");
+    }
+    // still within period — let them through
+  }
+
+  // paused: immediately blocked, no access until they resume
+  if (org?.subscriptionStatus === "paused" || org?.subscriptionStatus === "canceled") {
     redirect("/trial-expired");
   }
 

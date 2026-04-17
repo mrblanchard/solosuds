@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import PricingSection from "@/components/pricing-section";
 import LandingNav from "@/components/landing-nav";
@@ -6,9 +6,8 @@ import { AppFooter } from "@/components/layout/app-footer";
 import {
   CalendarDays,
   Users,
-  Shield,
   CreditCard,
-  Smartphone,
+  FileText,
   ArrowRight,
   CheckCircle,
 } from "lucide-react";
@@ -20,7 +19,7 @@ export default function LandingPage() {
       <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b-primary">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center shrink-0">
-            <img src="/logo.png" alt="SoapSuds" className="h-10 w-auto" />
+            <img src="/logo.png" alt="SoloSuds" className="h-10 w-auto" />
           </div>
           <LandingNav />
         </div>
@@ -33,14 +32,16 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-white/50" />
         <div className="relative mx-auto max-w-3xl">
           <div className="mb-4 inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
-            HIPAA-compliant · Built for SMBs
+            Built for independent practitioners
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-6xl">
-            Clinical documentation{" "}
-            <span className="text-indigo-600">should be effortless</span>
+            Write your notes.
+            
           </h1>
-          <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
-          SoapSuds combines intelligent scheduling, integrated billing, and secure SOAP documentation into one HIPAA-compliant platform built for modern healthcare practices.
+          <h2 className="text-4xl font-extrabold tracking-tight text-indigo-600 sm:text-6xl">Schedule your clients. </h2>
+          <h3 className="text-4xl font-extrabold tracking-tight text-indigo-600 sm:text-6xl">Run your practice.</h3>
+          <p className="mt-6 text-lg text-gray-700 max-w-2xl mx-auto rounded-xl bg-violet-100/20 px-3 py-3 backdrop-blur-sm">
+           Easily schedule appointments, take session notes, send intake forms, manage and much more. All in one place.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/register">
@@ -56,13 +57,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SOAPSuds Acronym Explainer */}
+      {/* SOAP Suds Acronym Explainer */}
       <section className="py-20 px-4 bg-gradient-to-b from-white to-indigo-50">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-gray-900">
               What does{" "}
-              <span className="text-indigo-600">SOAPSuds</span> mean?
+              <span className="text-indigo-600">Soap Suds</span> mean?
             </h2>
             <p className="mt-3 text-gray-500 max-w-2xl mx-auto">
               The name tells the whole story.{" "}
@@ -137,7 +138,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900">Everything your practice needs</h2>
             <p className="mt-3 text-gray-500 max-w-xl mx-auto">
-              From first appointment to final invoice, SoapSuds handles the workflow.
+              From first appointment to final invoice, Soap Suds handles the workflow.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -165,26 +166,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Security / HIPAA */}
-      <section id="security" className="bg-stone-900 py-16 px-4 text-center">
-        <div className="mx-auto max-w-3xl">
-          <Shield className="h-12 w-12 text-indigo-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-3">
-            HIPAA Compliance is non-negotiable
-          </h2>
-          <p className="text-stone-400 mb-8">
-            Built from the ground up with security in mind. We sign Business
-            Associate Agreements, encrypt all PHI, and maintain full audit logs.
-          </p>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {["256-bit AES Encryption", "Business Associate Agreement", "Role-Based Access", "Audit Logs"].map((item) => (
-              <div key={item} className="rounded-xl bg-stone-800 p-4 text-sm text-stone-300">
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <PricingSection />
 
@@ -252,32 +233,26 @@ const features = [
   {
     title: "Smart Scheduling",
     icon: CalendarDays,
-    description: "A full-featured calendar with client self-booking, automated reminders, and Google/Outlook sync.",
-    bullets: ["Self-serve online booking", "Google & Outlook sync", "Automated reminders", "Time padding"],
+    description: "A full-featured calendar with client self-booking, automated reminders, and easy appointment management.",
+    bullets: ["Self-serve online booking", "Email & SMS reminders", "Team calendar view", "Block & buffer times"],
   },
   {
     title: "Client Management",
     icon: Users,
-    description: "Centralized client profiles with full history, paperless intake forms, and secure messaging.",
-    bullets: ["Digital intake forms", "Full history timeline", "HIPAA-compliant messaging", "Tag & search"],
+    description: "Centralized client profiles with full history, paperless intake forms, and a secure document portal.",
+    bullets: ["Digital intake forms", "Unlimited clients", "Secure messaging", "Tag & search"],
   },
   {
-    title: "Integrated Billing",
+    title: "SOAP Notes",
+    icon: FileText,
+    description: "Write, sign, and store structured SOAP notes for every session — fast, organized, and always accessible.",
+    bullets: ["SOAP & session note types", "Draft, sign & lock notes", "Note templates", "Amendment tracking"],
+  },
+  {
+    title: "Billing & Invoicing",
     icon: CreditCard,
-    description: "Generate invoices, process credit card payments, and manage ICD/CPT codes — all in one place.",
-    bullets: ["Stripe payment processing", "ICD-10 & CPT codes", "Invoice automation", "Insurance exports"],
-  },
-  {
-    title: "HIPAA Compliance",
-    icon: Shield,
-    description: "Enterprise-grade security with encryption, role-based access, and signed BAAs for every practice.",
-    bullets: ["End-to-end encryption", "Role-based access control", "BAA included", "Full audit logs"],
-  },
-  {
-    title: "Mobile-First",
-    icon: Smartphone,
-    description: "Document on the go with a fully responsive interface optimized for tablets and smartphones.",
-    bullets: ["Responsive web app", "Touch-friendly calendar", "Offline notes"],
+    description: "Create invoices, accept card payments, and track what's owed — all without leaving the app.",
+    bullets: ["Stripe payment processing", "CPT code fields", "Invoice history", "Payment status tracking"],
   },
 ];
 

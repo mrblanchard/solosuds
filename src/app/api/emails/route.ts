@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
       <div style="background: #4f46e5; padding: 24px 32px; border-radius: 8px 8px 0 0;">
         <h1 style="color: white; margin: 0; font-size: 20px; font-weight: 600;">
-          ${org?.name || "SoapSuds"}
+          ${org?.name || "SoloSuds"}
         </h1>
       </div>
       <div style="padding: 32px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       </div>
       <div style="padding: 16px 32px; text-align: center;">
         <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-          Sent via <strong>${org?.name || "SoapSuds"}</strong>
+          Sent via <strong>${org?.name || "SoloSuds"}</strong>
         </p>
       </div>
     </div>
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
         senderId: session.user.id,
         clientId: clientId || null,
         direction: "OUTBOUND",
-        fromEmail: process.env.FROM_EMAIL || "noreply@soapsuds.app",
+        fromEmail: process.env.FROM_EMAIL || "noreply@solosuds.com",
         toEmail,
         subject,
         htmlBody,

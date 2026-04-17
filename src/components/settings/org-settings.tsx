@@ -32,9 +32,10 @@ interface IntakeForm {
 interface Props {
   org: OrgData;
   intakeForms?: IntakeForm[];
+  plan?: string;
 }
 
-export default function OrgSettings({ org, intakeForms = [] }: Props) {
+export default function OrgSettings({ org, intakeForms = [], plan = "solo" }: Props) {
   const router = useRouter();
   const [form, setForm] = useState({
     name: org.name,

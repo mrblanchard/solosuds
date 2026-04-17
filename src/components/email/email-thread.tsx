@@ -395,7 +395,7 @@ export default function EmailThread({ client, emails, consentFormId }: Props) {
           {!showCompose ? (
             <div className="border-t border-gray-200 pt-4 space-y-3">
               <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
-                <strong>HIPAA Notice:</strong> Standard email is not fully encrypted and may not be HIPAA-secured. Only send non-sensitive scheduling information, or ensure your client has consented to email communication.
+                <strong>Notice:</strong> Standard email is not end-to-end encrypted. Only send non-sensitive scheduling information, or ensure your client has consented to email communication.
               </p>
               <Button onClick={() => setShowCompose(true)} className="w-full">
                 <Send className="h-4 w-4 mr-2" /> Reply to {client.firstName}

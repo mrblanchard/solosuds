@@ -1,4 +1,4 @@
-# SoapSuds — Developer Notes
+﻿# SoloSuds — Developer Notes
 
 Internal reference for ongoing development decisions, fixes, and conventions. Not intended for end users.
 
@@ -414,7 +414,7 @@ Added PRACTITIONER/FRONT_DESK role blocking to all DELETE routes:
 
 #### Inbound email via Resend webhook
 - `src/app/api/webhooks/resend/route.ts` (new): Handles `email.received` webhook events. Fetches full email via `resend.emails.receiving.get()`, matches sender to client by email (case-insensitive), stores as INBOUND email with `read: false`.
-- Requires Resend MX record on `soapsuds.app` domain for inbound routing.
+- Requires Resend MX record on `solosuds.com` domain for inbound routing.
 
 #### Conversational email threads
 - `src/components/email/conversation-list.tsx` (new): Conversations grouped by client with initials avatar, unread count badge (indigo), last message preview.

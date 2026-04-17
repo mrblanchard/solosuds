@@ -71,6 +71,8 @@ model Organization {
   stripeCustomerId     String?   @unique
   stripeSubscriptionId String?   @unique
   subscriptionStatus   String?   @default("trialing")
+  subscriptionPeriodEnd DateTime?
+  plan                 String?   @default("solo")  // solo | practice | clinic
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 

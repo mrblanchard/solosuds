@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Paperclip, X, Send } from "lucide-react";
+import { Paperclip, X, Send, Mail } from "lucide-react";
 
 const CKEditorWrapper = dynamic(
   () => import("@/components/email/ckeditor-wrapper"),
@@ -42,6 +42,8 @@ export default function ComposeEmail({ clients, replyTo }: Props) {
   const [attachments, setAttachments] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [consentSending, setConsentSending] = useState(false);
+  const [consentSent, setConsentSent] = useState(false);
 
   const selectedClient = clients.find((c) => c.id === selectedClientId);
   const consentBlocked =
@@ -53,8 +55,20 @@ export default function ComposeEmail({ clients, replyTo }: Props) {
     if (selectedClientId) {
       const client = clients.find((c) => c.id === selectedClientId);
       if (client?.email) setToEmail(client.email);
+      setConsentSent(false);
     }
   }, [selectedClientId, clients]);
+
+  async function handleSendConsent() {
+    if (!selectedClientId) return;
+    setConsentSending(true);
+    try {
+      await fetch(`/api/clients/${selectedClientId}/email-consent`, { method: "POST" });
+      setConsentSent(true);
+    } finally {
+      setConsentSending(false);
+    }
+  }
 
   function handleFileAdd(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -123,11 +137,31 @@ export default function ComposeEmail({ clients, replyTo }: Props) {
           ))}
         </select>
         {consentBlocked && (
-          <p className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
-            {selectedClient?.emailConsentStatus === "PENDING"
-              ? `${selectedClient.firstName} has a consent form pending. Email will be available once they sign it.`
-              : `${selectedClient?.firstName} hasn't consented to email communication. Open their email thread to send a consent form first.`}
-          </p>
+          <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-800">
+            {selectedClient?.emailConsentStatus === "PENDING" ? (
+              <p>{selectedClient.firstName} has a consent form pending — email will be available once they sign it.</p>
+            ) : consentSent ? (
+              <p className="font-medium text-green-700">
+                ✓ Consent form sent to {selectedClient?.firstName}. Email will be available once they sign it.
+              </p>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <p>
+                  {selectedClient?.firstName} hasn&apos;t consented to email communication yet.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 border-amber-300 bg-white text-amber-800 hover:bg-amber-100"
+                  disabled={consentSending || !selectedClient?.email}
+                  onClick={handleSendConsent}
+                >
+                  <Mail className="mr-1.5 h-3.5 w-3.5" />
+                  {consentSending ? "Sending…" : "Send consent form"}
+                </Button>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -212,9 +246,9 @@ export default function ComposeEmail({ clients, replyTo }: Props) {
         <p className="text-sm text-red-600">{error}</p>
       )}
 
-      {/* HIPAA Notice */}
+      {/* Email Notice */}
       <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
-        <strong>HIPAA Notice:</strong> Standard email is not fully encrypted. Only send non-sensitive scheduling information, or confirm your client has consented to email communication and understands the risks.
+        <strong>Notice:</strong> Standard email is not end-to-end encrypted. Only send non-sensitive scheduling information, or confirm your client has consented to email communication.
       </p>
 
       {/* Send */}

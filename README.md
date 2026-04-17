@@ -1,9 +1,9 @@
-# SoapSuds
+﻿# SoloSuds
 
 Practice management software for healthcare practitioners. SOAP notes, scheduling, billing, intake forms, and client messaging — in one place.
 
-**Production:** https://soapsuds.app  
-**Dev:** https://dev.soapsuds.app
+**Production:** https://solosuds.com  
+**Dev:** https://dev.solosuds.com
 
 ---
 
@@ -55,7 +55,7 @@ npm install
 npm run dev
 ```
 
-Runs at `http://localhost:3000`. The Cloudflare tunnel at `dev.soapsuds.app` proxies to this port.
+Runs at `http://localhost:3000`. The Cloudflare tunnel at `dev.solosuds.com` proxies to this port.
 
 Copy `.env.example` to `.env` and fill in the required values (see below).
 
@@ -71,14 +71,14 @@ GOOGLE_CLIENT_SECRET
 
 ### Cloudflare R2 (file storage)
 
-The client document portal requires Cloudflare R2. The bucket is already named `soapsuds` in the `.env`.
+The client document portal requires Cloudflare R2. The bucket is already named `SoloSuds` in the `.env`.
 
 **Getting credentials:**
 
 1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → **R2 Object Storage** (left sidebar)
 2. Your **Account ID** appears in the URL: `dash.cloudflare.com/<account-id>/r2/...`
 3. Click **Manage R2 API Tokens** (top right)
-4. Click **Create API Token** — name it `soapsuds-app`, set permissions to **Object Read & Write**, scope it to the `soapsuds` bucket
+4. Click **Create API Token** — name it `SoloSuds-app`, set permissions to **Object Read & Write**, scope it to the `SoloSuds` bucket
 5. Copy the credentials immediately — they are shown once
 
 **Fill in `.env`:**
@@ -86,13 +86,13 @@ The client document portal requires Cloudflare R2. The bucket is already named `
 STORAGE_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com"
 STORAGE_ACCESS_KEY_ID="<token access key id>"
 STORAGE_SECRET_ACCESS_KEY="<token secret access key>"
-STORAGE_BUCKET="soapsuds"
+STORAGE_BUCKET="SoloSuds"
 STORAGE_PUBLIC_URL=""   # leave blank — never expose the bucket publicly
 ```
 
 > **Do not enable public bucket access.** Files are served through 15-minute expiring signed URLs generated server-side after authorization. A public bucket URL would bypass all access controls and violate HIPAA.
 
-**On the production server**, update `/app/soapsuds/.env` with the same values and restart: `pm2 restart soapsuds`
+**On the production server**, update `/app/SoloSuds/.env` with the same values and restart: `pm2 restart SoloSuds`
 
 ### Database
 
@@ -106,16 +106,16 @@ npx prisma studio        # open DB browser
 
 ## Deploying to Production
 
-Code is hosted on [Forgejo](https://v14.next.forgejo.org/soapsuds/soapsuds). The production server is a Linode VPS (Ubuntu 24.04, 1GB RAM, Newark NJ) running PM2 + cloudflared.
+Code is hosted on [Forgejo](https://v14.next.forgejo.org/SoloSuds/SoloSuds). The production server is a Linode VPS (Ubuntu 24.04, 1GB RAM, Newark NJ) running PM2 + cloudflared.
 
 **Server IP:** `45.33.68.189`  
-**Tunnel:** `soapsuds-prod` (ID: `96854119-0d6e-4303-a1b7-914706b14f52`) → `soapsuds.app`  
-**Process manager:** PM2 (`pm2 list`, `pm2 logs soapsuds`)  
+**Tunnel:** `SoloSuds-prod` (ID: `96854119-0d6e-4303-a1b7-914706b14f52`) → `solosuds.com`  
+**Process manager:** PM2 (`pm2 list`, `pm2 logs SoloSuds`)  
 **Swap:** 2GB swapfile at `/swapfile` (needed for builds on 1GB RAM)
 
 ### Deploy workflow
 
-1. Make changes locally and test on `dev.soapsuds.app`
+1. Make changes locally and test on `dev.solosuds.com`
 2. Commit and push to Forgejo:
    ```bash
    git add .
@@ -125,12 +125,12 @@ Code is hosted on [Forgejo](https://v14.next.forgejo.org/soapsuds/soapsuds). The
 3. SSH into the server and deploy:
    ```bash
    ssh root@45.33.68.189
-   cd /app/soapsuds
+   cd /app/SoloSuds
    git pull
    npm install        # only if package.json changed
    npx prisma generate  # only if schema.prisma changed
    npm run build
-   pm2 restart soapsuds
+   pm2 restart SoloSuds
    ```
 
 ### First-time server setup (already done)
@@ -139,14 +139,14 @@ Code is hosted on [Forgejo](https://v14.next.forgejo.org/soapsuds/soapsuds). The
 - PM2 with systemd startup (`pm2 startup systemd`)
 - cloudflared as systemd service (`/etc/systemd/system/cloudflared.service`)
 - 2GB swap at `/swapfile`
-- App cloned to `/app/soapsuds`
-- `.env` at `/app/soapsuds/.env` (not in git — must be set manually on server)
+- App cloned to `/app/SoloSuds`
+- `.env` at `/app/SoloSuds/.env` (not in git — must be set manually on server)
 
 ### Google OAuth redirect URIs
 
 Both of these must be in Google Console → OAuth client → Authorized redirect URIs:
-- `https://dev.soapsuds.app/api/auth/callback/google`
-- `https://soapsuds.app/api/auth/callback/google`
+- `https://dev.solosuds.com/api/auth/callback/google`
+- `https://solosuds.com/api/auth/callback/google`
 
 ## Scalability Notes
 

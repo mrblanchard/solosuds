@@ -1,4 +1,4 @@
-import {
+﻿import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
@@ -17,7 +17,7 @@ function getClient() {
   });
 }
 
-const BUCKET = process.env.STORAGE_BUCKET ?? "soapsuds-files";
+const BUCKET = process.env.STORAGE_BUCKET ?? "SoloSuds-files";
 
 export async function uploadFile({
   key,

@@ -1,7 +1,7 @@
-import type { NextConfig } from "next";
+﻿import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["dev.soapsuds.app"],
+  allowedDevOrigins: ["dev.solosuds.com"],
   typescript: {
     ignoreBuildErrors: true,
   },
