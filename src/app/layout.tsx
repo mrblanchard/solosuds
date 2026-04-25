@@ -32,6 +32,7 @@ export default async function RootLayout({
   let primaryColor: string | null = null;
   let faviconUrl: string | null = null;
   let orgId: string | null = null;
+  let brandFont: string | null = null;
 
   try {
     const session = await auth();
@@ -41,7 +42,7 @@ export default async function RootLayout({
         select: {
           theme: true,
           organization: {
-            select: { id: true, primaryColor: true, faviconUrl: true },
+            select: { id: true, primaryColor: true, faviconUrl: true, brandFont: true },
           },
         },
       });
@@ -53,6 +54,9 @@ export default async function RootLayout({
         }
         if (user.organization.faviconUrl) {
           faviconUrl = user.organization.faviconUrl;
+        }
+        if (user.organization.brandFont) {
+          brandFont = user.organization.brandFont.replace(/[^a-zA-Z0-9 ]/g, "");
         }
       }
     }
@@ -89,8 +93,18 @@ export default async function RootLayout({
         {faviconUrl && (
           <link rel="icon" href={faviconUrl} key="brand-favicon" />
         )}
+        {brandFont && (
+          <link
+            rel="stylesheet"
+            href={`https://fonts.googleapis.com/css2?family=${encodeURIComponent(brandFont)}:wght@400;500;600;700&display=swap`}
+            key="brand-font"
+          />
+        )}
         {brandColorStyle && (
           <style dangerouslySetInnerHTML={{ __html: brandColorStyle }} />
+        )}
+        {brandFont && (
+          <style dangerouslySetInnerHTML={{ __html: `body { font-family: '${brandFont}', system-ui, -apple-system, sans-serif; }` }} />
         )}
       </head>
       <body

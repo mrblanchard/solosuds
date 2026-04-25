@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, phone, email, address, website, timezone, practiceType, noteType, defaultIntakeFormId, primaryColor, logoUrl, faviconUrl } = body;
+    const { name, phone, email, address, website, timezone, practiceType, noteType, defaultIntakeFormId, primaryColor, logoUrl, faviconUrl, brandFont, emailSignature } = body;
 
     if (name !== undefined && name.trim() === "") {
       return NextResponse.json({ error: "Organization name cannot be empty" }, { status: 400 });
@@ -58,6 +58,8 @@ export async function PATCH(request: NextRequest) {
         ...(primaryColor !== undefined && { primaryColor: primaryColor || null }),
         ...(logoUrl !== undefined && { logoUrl: logoUrl || null }),
         ...(faviconUrl !== undefined && { faviconUrl: faviconUrl || null }),
+        ...(brandFont !== undefined && { brandFont: brandFont || null }),
+        ...(emailSignature !== undefined && { emailSignature: emailSignature || null }),
       },
     });
 

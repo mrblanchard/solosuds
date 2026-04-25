@@ -64,6 +64,8 @@ model Organization {
   logoUrl              String?
   faviconUrl           String?
   primaryColor         String?
+  brandFont            String?   @default("Inter")
+  emailSignature       String?
   timezone             String    @default("America/New_York")
   noteType             String    @default("SOAP")   // SOAP | SESSION
   defaultIntakeFormId  String?

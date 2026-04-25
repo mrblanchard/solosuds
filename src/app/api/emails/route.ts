@@ -1,7 +1,7 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, buildBrandedEmail } from "@/lib/email";
 
 const ALLOWED_TYPES = [
   "application/pdf",
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
   const org = await db.organization.findUnique({
     where: { id: session.user.organizationId },
-    select: { name: true, logoUrl: true },
+    select: { name: true, logoUrl: true, primaryColor: true, brandFont: true, emailSignature: true },
   });
 
   const formData = await request.formData();
@@ -105,24 +105,14 @@ export async function POST(request: NextRequest) {
   }
 
   // Wrap in branded email template
-  const brandedHtml = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
-      <div style="background: #4f46e5; padding: 24px 32px; border-radius: 8px 8px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 20px; font-weight: 600;">
-          ${org?.name || "SoloSuds"}
-        </h1>
-      </div>
-      <div style="padding: 32px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
-        ${clientName ? `<p style="color: #6b7280; margin-top: 0;">Hi ${clientName},</p>` : ""}
-        ${htmlBody}
-      </div>
-      <div style="padding: 16px 32px; text-align: center;">
-        <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-          Sent via <strong>${org?.name || "SoloSuds"}</strong>
-        </p>
-      </div>
-    </div>
-  `;
+  const content = `${clientName ? `<p style="color:#6b7280;margin-top:0;">Hi ${clientName},</p>` : ""}${htmlBody}`;
+  const brandedHtml = buildBrandedEmail(content, org ? {
+    name: org.name,
+    logoUrl: org.logoUrl,
+    primaryColor: org.primaryColor,
+    brandFont: org.brandFont,
+    emailSignature: org.emailSignature,
+  } : null);
 
   try {
     const result = await sendEmail({

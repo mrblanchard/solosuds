@@ -18,7 +18,7 @@ export default async function SettingsPage() {
     }),
     db.organization.findUnique({
       where: { id: session.user.organizationId },
-      select: { id: true, name: true, phone: true, email: true, address: true, website: true, timezone: true, practiceType: true, noteType: true, defaultIntakeFormId: true, inviteCode: true, plan: true, logoUrl: true, faviconUrl: true, primaryColor: true },
+      select: { id: true, name: true, phone: true, email: true, address: true, website: true, timezone: true, practiceType: true, noteType: true, defaultIntakeFormId: true, inviteCode: true, plan: true, logoUrl: true, faviconUrl: true, primaryColor: true, brandFont: true, emailSignature: true },
     }),
     db.service.findMany({
       where: { organizationId: session.user.organizationId, isActive: true },
@@ -52,6 +52,8 @@ export default async function SettingsPage() {
               logoUrl: org.logoUrl ?? null,
               faviconUrl: org.faviconUrl ?? null,
               primaryColor: org.primaryColor ?? null,
+              brandFont: org.brandFont ?? null,
+              emailSignature: org.emailSignature ?? null,
             }}
           />
           <OrgSettings org={org} intakeForms={intakeForms} plan={org.plan ?? "solo"} />
