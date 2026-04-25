@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, X, Palette, Image as ImageIcon, Type, Mail, Eye, EyeOff } from "lucide-react";
+import { Upload, X, Palette, Image as ImageIcon, Type, Mail, Eye, EyeOff, Building2 } from "lucide-react";
 
 // Curated list of popular Google Fonts
 const GOOGLE_FONTS = [
@@ -33,6 +34,9 @@ interface Props {
 }
 
 export default function BrandingSettings({ org }: Props) {
+  const router = useRouter();
+  const [practiceName, setPracticeName] = useState(org.name);
+  const [savingName, setSavingName] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(org.logoUrl);
   const [faviconPreview, setFaviconPreview] = useState<string | null>(org.faviconUrl);
   const [primaryColor, setPrimaryColor] = useState(org.primaryColor ?? "");
@@ -130,6 +134,22 @@ export default function BrandingSettings({ org }: Props) {
     } finally { setSavingFont(false); setShowFontPicker(false); }
   }
 
+  async function saveName() {
+    if (!practiceName.trim()) { setMessage("Practice name is required."); return; }
+    if (practiceName.length > 200) { setMessage("Name is too long."); return; }
+    setSavingName(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/settings/organization", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: practiceName.trim() }),
+      });
+      if (res.ok) { setMessage("Practice name updated!"); router.refresh(); }
+      else setMessage("Failed to save name.");
+    } finally { setSavingName(false); }
+  }
+
   async function saveSignature() {
     setSavingSignature(true);
     setMessage(null);
@@ -158,6 +178,26 @@ export default function BrandingSettings({ org }: Props) {
         </p>
       </CardHeader>
       <CardContent className="space-y-8">
+
+        {/* Practice Name */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-1">
+            <Building2 className="h-4 w-4" /> Practice Name
+          </Label>
+          <p className="text-xs text-gray-500">Shown in the sidebar, topbar, emails, and everywhere your brand appears.</p>
+          <div className="flex items-center gap-2">
+            <Input
+              value={practiceName}
+              onChange={e => setPracticeName(e.target.value)}
+              placeholder="Your Practice Name"
+              maxLength={200}
+              className="max-w-xs"
+            />
+            <Button type="button" size="sm" onClick={saveName} disabled={savingName || practiceName.trim() === org.name}>
+              {savingName ? "Saving…" : "Save Name"}
+            </Button>
+          </div>
+        </div>
 
         {/* Logo */}
         <div className="space-y-2">
@@ -346,8 +386,8 @@ export default function BrandingSettings({ org }: Props) {
             </Label>
             <div className="rounded-lg border border-gray-200 overflow-hidden text-sm" style={{ fontFamily: `'${brandFont || "Inter"}', system-ui, sans-serif` }}>
               <div className="p-4" style={{ backgroundColor: (primaryColor && isValidColor(primaryColor)) ? primaryColor : "#4f46e5" }}>
-                {logoPreview && <img src={logoPreview} alt={org.name} className="h-8 object-contain block mb-2" />}
-                <span className="text-white font-semibold">{org.name}</span>
+                {logoPreview && <img src={logoPreview} alt={practiceName} className="h-8 object-contain block mb-2" />}
+                <span className="text-white font-semibold">{practiceName}</span>
               </div>
               <div className="p-4 bg-white">
                 <p className="text-gray-600 mb-2">Hi [Client Name],</p>
@@ -357,7 +397,7 @@ export default function BrandingSettings({ org }: Props) {
                 )}
               </div>
               <div className="p-3 bg-gray-50 border-t border-gray-200 text-center text-xs text-gray-400">
-                Sent via <strong>{org.name}</strong>
+                Sent via <strong>{practiceName}</strong>
               </div>
             </div>
           </div>
