@@ -92,6 +92,25 @@ const SECTION_META: Record<SectionId, SectionMeta> = {
   tasks:               { title: "Tasks",                  description: "To-do list and task management",        icon: FileText },
 };
 
+// ─── Per-breakpoint column counts (must match ResponsiveGridLayout cols prop) ──
+const BP_COLS: Record<string, number> = { lg: 12, md: 8, sm: 4, xs: 4, xxs: 2 };
+
+// Default size for a section when it is first shown at a given breakpoint
+function sectionDefaultSize(
+  id: SectionId,
+  bp: string
+): { w: number; h: number; minW: number; minH: number; maxH?: number } {
+  const isStat = id.startsWith("stat-");
+  if (isStat) {
+    if (bp === "lg") return { w: 3, h: 3, minW: 2, minH: 2, maxH: 4 };
+    if (bp === "md") return { w: 4, h: 3, minW: 2, minH: 2, maxH: 4 };
+    return { w: 2, h: 3, minW: 1, minH: 2, maxH: 4 };
+  }
+  if (bp === "lg") return { w: 4, h: 6, minW: 3, minH: 4 };
+  if (bp === "md") return { w: 4, h: 6, minW: 3, minH: 4 };
+  return { w: 4, h: 6, minW: 2, minH: 4 };
+}
+
 // ─── Default grid layouts ─────────────────────────────────────────────────────
 // rowHeight=50px, so h:3 = 150px visible, h:9 = 450px visible
 
@@ -368,7 +387,44 @@ export default function DashboardWidgets({
   }
 
   function showSection(id: SectionId) {
-    const next = { ...state, hidden: state.hidden.filter((s) => s !== id) };
+    // Ensure every breakpoint has a properly-sized layout entry for this section.
+    // If the entry is missing (e.g. it was removed when hidden), create one and
+    // append it inline after the rightmost item in the bottom row so new widgets
+    // appear next to existing ones rather than stacked vertically.
+    const updatedLayouts: ResponsiveLayouts = { ...state.layouts };
+    for (const [bp, items] of Object.entries(state.layouts)) {
+      const existing = items as LayoutItem[];
+      if (existing.find((item) => item.i === id)) continue; // already has an entry
+
+      const size = sectionDefaultSize(id, bp);
+      const cols = BP_COLS[bp] ?? 12;
+
+      // Find the maximum bottom edge (y + h) of all current items
+      let maxBottom = 0;
+      for (const item of existing) maxBottom = Math.max(maxBottom, item.y + item.h);
+
+      // Try to place inline: find rightmost occupied x+w at the bottom row
+      let placeX = 0;
+      let placeY = maxBottom;
+      const bottomRowItems = existing.filter((item) => item.y + item.h === maxBottom);
+      if (bottomRowItems.length > 0) {
+        const rightmost = bottomRowItems.reduce((a, b) =>
+          a.x + a.w >= b.x + b.w ? a : b
+        );
+        const nextX = rightmost.x + rightmost.w;
+        if (nextX + size.w <= cols) {
+          placeX = nextX;
+          placeY = rightmost.y; // same row
+        }
+      }
+
+      updatedLayouts[bp] = [...existing, { i: id, x: placeX, y: placeY, ...size }];
+    }
+    const next = {
+      ...state,
+      hidden: state.hidden.filter((s) => s !== id),
+      layouts: updatedLayouts,
+    };
     setState(next);
     saveState(userId, next);
   }
