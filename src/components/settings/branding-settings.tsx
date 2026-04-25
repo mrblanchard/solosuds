@@ -103,7 +103,7 @@ export default function BrandingSettings({ org }: Props) {
 
   async function saveColor() {
     if (primaryColor && !/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(primaryColor)) {
-      setMessage("Invalid color â€” use a hex value like #5a4f8a");
+      setMessage("Invalid color - use a hex value like #5a4f8a");
       return;
     }
     setSavingColor(true);
@@ -194,7 +194,7 @@ export default function BrandingSettings({ org }: Props) {
               className="max-w-xs"
             />
             <Button type="button" size="sm" onClick={saveName} disabled={savingName || practiceName.trim() === org.name}>
-              {savingName ? "Savingâ€¦" : "Save Name"}
+              {savingName ? "Saving..." : "Save Name"}
             </Button>
           </div>
         </div>
@@ -214,7 +214,7 @@ export default function BrandingSettings({ org }: Props) {
             <div className="flex flex-col gap-2">
               <Button type="button" variant="outline" size="sm" disabled={uploading === "logo"} onClick={() => logoInputRef.current?.click()}>
                 <Upload className="mr-1 h-3.5 w-3.5" />
-                {uploading === "logo" ? "Uploadingâ€¦" : "Upload Logo"}
+                {uploading === "logo" ? "Uploading..." : "Upload Logo"}
               </Button>
               {logoPreview && (
                 <Button type="button" variant="ghost" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => removeBrandingField("logoUrl")}>
@@ -241,7 +241,7 @@ export default function BrandingSettings({ org }: Props) {
             <div className="flex flex-col gap-2">
               <Button type="button" variant="outline" size="sm" disabled={uploading === "favicon"} onClick={() => faviconInputRef.current?.click()}>
                 <Upload className="mr-1 h-3.5 w-3.5" />
-                {uploading === "favicon" ? "Uploadingâ€¦" : "Upload Favicon"}
+                {uploading === "favicon" ? "Uploading..." : "Upload Favicon"}
               </Button>
               {faviconPreview && (
                 <Button type="button" variant="ghost" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => removeBrandingField("faviconUrl")}>
@@ -266,7 +266,7 @@ export default function BrandingSettings({ org }: Props) {
               <div className="h-8 w-16 rounded-md border border-gray-200 shadow-sm" style={{ backgroundColor: primaryColor }} />
             )}
             <Button type="button" size="sm" onClick={saveColor} disabled={savingColor}>
-              {savingColor ? "Savingâ€¦" : "Save Color"}
+              {savingColor ? "Saving..." : "Save Color"}
             </Button>
             {primaryColor && (
               <Button type="button" variant="ghost" size="sm" className="text-gray-400" onClick={() => { setPrimaryColor(""); fetch("/api/settings/organization", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ primaryColor: null }) }); }}>
@@ -291,7 +291,7 @@ export default function BrandingSettings({ org }: Props) {
               <span className="text-sm">{brandFont || "Select font"}</span>
               <svg className="h-4 w-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
-            {savingFont && <span className="text-sm text-gray-500">Savingâ€¦</span>}
+            {savingFont && <span className="text-sm text-gray-500">Saving...</span>}
           </div>
 
           {showFontPicker && (
@@ -299,7 +299,7 @@ export default function BrandingSettings({ org }: Props) {
               <div className="p-2 border-b border-gray-100">
                 <Input
                   autoFocus
-                  placeholder="Search fontsâ€¦"
+                  placeholder="Search fonts..."
                   value={fontSearch}
                   onChange={e => setFontSearch(e.target.value)}
                   className="h-8 text-sm"
@@ -351,7 +351,7 @@ export default function BrandingSettings({ org }: Props) {
           />
           <div className="flex items-center gap-2 flex-wrap">
             <Button type="button" size="sm" onClick={saveSignature} disabled={savingSignature}>
-              {savingSignature ? "Savingâ€¦" : "Save Signature"}
+              {savingSignature ? "Saving..." : "Save Signature"}
             </Button>
             {emailSignature && (
               <Button
@@ -391,7 +391,7 @@ export default function BrandingSettings({ org }: Props) {
               </div>
               <div className="p-4 bg-white">
                 <p className="text-gray-600 mb-2">Hi [Client Name],</p>
-                <p className="text-gray-800">Your email content will appear hereâ€¦</p>
+                <p className="text-gray-800">Your email content will appear here.</p>
                 {emailSignature && (
                   <div className="mt-4 pt-4 border-t border-gray-200 text-sm text-gray-700" dangerouslySetInnerHTML={{ __html: emailSignature }} />
                 )}
