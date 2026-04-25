@@ -1,0 +1,15 @@
+Success: 4242 4242 4242 4242 · any future expiry · any CVC
+Decline: 4000 0000 0000 0002
+Requires auth: 4000 0025 0000 3155
+
+\Tier	Email	Password
+Solo	solo@test.soapsuds.dev	Test1234!
+Practice	practice@test.soapsuds.dev	Test1234!
+Clinic	clinic@test.soapsuds.dev	Test1234!
+
+
+
+Stripe webhook URL — update to https://solosuds.com/api/webhooks/stripe
+Deploy code — git pull && npm run build && pm2 restart solosuds --update-env on the server
+
+cloudflared.exe service install eyJhIjoiZGVjMTAyY2QxOWYwMjkxYmU5ZTdkYjhjZGIxYzE3NDQiLCJ0IjoiZjk2MTRjOWQtNmY2Yi00MjY1LWI2NDgtMzMzZTFlZmRhODFkIiwicyI6IlkyTTRZekJpTTJRdFpUYzRaaTAwTXpneExUazBNMll0T0dNeE5tWXdPR0prWmpBNSJ9

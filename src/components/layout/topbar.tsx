@@ -9,6 +9,7 @@ import AccountMenu from "@/components/layout/account-menu";
 
 interface TopbarProps {
   onMenuClick?: () => void;
+  branding?: { name: string; logoUrl: string | null; primaryColor: string | null } | null;
 }
 
 const PRACTICE_LABELS: Record<string, string> = {
@@ -19,10 +20,14 @@ const PRACTICE_LABELS: Record<string, string> = {
   OTHER:   "General Practice",
 };
 
-export function Topbar({ onMenuClick }: TopbarProps) {
+export function Topbar({ onMenuClick, branding }: TopbarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const { data: session } = useSession();
   const practiceType = session?.user?.practiceType;
+
+  // Use org name if available, fall back to practice type label
+  const displayLabel = branding?.name
+    ?? (practiceType ? PRACTICE_LABELS[practiceType] : undefined);
 
   // ⌘K / Ctrl+K opens search
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -49,10 +54,13 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           <Menu className="h-5 w-5" />
         </button>
 
-        {/* Practice type */}
-        {practiceType && PRACTICE_LABELS[practiceType] && (
-          <span className="text-xl font-bold text-indigo-600 truncate">
-            {PRACTICE_LABELS[practiceType]}
+        {/* Practice / org name */}
+        {displayLabel && (
+          <span
+            className="text-xl font-bold text-indigo-600 truncate"
+            style={branding?.primaryColor ? { color: branding.primaryColor } : undefined}
+          >
+            {displayLabel}
           </span>
         )}
 

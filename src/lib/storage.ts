@@ -49,6 +49,28 @@ export async function getSignedDownloadUrl(key: string, expiresInSeconds = 900) 
   );
 }
 
+export async function getFileBody(key: string): Promise<{ body: Uint8Array; contentType: string } | null> {
+  const client = getClient();
+  try {
+    const res = await client.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }));
+    if (!res.Body) return null;
+    const chunks: Uint8Array[] = [];
+    for await (const chunk of res.Body as AsyncIterable<Uint8Array>) {
+      chunks.push(chunk);
+    }
+    const total = chunks.reduce((acc, c) => acc + c.length, 0);
+    const merged = new Uint8Array(total);
+    let offset = 0;
+    for (const chunk of chunks) {
+      merged.set(chunk, offset);
+      offset += chunk.length;
+    }
+    return { body: merged, contentType: res.ContentType ?? "application/octet-stream" };
+  } catch {
+    return null;
+  }
+}
+
 export async function deleteFile(key: string) {
   const client = getClient();
   await client.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));

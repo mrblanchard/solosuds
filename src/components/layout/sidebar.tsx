@@ -99,6 +99,7 @@ interface SidebarProps {
   onToggleCollapse?: () => void;
   practiceType?: PracticeType;
   userRole?: UserRole;
+  branding?: { name: string; logoUrl: string | null; primaryColor: string | null } | null;
 }
 
 export function Sidebar({
@@ -108,9 +109,13 @@ export function Sidebar({
   onToggleCollapse,
   practiceType,
   userRole,
+  branding,
 }: SidebarProps) {
   const pathname = usePathname();
   const navItems = buildNav(practiceType, userRole);
+
+  const logoSrc = branding?.logoUrl ?? "/logo.png";
+  const logoAlt = branding?.name ?? "SoloSuds";
 
   function sidebarContent({ mobile }: { mobile: boolean }) {
     const isCollapsed = !mobile && collapsed;
@@ -123,8 +128,8 @@ export function Sidebar({
         )}>
           <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
             <img
-              src="/logo.png"
-              alt="SoloSuds"
+              src={logoSrc}
+              alt={logoAlt}
               className={isCollapsed ? "h-8 w-auto" : "h-12 w-auto"}
             />
           </Link>

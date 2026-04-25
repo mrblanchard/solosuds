@@ -62,6 +62,7 @@ model Organization {
   address              String?
   website              String?
   logoUrl              String?
+  faviconUrl           String?
   primaryColor         String?
   timezone             String    @default("America/New_York")
   noteType             String    @default("SOAP")   // SOAP | SESSION

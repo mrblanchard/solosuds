@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, phone, email, address, website, timezone, practiceType, noteType, defaultIntakeFormId } = body;
+    const { name, phone, email, address, website, timezone, practiceType, noteType, defaultIntakeFormId, primaryColor, logoUrl, faviconUrl } = body;
 
     if (name !== undefined && name.trim() === "") {
       return NextResponse.json({ error: "Organization name cannot be empty" }, { status: 400 });
@@ -29,6 +29,9 @@ export async function PATCH(request: NextRequest) {
     }
     if (phone !== undefined && phone && !/^[+]?[\d\s()-]{7,20}$/.test(phone)) {
       return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
+    }
+    if (primaryColor !== undefined && primaryColor && !/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(primaryColor)) {
+      return NextResponse.json({ error: "Invalid color — use a hex value like #5a4f8a" }, { status: 400 });
     }
 
     const validPracticeTypes = ["THERAPY", "SALON", "MEDICAL", "FITNESS", "OTHER"];
@@ -52,6 +55,9 @@ export async function PATCH(request: NextRequest) {
         ...(practiceType !== undefined && { practiceType }),
         ...(noteType !== undefined && { noteType }),
         ...(defaultIntakeFormId !== undefined && { defaultIntakeFormId: defaultIntakeFormId || null }),
+        ...(primaryColor !== undefined && { primaryColor: primaryColor || null }),
+        ...(logoUrl !== undefined && { logoUrl: logoUrl || null }),
+        ...(faviconUrl !== undefined && { faviconUrl: faviconUrl || null }),
       },
     });
 

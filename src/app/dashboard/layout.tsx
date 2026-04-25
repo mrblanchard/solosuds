@@ -14,10 +14,17 @@ export default async function DashboardLayout({
   if (!session?.user) redirect("/login");
   if (!session.user.organizationId) redirect("/onboarding");
 
-  // Check trial expiry
+  // Check trial expiry + fetch branding in one query
   const org = await db.organization.findUnique({
     where: { id: session.user.organizationId },
-    select: { subscriptionStatus: true, createdAt: true, subscriptionPeriodEnd: true },
+    select: {
+      name: true,
+      logoUrl: true,
+      primaryColor: true,
+      subscriptionStatus: true,
+      createdAt: true,
+      subscriptionPeriodEnd: true,
+    },
   });
 
   if (org?.subscriptionStatus === "trialing") {
@@ -48,5 +55,9 @@ export default async function DashboardLayout({
     redirect("/trial-expired");
   }
 
-  return <DashboardShell>{children}</DashboardShell>;
+  const branding = org
+    ? { name: org.name, logoUrl: org.logoUrl ?? null, primaryColor: org.primaryColor ?? null }
+    : null;
+
+  return <DashboardShell branding={branding}>{children}</DashboardShell>;
 }

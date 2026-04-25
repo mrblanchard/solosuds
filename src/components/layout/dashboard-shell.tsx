@@ -8,7 +8,19 @@ import { AppFooter } from "@/components/layout/app-footer";
 
 const COLLAPSED_KEY = "sidebar-collapsed";
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+interface OrgBranding {
+  name: string;
+  logoUrl: string | null;
+  primaryColor: string | null;
+}
+
+export function DashboardShell({
+  children,
+  branding,
+}: {
+  children: React.ReactNode;
+  branding?: OrgBranding | null;
+}) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const { data: session } = useSession();
@@ -40,9 +52,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         onToggleCollapse={toggleCollapsed}
         practiceType={practiceType}
         userRole={userRole}
+        branding={branding}
       />
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-        <Topbar onMenuClick={() => setMobileOpen(true)} />
+        <Topbar onMenuClick={() => setMobileOpen(true)} branding={branding} />
         <main className="flex flex-1 flex-col overflow-y-auto overscroll-contain touch-auto">
           <div className="flex-1 pt-8 px-4 sm:px-6">
             {children}
