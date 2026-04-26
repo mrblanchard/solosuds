@@ -18,8 +18,8 @@ const registerSchema = z.object({
   name: z.string().min(2, "Your name is required").max(200, "Name is too long"),
   email: z.string().email("Invalid email address").max(254, "Email is too long"),
   password: passwordSchema,
-  acceptBaa: z.boolean().refine((v) => v === true, {
-    message: "You must accept the BAA to continue",
+  acceptTerms: z.boolean().refine((v) => v === true, {
+    message: "You must accept the Terms of Service to continue",
   }),
 });
 
@@ -223,24 +223,20 @@ function RegisterContent() {
 
             <div className="flex items-start gap-3">
               <input
-                id="acceptBaa"
+                id="acceptTerms"
                 type="checkbox"
                 className="mt-0.5 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                {...register("acceptBaa")}
+                {...register("acceptTerms")}
               />
-              <label htmlFor="acceptBaa" className="text-sm text-gray-600">
+              <label htmlFor="acceptTerms" className="text-sm text-gray-600">
                 I agree to the{" "}
-                <Link href="/hipaa" className="text-indigo-600 hover:underline">
-                  Business Associate Agreement
-                </Link>
-                {" "}and{" "}
                 <Link href="/terms" className="text-indigo-600 hover:underline">
                   Terms of Service
                 </Link>
               </label>
             </div>
-            {errors.acceptBaa && (
-              <p className="text-xs text-red-600">{errors.acceptBaa.message}</p>
+            {errors.acceptTerms && (
+              <p className="text-xs text-red-600">{errors.acceptTerms.message}</p>
             )}
 
             {!fromGoogle && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (

@@ -10,6 +10,7 @@ import {
   FileText,
   ArrowRight,
   CheckCircle,
+  Palette,
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -168,6 +169,65 @@ export default function LandingPage() {
 
 
       <PricingSection />
+
+      {/* White Label */}
+      <section className="py-24 px-4 bg-gradient-to-br from-indigo-600 to-violet-700 text-white">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 items-center">
+            <div>
+              <div className="mb-4 inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium">
+                White Label
+              </div>
+              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+                Make it yours — your brand, your portal
+              </h2>
+              <p className="mt-4 text-lg text-indigo-100 leading-relaxed">
+                SoloSuds fades into the background so your practice shines. Customize your logo, colors, and client-facing portal to match your brand — no "Powered by" watermarks.
+              </p>
+              <ul className="mt-8 space-y-3">
+                {[
+                  "Upload your own logo & favicon",
+                  "Set your brand colors across the app",
+                  "Custom email sender name & reply-to address",
+                  "Branded client intake & document portal",
+                  "Custom email signature on every message",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm text-indigo-100">
+                    <CheckCircle className="h-4 w-4 shrink-0 text-white" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-8 space-y-5">
+              <div className="flex items-center gap-3">
+                <Palette className="h-8 w-8 text-white/80" />
+                <div>
+                  <p className="font-semibold text-white">Full Branding Control</p>
+                  <p className="text-xs text-indigo-200">Logo, favicon, colors, fonts</p>
+                </div>
+              </div>
+              <div className="h-px bg-white/10" />
+              <div className="grid grid-cols-3 gap-3">
+                {["#6366F1", "#0EA5E9", "#10B981"].map((color) => (
+                  <div
+                    key={color}
+                    className="h-12 rounded-xl border border-white/20"
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-indigo-200">Your clients see your brand — not ours.</p>
+              <div className="rounded-xl bg-white/10 border border-white/20 p-4 text-sm">
+                <p className="text-white font-medium">From: Missy&apos;s Massage Studio</p>
+                <p className="text-indigo-200 text-xs mt-0.5">reply-to: hello@missysmassage.com</p>
+                <p className="mt-2 text-indigo-100 text-xs">Hi Sarah, your intake form is ready…</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       {/* Footer */}
       <AppFooter />
