@@ -102,12 +102,23 @@ function RegisterContent() {
         setError(json.error ?? "Registration failed");
         return;
       }
+      const { signIn } = await import("next-auth/react");
       if (fromGoogle) {
         // Sign in via Google now that the account exists
-        const { signIn } = await import("next-auth/react");
         await signIn("google", { callbackUrl: "/onboarding" });
       } else {
-        router.push("/login?registered=1&callbackUrl=/onboarding");
+        // Auto sign-in with the credentials they just registered with
+        const result = await signIn("credentials", {
+          email: data.email,
+          password: data.password,
+          redirect: false,
+        });
+        if (result?.error) {
+          // Fallback: send to login if auto sign-in fails for any reason
+          router.push("/login?registered=1&callbackUrl=/onboarding");
+        } else {
+          router.push("/onboarding");
+        }
       }
     } catch {
       setError("Something went wrong. Please try again.");
