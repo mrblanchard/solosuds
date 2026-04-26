@@ -86,7 +86,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const parts = cfToken.split(":");
           if (parts.length !== 3) return null;
           const [, expiry, sig] = parts;
-          const secret = process.env.AUTH_SECRET!;
+          const secret = (process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET)!;
           const expectedSig = createHmac("sha256", secret)
             .update(`${credentials.email}:${expiry}`)
             .digest("hex");

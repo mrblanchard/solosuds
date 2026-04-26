@@ -8,7 +8,7 @@ import { verifyTurnstile } from "@/lib/turnstile";
 /** Generate a short-lived signed token so the register page can auto sign-in without a CAPTCHA. */
 function generateAutoSignInToken(email: string): string {
   const expiry = Date.now() + 5 * 60 * 1000; // 5 minutes
-  const secret = process.env.AUTH_SECRET!;
+  const secret = (process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET)!;
   const sig = crypto.createHmac("sha256", secret).update(`${email}:${expiry}`).digest("hex");
   return `internal:${expiry}:${sig}`;
 }
