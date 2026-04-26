@@ -36,10 +36,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (session.user.organizationId) {
-    return NextResponse.json({ error: "Organization already exists" }, { status: 400 });
-  }
-
   const body = await req.json();
   const { name, practiceType, noteType } = body;
 
@@ -51,35 +47,60 @@ export async function POST(req: Request) {
     ? practiceType
     : PracticeType.OTHER;
 
-  // Generate a unique slug from the name
-  const baseSlug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const existing = await db.organization.findMany({ where: { slug: { startsWith: baseSlug } }, select: { slug: true } });
-  const slug = existing.length === 0 ? baseSlug : `${baseSlug}-${existing.length}`;
+  let org;
 
-  const org = await db.organization.create({
-    data: {
-      name: name.trim(),
-      slug,
-      practiceType: type,
-      noteType: noteType === "SESSION" ? "SESSION" : "SOAP",
-    },
-  });
+  if (session.user.organizationId) {
+    // Org was already created during registration — update it with onboarding details
+    const baseSlug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const existing = await db.organization.findMany({
+      where: { slug: { startsWith: baseSlug }, NOT: { id: session.user.organizationId } },
+      select: { slug: true },
+    });
+    const slug = existing.length === 0 ? baseSlug : `${baseSlug}-${existing.length}`;
 
-  await db.user.update({
-    where: { id: session.user.id },
-    data: { organizationId: org.id, role: "OWNER" },
-  });
+    org = await db.organization.update({
+      where: { id: session.user.organizationId },
+      data: {
+        name: name.trim(),
+        slug,
+        practiceType: type,
+        noteType: noteType === "SESSION" ? "SESSION" : "SOAP",
+      },
+    });
+  } else {
+    // No org yet — create one
+    const baseSlug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const existing = await db.organization.findMany({ where: { slug: { startsWith: baseSlug } }, select: { slug: true } });
+    const slug = existing.length === 0 ? baseSlug : `${baseSlug}-${existing.length}`;
 
-  // Seed starter services for the chosen practice type
+    org = await db.organization.create({
+      data: {
+        name: name.trim(),
+        slug,
+        practiceType: type,
+        noteType: noteType === "SESSION" ? "SESSION" : "SOAP",
+      },
+    });
+
+    await db.user.update({
+      where: { id: session.user.id },
+      data: { organizationId: org.id, role: "OWNER" },
+    });
+  }
+
+  // Seed starter services only if none exist yet for this org
+  const existingServices = await db.service.count({ where: { organizationId: org.id } });
   const starterServices = STARTER_SERVICES[type];
-  if (starterServices.length > 0) {
+  if (starterServices.length > 0 && existingServices === 0) {
     await db.service.createMany({
       data: starterServices.map((s) => ({ ...s, organizationId: org.id })),
     });
   }
 
-  // Create the email communication consent intake form for this org
-  await db.intakeForm.create({
+  // Create the email consent intake form only if it doesn't exist yet
+  const existingConsentForm = await db.intakeForm.findFirst({ where: { organizationId: org.id, isEmailConsent: true } });
+  if (!existingConsentForm) {
+    await db.intakeForm.create({
     data: {
       organizationId: org.id,
       title: "Email Communication Consent",
@@ -143,6 +164,7 @@ export async function POST(req: Request) {
       ],
     },
   });
+  }
 
   return NextResponse.json({ success: true });
 }

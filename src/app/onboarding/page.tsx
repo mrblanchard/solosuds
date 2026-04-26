@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { ChevronRight, ChevronLeft, Check } from "lucide-react";
 import { AppFooter } from "@/components/layout/app-footer";
 
@@ -55,6 +56,7 @@ const PRACTICE_OPTIONS: PracticeOption[] = [
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { update } = useSession();
   const [step, setStep] = useState<1 | 2>(1);
   const [practiceType, setPracticeType] = useState<PracticeType | null>(null);
   const [name, setName] = useState("");
@@ -78,6 +80,7 @@ export default function OnboardingPage() {
         setError(data.error ?? "Something went wrong");
         return;
       }
+      await update(); // refresh JWT so practiceType is set before hitting dashboard guard
       router.push("/dashboard");
       router.refresh();
     } catch {
