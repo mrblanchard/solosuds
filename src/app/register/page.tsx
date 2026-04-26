@@ -107,7 +107,7 @@ function RegisterContent() {
         const { signIn } = await import("next-auth/react");
         await signIn("google", { callbackUrl: "/onboarding" });
       } else {
-        router.push("/login?registered=1");
+        router.push("/login?registered=1&callbackUrl=/onboarding");
       }
     } catch {
       setError("Something went wrong. Please try again.");

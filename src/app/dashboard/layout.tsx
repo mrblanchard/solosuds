@@ -13,6 +13,7 @@ export default async function DashboardLayout({
   const session = await auth();
   if (!session?.user) redirect("/login");
   if (!session.user.organizationId) redirect("/onboarding");
+  if (!session.user.practiceType) redirect("/onboarding");
 
   // Check trial expiry + fetch branding in one query
   const org = await db.organization.findUnique({
