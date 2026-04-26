@@ -6,6 +6,7 @@ import OrgSettings from "@/components/settings/org-settings";
 import ServicesSettings from "@/components/settings/services-settings";
 import ThemePicker from "@/components/settings/theme-picker";
 import BrandingSettings from "@/components/settings/branding-settings";
+import BookingSettings from "@/components/settings/booking-settings";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -57,6 +58,7 @@ export default async function SettingsPage() {
             }}
           />
           <OrgSettings org={org} intakeForms={intakeForms} plan={org.plan ?? "solo"} />
+          <BookingSettings orgId={org.id} />
           <ServicesSettings initialServices={services} />
         </>
       )}

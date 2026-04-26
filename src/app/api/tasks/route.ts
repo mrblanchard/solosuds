@@ -8,6 +8,7 @@ const createSchema = z.object({
   description: z.string().max(5000).optional().nullable(),
   status: z.enum(["TODO", "IN_PROGRESS", "DONE"]).optional(),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
+  recurrence: z.enum(["NONE", "DAILY", "WEEKLY", "BIWEEKLY", "MONTHLY"]).optional(),
   dueDate: z.string().optional().nullable(),
   assigneeId: z.string().optional().nullable(),
 });

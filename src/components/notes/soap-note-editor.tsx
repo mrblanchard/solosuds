@@ -81,8 +81,15 @@ export default function SoapNoteEditor({
       });
 
       if (!res.ok) throw new Error("Save failed");
-      router.refresh();
-      if (action === "sign") router.push("/dashboard/notes");
+      if (action === "sign") {
+        // Navigate away — the notes list will fetch fresh data from the server.
+        // Do NOT call router.refresh() here; it races with router.push and can
+        // cause the page to flash or the list to render with stale data.
+        router.push("/dashboard/notes");
+      } else {
+        // Stay on the page but re-sync server component data.
+        router.refresh();
+      }
     } catch {
       alert("Failed to save note. Please try again.");
     } finally {

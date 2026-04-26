@@ -151,7 +151,7 @@ export default function ServicesSettings({ initialServices }: Props) {
   const activeServices = services.filter((s) => s.isActive);
 
   return (
-    <Card>
+    <Card id="services-settings">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Services</CardTitle>
         {!showForm && (
