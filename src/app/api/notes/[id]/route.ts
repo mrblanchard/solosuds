@@ -97,9 +97,6 @@ export async function DELETE(
 
   const note = await db.soapNote.findFirst({ where: { id, organizationId: orgId } });
   if (!note) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (note.status === "LOCKED") {
-    return NextResponse.json({ error: "Cannot delete a locked note" }, { status: 400 });
-  }
 
   await db.soapNote.delete({ where: { id } });
   return NextResponse.json({ success: true });

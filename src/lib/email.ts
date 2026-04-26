@@ -202,6 +202,36 @@ export async function sendIntakeFormLink({
   });
 }
 
+export async function sendThankYouEmail({
+  to,
+  clientName,
+  practitionerName,
+  sessionDate,
+  branding,
+}: {
+  to: string;
+  clientName: string;
+  practitionerName: string;
+  sessionDate: string;
+  branding?: OrgBranding | null;
+}) {
+  const content = `
+    <h2 style="margin-top:0;">Thank You!</h2>
+    <p>Hi ${clientName},</p>
+    <p>Thank you for your session on <strong>${sessionDate}</strong>. It was a pleasure working with you.</p>
+    <p>If you have any questions or need to schedule your next appointment, please don't hesitate to reach out.</p>
+    <p>Looking forward to seeing you again!</p>
+    <p style="margin-top:24px;">Warm regards,<br/>${practitionerName}</p>
+  `;
+  return getResend().emails.send({
+    from: `${branding?.name || process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+    to,
+    subject: `Thank you for your session — ${sessionDate}`,
+    html: buildBrandedEmail(content, branding),
+    ...replyToHeader(branding),
+  });
+}
+
 export async function sendEmail({
   to,
   subject,
