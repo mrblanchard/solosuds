@@ -29,5 +29,8 @@ export async function verifyTurnstile(token: string | null | undefined): Promise
 
   if (!res.ok) return false;
   const data = (await res.json()) as TurnstileVerifyResponse;
+  if (!data.success) {
+    console.error("[Turnstile] verification failed, error-codes:", data["error-codes"]);
+  }
   return data.success === true;
 }
