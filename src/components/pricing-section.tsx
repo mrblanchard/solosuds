@@ -15,6 +15,7 @@ const coreFeatures = [
   "Invoicing",
   "Email & SMS messaging",
   "Client document portal",
+  "White label branding",
   "Community support",
 ];
 

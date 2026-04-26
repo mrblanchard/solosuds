@@ -58,36 +58,37 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SOAP Suds Acronym Explainer */}
+      {/* SoloSuds Acronym Explainer */}
       <section className="py-20 px-4 bg-gradient-to-b from-white to-indigo-50">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-gray-900">
               What does{" "}
-              <span className="text-indigo-600">Soap Suds</span> mean?
+              <span className="text-indigo-600">SoloSuds</span> mean?
             </h2>
             <p className="mt-3 text-gray-500 max-w-2xl mx-auto">
               The name tells the whole story.{" "}
-              <strong className="text-gray-700">SOAP</strong> is the clinical
-              documentation framework used by healthcare professionals worldwide.{" "}
-              <strong className="text-gray-700">Suds</strong> is everything else
-              your practice needs to run smoothly — from scheduling to sync.
+              <strong className="text-gray-700">Solo</strong> because it&apos;s built
+              for independent practitioners — just you and your clients, no enterprise
+              bloat.{" "}
+              <strong className="text-gray-700">Suds</strong> is the platform itself —
+              Scheduling, Unified client management, Documentation, and Sync.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-            {/* SOAP */}
+            {/* Solo */}
             <div className="rounded-2xl border border-indigo-100 bg-white p-8 shadow-sm">
               <div className="mb-8 flex items-center gap-3">
                 <span className="rounded-xl bg-indigo-600 px-3 py-1.5 font-mono text-lg font-extrabold text-white tracking-widest">
-                  SOAP
+                  Solo
                 </span>
                 <span className="text-sm font-medium text-gray-500">
-                  The clinical documentation framework
+                  Built for independent practitioners
                 </span>
               </div>
               <div className="space-y-6">
-                {soapLetters.map(({ letter, label, description }) => (
+                {soloLetters.map(({ letter, label, description }) => (
                   <div key={label} className="flex gap-4">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-xl font-extrabold text-indigo-600">
                       {letter}
@@ -235,30 +236,30 @@ export default function LandingPage() {
   );
 }
 
-const soapLetters = [
+const soloLetters = [
   {
     letter: "S",
-    label: "Subjective",
+    label: "Streamlined",
     description:
-      "Captures the client's perspective — their reported feelings, symptoms, or concerns about their progress.",
+      "No bloat, no enterprise complexity. Every feature is purpose-built for one practitioner running their own show.",
   },
   {
     letter: "O",
-    label: "Objective",
+    label: "Owned",
     description:
-      "Measurable, observable data from the session: vital signs, test results, or specific non-biased observations by the professional.",
+      "Your brand, your client data, your portal. White label the entire experience so clients only see you — not us.",
   },
   {
-    letter: "A",
-    label: "Assessment",
+    letter: "L",
+    label: "Lightweight",
     description:
-      "The practitioner interprets Subjective and Objective data to describe the client's progress, diagnose issues, or analyze changes in their condition.",
+      "Set up in minutes, not months. No IT department required — just sign up, configure, and start seeing clients.",
   },
   {
-    letter: "P",
-    label: "Plan",
+    letter: "O",
+    label: "Organized",
     description:
-      "Outlines the next steps — upcoming treatment, adjustments to the current plan, and recommendations for the client.",
+      "Every appointment, note, invoice, and message in one place. Stop juggling apps and start focusing on your clients.",
   },
 ];
 
