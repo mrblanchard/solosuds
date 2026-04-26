@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# local verification tests (not committed)
+/tests/
+
 # next.js
 /.next/
 /out/

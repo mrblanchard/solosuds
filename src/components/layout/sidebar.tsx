@@ -31,7 +31,7 @@ interface NavItem {
   disabled?: boolean;
 }
 
-const ALL_NAV: Record<string, NavItem> = {
+export const ALL_NAV: Record<string, NavItem> = {
   dashboard:  { href: "/dashboard",          label: "Dashboard",    icon: LayoutDashboard },
   schedule:   { href: "/dashboard/schedule", label: "Schedule",     icon: CalendarDays },
   clients:    { href: "/dashboard/clients",  label: "Clients",      icon: Users },
@@ -77,12 +77,12 @@ const PRACTICE_LABELS: Record<NonNullable<PracticeType>, string> = {
 type UserRole = "OWNER" | "ADMIN" | "PRACTITIONER" | "FRONT_DESK" | undefined;
 
 // Items hidden per role (FRONT_DESK = Staff, PRACTITIONER = Editor)
-const ROLE_HIDDEN: Record<string, string[]> = {
+export const ROLE_HIDDEN: Record<string, string[]> = {
   FRONT_DESK:    ["billing", "settings", "schedule", "whitelabel"],
   PRACTITIONER:  ["whitelabel"],
 };
 
-function buildNav(practiceType: PracticeType, userRole?: UserRole): NavItem[] {
+export function buildNav(practiceType: PracticeType, userRole?: UserRole): NavItem[] {
   const config = NAV_CONFIG[practiceType ?? "OTHER"];
   const hidden = ROLE_HIDDEN[userRole ?? ""] ?? [];
   return config.order

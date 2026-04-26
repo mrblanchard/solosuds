@@ -6,6 +6,7 @@ export default defineConfig({
     environment: "node",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
+    include: ["src/test/**/*.test.ts", "tests/**/*.test.ts"],
     server: {
       deps: {
         // Force vitest to transform these ESM-only packages

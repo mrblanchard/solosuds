@@ -92,7 +92,7 @@ function buildIcsContent(title: string, description: string, start: Date, end: D
   ].join("\r\n");
 }
 
-function replyToHeader(branding?: OrgBranding | null): { replyTo?: string } {
+export function replyToHeader(branding?: OrgBranding | null): { replyTo?: string } {
   const r = branding?.replyToEmail?.trim();
   return r ? { replyTo: r } : {};
 }
