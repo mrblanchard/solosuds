@@ -101,6 +101,20 @@ export default async function NotePage({
         </div>
       </div>
 
+      <ClientReminderPanel
+        clientId={note.clientId}
+        clientName={`${note.client.firstName} ${note.client.lastName}`}
+        clientEmail={note.client.email ?? null}
+        sessionDate={note.sessionDate.toISOString()}
+        upcomingAppointments={upcomingAppointments.map((a) => ({
+          id: a.id,
+          startTime: a.startTime.toISOString(),
+          endTime: a.endTime.toISOString(),
+          serviceName: a.service?.name ?? null,
+          reminderSentAt: a.reminderSentAt?.toISOString() ?? null,
+        }))}
+      />
+
       <SoapNoteEditor
         noteId={note.id}
         clientName={`${note.client.firstName} ${note.client.lastName}`}
@@ -115,20 +129,6 @@ export default async function NotePage({
           procedureCodes: note.procedureCodes.join(", "),
           status: note.status,
         }}
-      />
-
-      <ClientReminderPanel
-        clientId={note.clientId}
-        clientName={`${note.client.firstName} ${note.client.lastName}`}
-        clientEmail={note.client.email ?? null}
-        sessionDate={note.sessionDate.toISOString()}
-        upcomingAppointments={upcomingAppointments.map((a) => ({
-          id: a.id,
-          startTime: a.startTime.toISOString(),
-          endTime: a.endTime.toISOString(),
-          serviceName: a.service?.name ?? null,
-          reminderSentAt: a.reminderSentAt?.toISOString() ?? null,
-        }))}
       />
     </div>
   );
