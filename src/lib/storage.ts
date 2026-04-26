@@ -35,7 +35,6 @@ export async function uploadFile({
       Key: key,
       Body: body,
       ContentType: contentType,
-      ServerSideEncryption: "AES256",
     })
   );
 }
