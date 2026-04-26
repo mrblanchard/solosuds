@@ -13,7 +13,7 @@ export function AppFooter() {
               <span className="text-base font-semibold text-gray-800">SoloSuds</span>
             </div>
             <p className="max-w-xs text-xs text-gray-500 leading-relaxed">
-              HIPAA-compliant practice management for modern healthcare providers.
+              Practice management software for independent practitioners.
             </p>
           </div>
 
@@ -37,12 +37,6 @@ export function AppFooter() {
               className="text-sm text-gray-600 transition-colors hover:text-indigo-600"
             >
               Terms of Service
-            </Link>
-            <Link
-              href="/hipaa"
-              className="text-sm text-gray-600 transition-colors hover:text-indigo-600"
-            >
-              HIPAA Privacy Notice
             </Link>
           </div>
         </div>
