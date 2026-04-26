@@ -1,8 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
-import SoapNoteEditor from "@/components/notes/soap-note-editor";
-import ClientReminderPanel from "@/components/notes/client-reminder-panel";
+import NotePagePanels from "@/components/notes/note-page-panels";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -101,24 +100,13 @@ export default async function NotePage({
         </div>
       </div>
 
-      <ClientReminderPanel
-        clientId={note.clientId}
-        clientName={`${note.client.firstName} ${note.client.lastName}`}
-        clientEmail={note.client.email ?? null}
-        sessionDate={note.sessionDate.toISOString()}
-        upcomingAppointments={upcomingAppointments.map((a) => ({
-          id: a.id,
-          startTime: a.startTime.toISOString(),
-          endTime: a.endTime.toISOString(),
-          serviceName: a.service?.name ?? null,
-          reminderSentAt: a.reminderSentAt?.toISOString() ?? null,
-        }))}
-      />
-
-      <SoapNoteEditor
-        noteId={note.id}
-        clientName={`${note.client.firstName} ${note.client.lastName}`}
-        initialData={{
+      <NotePagePanels
+        note={{
+          id: note.id,
+          clientId: note.clientId,
+          clientName: `${note.client.firstName} ${note.client.lastName}`,
+          clientEmail: note.client.email ?? null,
+          sessionDate: note.sessionDate.toISOString(),
           subjective: note.subjective ?? "",
           objective: note.objective ?? "",
           assessment: note.assessment ?? "",
@@ -129,6 +117,13 @@ export default async function NotePage({
           procedureCodes: note.procedureCodes.join(", "),
           status: note.status,
         }}
+        upcomingAppointments={upcomingAppointments.map((a) => ({
+          id: a.id,
+          startTime: a.startTime.toISOString(),
+          endTime: a.endTime.toISOString(),
+          serviceName: a.service?.name ?? null,
+          reminderSentAt: a.reminderSentAt?.toISOString() ?? null,
+        }))}
       />
     </div>
   );
