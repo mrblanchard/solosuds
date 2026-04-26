@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { createHmac } from "crypto";
 // UserRole will be typed inline as string until prisma generate is run
 
 const prismaAdapter = PrismaAdapter(db);
@@ -79,10 +80,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // Verify Turnstile CAPTCHA token
-        const { verifyTurnstile } = await import("@/lib/turnstile");
-        const captchaOk = await verifyTurnstile(credentials.cfToken as string | undefined);
-        if (!captchaOk) return null;
+        // Check for post-registration bypass token (internal:expiry:sig)
+        const cfToken = credentials.cfToken as string | undefined;
+        if (cfToken?.startsWith("internal:")) {
+          const parts = cfToken.split(":");
+          if (parts.length !== 3) return null;
+          const [, expiry, sig] = parts;
+          const secret = process.env.AUTH_SECRET!;
+          const expectedSig = createHmac("sha256", secret)
+            .update(`${credentials.email}:${expiry}`)
+            .digest("hex");
+          const valid = sig === expectedSig && Date.now() < parseInt(expiry);
+          if (!valid) return null;
+          // Token is valid — skip CAPTCHA and proceed to password check
+        } else {
+          // Normal login flow — verify Turnstile CAPTCHA
+          const { verifyTurnstile } = await import("@/lib/turnstile");
+          const captchaOk = await verifyTurnstile(cfToken);
+          if (!captchaOk) return null;
+        }
 
         const user = await db.user.findUnique({
           where: { email: credentials.email as string },

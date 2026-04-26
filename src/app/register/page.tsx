@@ -107,10 +107,11 @@ function RegisterContent() {
         // Sign in via Google now that the account exists
         await signIn("google", { callbackUrl: "/onboarding" });
       } else {
-        // Auto sign-in with the credentials they just registered with
+        // Auto sign-in using the bypass token returned by the register API
         const result = await signIn("credentials", {
           email: data.email,
           password: data.password,
+          cfToken: json.autoSignInToken,
           redirect: false,
         });
         if (result?.error) {

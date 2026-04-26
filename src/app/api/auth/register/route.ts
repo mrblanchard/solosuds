@@ -5,6 +5,14 @@ import { db } from "@/lib/db";
 import { validatePassword } from "@/lib/utils";
 import { verifyTurnstile } from "@/lib/turnstile";
 
+/** Generate a short-lived signed token so the register page can auto sign-in without a CAPTCHA. */
+function generateAutoSignInToken(email: string): string {
+  const expiry = Date.now() + 5 * 60 * 1000; // 5 minutes
+  const secret = process.env.AUTH_SECRET!;
+  const sig = crypto.createHmac("sha256", secret).update(`${email}:${expiry}`).digest("hex");
+  return `internal:${expiry}:${sig}`;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -118,7 +126,8 @@ export async function POST(request: NextRequest) {
       });
     });
 
-    return NextResponse.json({ id: user.id }, { status: 201 });
+    const autoSignInToken = fromGoogle ? undefined : generateAutoSignInToken(email);
+    return NextResponse.json({ id: user.id, autoSignInToken }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === "INVALID_INVITE") {
       return NextResponse.json({ error: "Invalid or expired invite link" }, { status: 400 });
