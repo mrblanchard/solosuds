@@ -314,6 +314,12 @@ const features = [
     description: "Create invoices, accept card payments, and track what's owed — all without leaving the app.",
     bullets: ["Stripe payment processing", "CPT code fields", "Invoice history", "Payment status tracking"],
   },
+  {
+    title: "White Label Branding",
+    icon: Palette,
+    description: "Make the app your own — your logo, your colors, your domain. Clients see your brand, not ours.",
+    bullets: ["Upload logo & favicon", "Custom brand colors", "Branded client portal", "Custom email sender name"],
+  },
 ];
 
 
