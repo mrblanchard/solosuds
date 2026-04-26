@@ -66,6 +66,7 @@ model Organization {
   primaryColor         String?
   brandFont            String?   @default("Inter")
   emailSignature       String?
+  replyToEmail         String?
   timezone             String    @default("America/New_York")
   noteType             String    @default("SOAP")   // SOAP | SESSION
   defaultIntakeFormId  String?

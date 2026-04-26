@@ -19,6 +19,7 @@ import {
   X,
   PanelLeftClose,
   PanelLeftOpen,
+  Paintbrush,
 } from "lucide-react";
 
 type PracticeType = "THERAPY" | "SALON" | "MEDICAL" | "FITNESS" | "OTHER" | undefined;
@@ -39,28 +40,29 @@ const ALL_NAV: Record<string, NavItem> = {
   email:      { href: "/dashboard/email",    label: "Email",        icon: Mail },
   messages:   { href: "/dashboard/messages", label: "Messages",     icon: MessageSquare, disabled: true },
   billing:    { href: "/dashboard/billing",  label: "Billing",      icon: CreditCard },
-  settings:   { href: "/dashboard/settings", label: "Settings",     icon: Settings },
-  faq:        { href: "/dashboard/faq",      label: "Help & FAQ",   icon: HelpCircle },
+  settings:    { href: "/dashboard/settings",     label: "Settings",     icon: Settings },
+  whitelabel:  { href: "/dashboard/white-label",  label: "White Label",  icon: Paintbrush },
+  faq:         { href: "/dashboard/faq",           label: "Help & FAQ",   icon: HelpCircle },
 };
 
 // Per-type nav order + optional label overrides
 const NAV_CONFIG: Record<NonNullable<PracticeType>, { order: string[]; labels?: Partial<Record<string, string>> }> = {
   THERAPY: {
-    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "billing", "settings", "faq", "messages"],
+    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "billing", "settings", "whitelabel", "faq", "messages"],
   },
   SALON: {
-    order: ["dashboard", "schedule", "clients", "billing", "notes", "intake", "email", "settings", "faq", "messages"],
+    order: ["dashboard", "schedule", "clients", "billing", "notes", "intake", "email", "settings", "whitelabel", "faq", "messages"],
     labels: { notes: "Session Notes" },
   },
   MEDICAL: {
-    order: ["dashboard", "clients", "intake", "notes", "schedule", "email", "billing", "settings", "faq", "messages"],
+    order: ["dashboard", "clients", "intake", "notes", "schedule", "email", "billing", "settings", "whitelabel", "faq", "messages"],
   },
   FITNESS: {
-    order: ["dashboard", "schedule", "clients", "billing", "notes", "intake", "email", "settings", "faq", "messages"],
+    order: ["dashboard", "schedule", "clients", "billing", "notes", "intake", "email", "settings", "whitelabel", "faq", "messages"],
     labels: { notes: "Session Notes", intake: "Health Forms" },
   },
   OTHER: {
-    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "billing", "settings", "faq", "messages"],
+    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "billing", "settings", "whitelabel", "faq", "messages"],
   },
 };
 
@@ -76,8 +78,8 @@ type UserRole = "OWNER" | "ADMIN" | "PRACTITIONER" | "FRONT_DESK" | undefined;
 
 // Items hidden per role (FRONT_DESK = Staff, PRACTITIONER = Editor)
 const ROLE_HIDDEN: Record<string, string[]> = {
-  FRONT_DESK: ["billing", "settings", "schedule"],
-  // PRACTITIONER and above see everything
+  FRONT_DESK:    ["billing", "settings", "schedule", "whitelabel"],
+  PRACTITIONER:  ["whitelabel"],
 };
 
 function buildNav(practiceType: PracticeType, userRole?: UserRole): NavItem[] {

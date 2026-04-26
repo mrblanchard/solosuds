@@ -161,17 +161,6 @@ export default async function TermsPage() {
               </p>
             </section>
 
-            <section>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">14. Contact Us</h2>
-              <p>
-                If you have questions about these Terms, please contact us at{" "}
-                <a href="mailto:legal@solosuds.com" className="text-indigo-600 hover:underline">
-                  legal@solosuds.com
-                </a>{" "}
-                or by mail at SoloSuds, Inc., 1234 Health Street, Wilmington, DE 19801.
-              </p>
-            </section>
-
           </div>
         </div>
 

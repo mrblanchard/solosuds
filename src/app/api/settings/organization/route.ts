@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, phone, email, address, website, timezone, practiceType, noteType, defaultIntakeFormId, primaryColor, logoUrl, faviconUrl, brandFont, emailSignature } = body;
+    const { name, phone, email, address, website, timezone, practiceType, noteType, defaultIntakeFormId, primaryColor, logoUrl, faviconUrl, brandFont, emailSignature, replyToEmail } = body;
 
     if (name !== undefined && name.trim() === "") {
       return NextResponse.json({ error: "Organization name cannot be empty" }, { status: 400 });
@@ -26,6 +26,9 @@ export async function PATCH(request: NextRequest) {
     }
     if (email !== undefined && email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
+    }
+    if (replyToEmail !== undefined && replyToEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyToEmail)) {
+      return NextResponse.json({ error: "Invalid reply-to email address" }, { status: 400 });
     }
     if (phone !== undefined && phone && !/^[+]?[\d\s()-]{7,20}$/.test(phone)) {
       return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
@@ -60,6 +63,7 @@ export async function PATCH(request: NextRequest) {
         ...(faviconUrl !== undefined && { faviconUrl: faviconUrl || null }),
         ...(brandFont !== undefined && { brandFont: brandFont || null }),
         ...(emailSignature !== undefined && { emailSignature: emailSignature || null }),
+        ...(replyToEmail !== undefined && { replyToEmail: replyToEmail || null }),
       },
     });
 

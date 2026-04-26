@@ -10,6 +10,7 @@ export interface OrgBranding {
   primaryColor?: string | null;
   brandFont?: string | null;
   emailSignature?: string | null;
+  replyToEmail?: string | null;
 }
 
 /** Wraps email body HTML in a branded template with logo, font, and signature. */
@@ -91,6 +92,11 @@ function buildIcsContent(title: string, description: string, start: Date, end: D
   ].join("\r\n");
 }
 
+function replyToHeader(branding?: OrgBranding | null): { replyTo?: string } {
+  const r = branding?.replyToEmail?.trim();
+  return r ? { replyTo: r } : {};
+}
+
 export async function sendAppointmentReminder({
   to,
   clientName,
@@ -157,11 +163,12 @@ export async function sendAppointmentReminder({
   `;
 
   return getResend().emails.send({
-    from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+    from: `${branding?.name || process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
     to,
     subject: `Reminder: Your appointment on ${appointmentDate}`,
     html: buildBrandedEmail(content, branding),
     ...(attachments ? { attachments } : {}),
+    ...replyToHeader(branding),
   });
 }
 
@@ -187,10 +194,11 @@ export async function sendIntakeFormLink({
     <p style="font-size:14px;color:#6b7280;">This link expires in 7 days.</p>
   `;
   return getResend().emails.send({
-    from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+    from: `${branding?.name || process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
     to,
     subject: "Please complete your intake form",
     html: buildBrandedEmail(content, branding),
+    ...replyToHeader(branding),
   });
 }
 
@@ -199,17 +207,22 @@ export async function sendEmail({
   subject,
   html,
   attachments,
+  replyTo,
+  fromName,
 }: {
   to: string;
   subject: string;
   html: string;
   attachments?: Array<{ filename: string; content: Buffer }>;
+  replyTo?: string;
+  fromName?: string;
 }) {
   return getResend().emails.send({
-    from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+    from: `${fromName || process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
     to,
     subject,
     html,
     ...(attachments ? { attachments } : {}),
+    ...(replyTo ? { replyTo } : {}),
   });
 }

@@ -5,7 +5,6 @@ import ProfileSettings from "@/components/settings/profile-settings";
 import OrgSettings from "@/components/settings/org-settings";
 import ServicesSettings from "@/components/settings/services-settings";
 import ThemePicker from "@/components/settings/theme-picker";
-import BrandingSettings from "@/components/settings/branding-settings";
 import BookingSettings from "@/components/settings/booking-settings";
 
 export default async function SettingsPage() {
@@ -19,7 +18,7 @@ export default async function SettingsPage() {
     }),
     db.organization.findUnique({
       where: { id: session.user.organizationId },
-      select: { id: true, name: true, phone: true, email: true, address: true, website: true, timezone: true, practiceType: true, noteType: true, defaultIntakeFormId: true, inviteCode: true, plan: true, logoUrl: true, faviconUrl: true, primaryColor: true, brandFont: true, emailSignature: true },
+      select: { id: true, name: true, phone: true, email: true, address: true, website: true, timezone: true, practiceType: true, noteType: true, defaultIntakeFormId: true, inviteCode: true, plan: true },
     }),
     db.service.findMany({
       where: { organizationId: session.user.organizationId, isActive: true },
@@ -47,16 +46,6 @@ export default async function SettingsPage() {
 
       {(user.role === "OWNER" || user.role === "ADMIN") && (
         <>
-          <BrandingSettings
-            org={{
-              name: org.name,
-              logoUrl: org.logoUrl ?? null,
-              faviconUrl: org.faviconUrl ?? null,
-              primaryColor: org.primaryColor ?? null,
-              brandFont: org.brandFont ?? null,
-              emailSignature: org.emailSignature ?? null,
-            }}
-          />
           <OrgSettings org={org} intakeForms={intakeForms} plan={org.plan ?? "solo"} />
           <BookingSettings orgId={org.id} />
           <ServicesSettings initialServices={services} />

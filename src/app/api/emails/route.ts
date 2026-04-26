@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
   const org = await db.organization.findUnique({
     where: { id: session.user.organizationId },
-    select: { name: true, logoUrl: true, primaryColor: true, brandFont: true, emailSignature: true },
+    select: { name: true, logoUrl: true, primaryColor: true, brandFont: true, emailSignature: true, replyToEmail: true },
   });
 
   const formData = await request.formData();
@@ -112,6 +112,7 @@ export async function POST(request: NextRequest) {
     primaryColor: org.primaryColor,
     brandFont: org.brandFont,
     emailSignature: org.emailSignature,
+    replyToEmail: org.replyToEmail,
   } : null);
 
   try {
@@ -120,6 +121,8 @@ export async function POST(request: NextRequest) {
       subject,
       html: brandedHtml,
       ...(resendAttachments.length > 0 ? { attachments: resendAttachments } : {}),
+      ...(org?.replyToEmail ? { replyTo: org.replyToEmail } : {}),
+      ...(org?.name ? { fromName: org.name } : {}),
     });
 
     const email = await db.email.create({
