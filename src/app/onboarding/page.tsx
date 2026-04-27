@@ -59,7 +59,12 @@ export default function OnboardingPage() {
   const { update } = useSession();
   const [step, setStep] = useState<1 | 2>(1);
   const [practiceType, setPracticeType] = useState<PracticeType | null>(null);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("orgName") ?? "";
+    }
+    return "";
+  });
   const [noteType, setNoteType] = useState<"SOAP" | "SESSION">("SOAP");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

@@ -114,11 +114,12 @@ function RegisterContent() {
           cfToken: json.autoSignInToken,
           redirect: false,
         });
+        const orgParam = data.organizationName ? `?orgName=${encodeURIComponent(data.organizationName)}` : "";
         if (result?.error) {
           // Fallback: send to login if auto sign-in fails for any reason
           router.push("/login?registered=1&callbackUrl=/onboarding");
         } else {
-          router.push("/onboarding");
+          router.push(`/onboarding${orgParam}`);
         }
       }
     } catch {
