@@ -49,7 +49,9 @@ export default async function AppointmentDetailPage({ params }: Props) {
         <div>
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-bold text-gray-900">
-              {appointment.client.firstName} {appointment.client.lastName}
+              {appointment.client
+                ? `${appointment.client.firstName} ${appointment.client.lastName}`
+                : appointment.service?.name ?? "Appointment"}
             </h1>
             <Badge variant={STATUS_VARIANT[appointment.status] ?? "secondary"}>
               {appointment.status}
@@ -71,12 +73,16 @@ export default async function AppointmentDetailPage({ params }: Props) {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">Client</span>
-              <Link
-                href={`/dashboard/clients/${appointment.clientId}`}
-                className="text-indigo-600 hover:underline font-medium"
-              >
-                {appointment.client.firstName} {appointment.client.lastName}
-              </Link>
+              {appointment.client ? (
+                <Link
+                  href={`/dashboard/clients/${appointment.clientId}`}
+                  className="text-indigo-600 hover:underline font-medium"
+                >
+                  {appointment.client.firstName} {appointment.client.lastName}
+                </Link>
+              ) : (
+                <span className="text-gray-400">No client</span>
+              )}
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Practitioner</span>

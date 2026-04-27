@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { ChevronRight, ChevronLeft, Check } from "lucide-react";
 import { AppFooter } from "@/components/layout/app-footer";
 
-type PracticeType = "THERAPY" | "SALON" | "MEDICAL" | "FITNESS" | "OTHER";
+type PracticeType = "THERAPY" | "SALON" | "MEDICAL" | "FITNESS" | "LESSONS" | "OTHER";
 
 interface PracticeOption {
   type: PracticeType;
@@ -44,6 +44,13 @@ const PRACTICE_OPTIONS: PracticeOption[] = [
     label: "Fitness & Wellness",
     subtitle: "Personal training, yoga, pilates, coaching",
     features: ["Class & session scheduling", "Package & membership billing", "Client progress tracking", "Appointment reminders"],
+  },
+  {
+    type: "LESSONS",
+    emoji: "🎵",
+    label: "Lessons & Tutoring",
+    subtitle: "Music, guitar, voice, tutoring, coaching",
+    features: ["Easy appointment scheduling", "Client management", "Session notes (optional)", "Invoicing & payments"],
   },
   {
     type: "OTHER",
@@ -217,6 +224,7 @@ export default function OnboardingPage() {
                     practiceType === "SALON"   ? "e.g. The Gilded Chair Salon" :
                     practiceType === "MEDICAL" ? "e.g. Riverside Family Practice" :
                     practiceType === "FITNESS" ? "e.g. Peak Performance Training" :
+                    practiceType === "LESSONS" ? "e.g. Taylor's Guitar Studio" :
                     "e.g. My Practice"
                   }
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"

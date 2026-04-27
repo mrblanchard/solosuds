@@ -27,6 +27,11 @@ const STARTER_SERVICES: Record<PracticeType, { name: string; durationMinutes: nu
     { name: "Group Class", durationMinutes: 60, price: 2500 },
     { name: "Fitness Assessment", durationMinutes: 60, price: 7500 },
   ],
+  LESSONS: [
+    { name: "30-Minute Lesson", durationMinutes: 30, price: 4000 },
+    { name: "60-Minute Lesson", durationMinutes: 60, price: 7000 },
+    { name: "Group Class (60 min)", durationMinutes: 60, price: 2500 },
+  ],
   OTHER: [],
 };
 
@@ -47,6 +52,14 @@ export async function POST(req: Request) {
     ? practiceType
     : PracticeType.OTHER;
 
+  // LESSONS defaults to SESSION notes; everything else defaults to SOAP
+  const resolvedNoteType =
+    noteType === "SESSION" || noteType === "SOAP"
+      ? noteType
+      : type === PracticeType.LESSONS
+      ? "SESSION"
+      : "SOAP";
+
   let org;
 
   if (session.user.organizationId) {
@@ -64,7 +77,7 @@ export async function POST(req: Request) {
         name: name.trim(),
         slug,
         practiceType: type,
-        noteType: noteType === "SESSION" ? "SESSION" : "SOAP",
+        noteType: resolvedNoteType,
       },
     });
   } else {
@@ -78,7 +91,7 @@ export async function POST(req: Request) {
         name: name.trim(),
         slug,
         practiceType: type,
-        noteType: noteType === "SESSION" ? "SESSION" : "SOAP",
+        noteType: resolvedNoteType,
       },
     });
 

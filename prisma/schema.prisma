@@ -49,6 +49,7 @@ enum PracticeType {
   SALON     // Hair, nail, beauty — booking & payments heavy
   MEDICAL   // Doctors, clinics — HIPAA & intake heavy
   FITNESS   // Personal training, yoga, pilates — scheduling heavy
+  LESSONS   // Music, tutoring, coaching — scheduling heavy, minimal notes
   OTHER     // Generic
 }
 
@@ -238,10 +239,10 @@ model Appointment {
   id             String            @id @default(cuid())
   organizationId String
   organization   Organization      @relation(fields: [organizationId], references: [id])
-  clientId       String
-  client         Client            @relation(fields: [clientId], references: [id])
-  practitionerId String
-  practitioner   User              @relation(fields: [practitionerId], references: [id])
+  clientId       String?
+  client         Client?           @relation(fields: [clientId], references: [id])
+  practitionerId String?
+  practitioner   User?             @relation(fields: [practitionerId], references: [id])
   serviceId      String?
   service        Service?          @relation(fields: [serviceId], references: [id])
   roomId         String?

@@ -39,13 +39,17 @@ export default async function SchedulePage() {
 
   const events = appointments.map((appt) => ({
     id: appt.id,
-    title: `${appt.client.firstName} ${appt.client.lastName}`,
+    title: appt.client
+      ? `${appt.client.firstName} ${appt.client.lastName}`.trim()
+      : appt.service?.name ?? "Appointment",
     start: appt.startTime.toISOString(),
     end: appt.endTime.toISOString(),
     backgroundColor: STATUS_COLORS[appt.status] ?? "#6366f1",
     borderColor: "transparent",
     extendedProps: {
-      clientName: `${appt.client.firstName} ${appt.client.lastName}`,
+      clientName: appt.client
+        ? `${appt.client.firstName} ${appt.client.lastName}`.trim()
+        : "No client",
       serviceName: appt.service?.name ?? "Session",
       status: appt.status,
     },
