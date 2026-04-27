@@ -68,7 +68,7 @@ export default function LandingPage() {
             </h2>
             <p className="mt-3 text-gray-500 max-w-2xl mx-auto">
               The name tells the whole story.{" "}
-              <strong className="text-gray-700">Solo</strong> because it&apos;s built
+              <strong className="text-gray-700">Solo</strong>&nbsp; because it&apos;s built
               for independent practitioners — just you and your clients, no enterprise
               bloat.{" "}
               <strong className="text-gray-700">Suds</strong> is the platform itself —
