@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
-import SoapNoteEditor from "@/components/notes/soap-note-editor";
+import { SoapNoteEditor } from "@/components/notes/soap-note-editor";
 import ClientReminderPanel from "@/components/notes/client-reminder-panel";
 
 interface NotePagePanelsProps {
