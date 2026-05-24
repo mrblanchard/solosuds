@@ -1,31 +1,446 @@
 @import "tailwindcss";
+@import "react-grid-layout/css/styles.css";
+
+/* ── Custom utilities ─────────────────────────────────────────────── */
+@utility border-b-primary {
+  border-bottom: 5px solid var(--color-indigo-600);
+}
+
+@utility bg-banner {
+  background-image: url('/care-without-the-mess.webp');
+}
+
+/* react-grid-layout theme overrides */
+.react-grid-item.react-grid-placeholder {
+  background: #bfb3e8;
+  border-radius: 12px;
+}
+.react-grid-item > .react-resizable-handle {
+  width: 24px;
+  height: 24px;
+  bottom: 2px;
+  right: 2px;
+}
+.react-grid-item > .react-resizable-handle::after {
+  width: 10px;
+  height: 10px;
+  right: 4px;
+  bottom: 4px;
+  border-color: #9d8fca;
+  border-width: 0 3px 3px 0;
+}
 
 @theme {
-  /* Sage green replaces the default indigo — calming, therapeutic, earthy */
-  --color-indigo-50: #f0f5f0;
-  --color-indigo-100: #dceadd;
-  --color-indigo-200: #b7d4b9;
-  --color-indigo-300: #8bb88e;
-  --color-indigo-400: #619865;
-  --color-indigo-500: #4a804f;
-  --color-indigo-600: #3a6b41;
-  --color-indigo-700: #2d5433;
-  --color-indigo-800: #234228;
-  --color-indigo-900: #1a321f;
+  /* Dusty lavender — calming, therapeutic, distinctive */
+  --color-indigo-50: #f5f2fb;
+  --color-indigo-100: #ede9f8;
+  --color-indigo-200: #d9d0f2;
+  --color-indigo-300: #bfb3e8;
+  --color-indigo-400: #9d8fca;
+  --color-indigo-500: #7c6fac;
+  --color-indigo-600: #5a4f8a;
+  --color-indigo-700: #453c6d;
+  --color-indigo-800: #342d52;
+  --color-indigo-900: #231e37;
 
-  /* Warm neutral backgrounds */
-  --color-gray-50: #fafaf7;
-  --color-gray-100: #f3f3ee;
-  --color-gray-200: #e8e8e1;
+  /* Neutral backgrounds with subtle lavender tint */
+  --color-gray-50: #f8f7fb;
+  --color-gray-100: #f0eef7;
+  --color-gray-200: #e2dff0;
 }
 
 :root {
-  --background: #fafaf7;
-  --foreground: #2a2a25;
+  --background: #faf9fc;
+  --foreground: #1e1b2e;
+}
+
+/* ── Theme overrides ──────────────────────────────────────────────── */
+/* Default is lavender (from @theme block above) */
+
+[data-theme="ocean"] {
+  --color-indigo-50: #f0f7ff;
+  --color-indigo-100: #e0efff;
+  --color-indigo-200: #baddff;
+  --color-indigo-300: #85c4ff;
+  --color-indigo-400: #4da3f0;
+  --color-indigo-500: #2b82d4;
+  --color-indigo-600: #1a66b5;
+  --color-indigo-700: #154f8f;
+  --color-indigo-800: #103c6c;
+  --color-indigo-900: #0b2948;
+  --color-gray-50: #f5f8fc;
+  --color-gray-100: #ebf0f7;
+  --color-gray-200: #d6dfed;
+  --background: #f7fafd;
+  --foreground: #0f1f33;
+}
+
+[data-theme="sage"] {
+  --color-indigo-50: #f2f7f2;
+  --color-indigo-100: #e5efe5;
+  --color-indigo-200: #c5dbc5;
+  --color-indigo-300: #9fc2a0;
+  --color-indigo-400: #72a674;
+  --color-indigo-500: #548c56;
+  --color-indigo-600: #3f6f41;
+  --color-indigo-700: #305633;
+  --color-indigo-800: #244028;
+  --color-indigo-900: #1a2e1c;
+  --color-gray-50: #f6f8f6;
+  --color-gray-100: #eef2ee;
+  --color-gray-200: #dce5dc;
+  --background: #f8faf8;
+  --foreground: #1a2e1c;
+}
+
+[data-theme="rose"] {
+  --color-indigo-50: #fdf2f5;
+  --color-indigo-100: #fce5ec;
+  --color-indigo-200: #f8c1d0;
+  --color-indigo-300: #f29ab1;
+  --color-indigo-400: #e66f8e;
+  --color-indigo-500: #d44d72;
+  --color-indigo-600: #b33a5c;
+  --color-indigo-700: #8e2d48;
+  --color-indigo-800: #6b2236;
+  --color-indigo-900: #481724;
+  --color-gray-50: #fdf7f8;
+  --color-gray-100: #f9eef0;
+  --color-gray-200: #f0dce0;
+  --background: #fdf9fa;
+  --foreground: #2e1520;
+}
+
+[data-theme="sunset"] {
+  --color-indigo-50: #fff7f0;
+  --color-indigo-100: #ffeddc;
+  --color-indigo-200: #ffd7b3;
+  --color-indigo-300: #ffbb80;
+  --color-indigo-400: #f59650;
+  --color-indigo-500: #e07830;
+  --color-indigo-600: #c05f1a;
+  --color-indigo-700: #964a14;
+  --color-indigo-800: #703810;
+  --color-indigo-900: #4c260b;
+  --color-gray-50: #fdf8f5;
+  --color-gray-100: #f7f0ea;
+  --color-gray-200: #ede2d6;
+  --background: #fdfaf7;
+  --foreground: #2e1f10;
+}
+
+[data-theme="slate"] {
+  --color-indigo-50: #f4f5f7;
+  --color-indigo-100: #e9eaee;
+  --color-indigo-200: #cfd2db;
+  --color-indigo-300: #adb2c0;
+  --color-indigo-400: #858ca0;
+  --color-indigo-500: #656d85;
+  --color-indigo-600: #4d5570;
+  --color-indigo-700: #3b4158;
+  --color-indigo-800: #2d3243;
+  --color-indigo-900: #1f222e;
+  --color-gray-50: #f6f7f8;
+  --color-gray-100: #edeef1;
+  --color-gray-200: #dbdde4;
+  --background: #f8f8fa;
+  --foreground: #1a1c24;
+}
+
+/* ── Dark themes ──────────────────────────────────────────────────── */
+
+[data-theme="royal"] {
+  --color-indigo-50: #2d2057;
+  --color-indigo-100: #3a2970;
+  --color-indigo-200: #4e3899;
+  --color-indigo-300: #7c5fc7;
+  --color-indigo-400: #a48be0;
+  --color-indigo-500: #c4acf0;
+  --color-indigo-600: #d8c7f5;
+  --color-indigo-700: #e8ddf9;
+  --color-indigo-800: #f2edfc;
+  --color-indigo-900: #faf8fe;
+  --color-gray-50: #1e1736;
+  --color-gray-100: #261e42;
+  --color-gray-200: #342a56;
+  --color-gray-300: #4a3d72;
+  --color-gray-400: #6b5f94;
+  --color-gray-500: #9088b0;
+  --color-gray-600: #b4aece;
+  --color-gray-700: #d0cce0;
+  --color-gray-800: #e6e4ef;
+  --color-gray-900: #f5f4f9;
+  --background: #140f28;
+  --foreground: #edebf5;
+}
+
+[data-theme="midnight"] {
+  --color-indigo-50: #1a1530;
+  --color-indigo-100: #231d42;
+  --color-indigo-200: #332a60;
+  --color-indigo-300: #5845a0;
+  --color-indigo-400: #7b6bc4;
+  --color-indigo-500: #9d8fda;
+  --color-indigo-600: #bcb0ea;
+  --color-indigo-700: #d5cdf2;
+  --color-indigo-800: #eae6f8;
+  --color-indigo-900: #f7f5fc;
+  --color-gray-50: #131118;
+  --color-gray-100: #1a1722;
+  --color-gray-200: #252230;
+  --color-gray-300: #383447;
+  --color-gray-400: #54506a;
+  --color-gray-500: #7a7690;
+  --color-gray-600: #a19db4;
+  --color-gray-700: #c5c2d2;
+  --color-gray-800: #e0dee9;
+  --color-gray-900: #f2f1f6;
+  --background: #0e0c16;
+  --foreground: #e8e6f0;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
+}
+
+/* ── Dark theme overrides for hardcoded colors ────────────────────── */
+[data-theme="royal"],
+[data-theme="midnight"] {
+  color-scheme: dark;
+}
+
+[data-theme="royal"] .bg-white,
+[data-theme="midnight"] .bg-white {
+  background-color: var(--color-gray-100);
+}
+
+[data-theme="royal"] .bg-gray-50,
+[data-theme="midnight"] .bg-gray-50 {
+  background-color: var(--color-gray-50);
+}
+
+[data-theme="royal"] .text-gray-900,
+[data-theme="midnight"] .text-gray-900 {
+  color: var(--color-gray-900);
+}
+
+[data-theme="royal"] .text-gray-800,
+[data-theme="midnight"] .text-gray-800 {
+  color: var(--color-gray-800);
+}
+
+[data-theme="royal"] .text-gray-700,
+[data-theme="midnight"] .text-gray-700 {
+  color: var(--color-gray-700);
+}
+
+[data-theme="royal"] .text-gray-600,
+[data-theme="midnight"] .text-gray-600 {
+  color: var(--color-gray-600);
+}
+
+[data-theme="royal"] .text-gray-500,
+[data-theme="midnight"] .text-gray-500 {
+  color: var(--color-gray-500);
+}
+
+[data-theme="royal"] .text-gray-400,
+[data-theme="midnight"] .text-gray-400 {
+  color: var(--color-gray-400);
+}
+
+[data-theme="royal"] .border-gray-200,
+[data-theme="midnight"] .border-gray-200 {
+  border-color: var(--color-gray-200);
+}
+
+[data-theme="royal"] .border-gray-100,
+[data-theme="midnight"] .border-gray-100 {
+  border-color: var(--color-gray-200);
+}
+
+[data-theme="royal"] .divide-gray-200 > :not(:last-child),
+[data-theme="midnight"] .divide-gray-200 > :not(:last-child) {
+  border-color: var(--color-gray-200);
+}
+
+[data-theme="royal"] .hover\:bg-gray-100:hover,
+[data-theme="midnight"] .hover\:bg-gray-100:hover {
+  background-color: var(--color-gray-200);
+}
+
+[data-theme="royal"] .bg-indigo-50,
+[data-theme="midnight"] .bg-indigo-50 {
+  background-color: var(--color-indigo-50);
+}
+
+[data-theme="royal"] .text-indigo-700,
+[data-theme="midnight"] .text-indigo-700 {
+  color: var(--color-indigo-600);
+}
+
+[data-theme="royal"] .text-indigo-600,
+[data-theme="midnight"] .text-indigo-600 {
+  color: var(--color-indigo-500);
+}
+
+[data-theme="royal"] .text-indigo-500,
+[data-theme="midnight"] .text-indigo-500 {
+  color: var(--color-indigo-500);
+}
+
+/* Input fields */
+[data-theme="royal"] input,
+[data-theme="royal"] textarea,
+[data-theme="royal"] select,
+[data-theme="midnight"] input,
+[data-theme="midnight"] textarea,
+[data-theme="midnight"] select {
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-200);
+  color: var(--color-gray-900);
+}
+
+[data-theme="royal"] input::placeholder,
+[data-theme="royal"] textarea::placeholder,
+[data-theme="midnight"] input::placeholder,
+[data-theme="midnight"] textarea::placeholder {
+  color: var(--color-gray-400);
+}
+
+/* Card backgrounds */
+[data-theme="royal"] [class*="rounded-xl"][class*="border"][class*="bg-white"],
+[data-theme="midnight"] [class*="rounded-xl"][class*="border"][class*="bg-white"],
+[data-theme="royal"] [class*="rounded-2xl"][class*="border"][class*="bg-white"],
+[data-theme="midnight"] [class*="rounded-2xl"][class*="border"][class*="bg-white"] {
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-200);
+}
+
+/* Tables */
+[data-theme="royal"] th,
+[data-theme="midnight"] th {
+  color: var(--color-gray-600);
+}
+
+[data-theme="royal"] td,
+[data-theme="midnight"] td {
+  color: var(--color-gray-800);
+}
+
+/* Saved toast animation */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px) translateX(-50%); }
+  to { opacity: 1; transform: translateY(0) translateX(-50%); }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+/* FullCalendar mobile toolbar — stack sections vertically */
+@media (max-width: 639px) {
+  .fc .fc-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .fc .fc-toolbar-title {
+    width: 100%;
+    order: -1;
+    text-align: center;
+    font-size: 1.1rem;
+  }
+
+  .fc .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+  }
+
+  .fc .fc-toolbar-chunk:first-child,
+  .fc .fc-toolbar-chunk:last-child {
+    flex: 1;
+  }
+
+  .fc .fc-toolbar-chunk:first-child {
+    justify-content: flex-start;
+  }
+
+  .fc .fc-toolbar-chunk:last-child {
+    justify-content: flex-end;
+  }
+
+  .fc .fc-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* FullCalendar button theme — match app purple */
+.fc .fc-button-primary {
+  background-color: var(--color-indigo-600);
+  border-color: var(--color-indigo-600);
+}
+
+.fc .fc-button-primary:hover {
+  background-color: var(--color-indigo-700);
+  border-color: var(--color-indigo-700);
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background-color: var(--color-indigo-800);
+  border-color: var(--color-indigo-800);
+}
+
+.fc .fc-button-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(90, 79, 138, 0.4);
+}
+
+.fc .fc-button-primary:disabled {
+  background-color: var(--color-indigo-400);
+  border-color: var(--color-indigo-400);
+}
+
+/* FullCalendar event colors — darker backgrounds for readability */
+.fc .fc-event,
+.fc .fc-timegrid-event,
+.fc .fc-daygrid-event {
+  background-color: var(--color-indigo-600) !important;
+  border-color: var(--color-indigo-700) !important;
+  color: #fff !important;
+}
+
+.fc .fc-event .fc-event-main {
+  color: #fff;
+}
+
+.fc .fc-event .fc-event-time,
+.fc .fc-event .fc-event-title {
+  color: #fff;
+}
+
+/* FullCalendar today column — light violet instead of yellow */
+.fc .fc-day-today {
+  background-color: var(--color-indigo-50) !important;
+}
+
+/* FullCalendar non-business hours — light violet instead of grey */
+.fc .fc-non-business {
+  background-color: rgba(245, 242, 251, 0.7) !important;
+}
+
+/* FullCalendar grid lines — deep purple */
+.fc td,
+.fc th {
+  border-color: var(--color-indigo-300) !important;
+}
+
+.fc .fc-scrollgrid {
+  border-color: var(--color-indigo-300) !important;
+}
+
+.fc .fc-timegrid-slot {
+  border-color: var(--color-indigo-300) !important;
 }

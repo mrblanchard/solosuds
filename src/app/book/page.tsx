@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import PublicBookingForm from "@/components/booking/public-booking-form";
+import { AppFooter } from "@/components/layout/app-footer";
 
 interface Props {
   searchParams: { org?: string };
@@ -25,7 +26,7 @@ export default async function BookingPage({ searchParams }: Props) {
   if (!org) notFound();
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-12">
+    <div className="min-h-dvh bg-gray-50 px-4 py-12">
       <div className="mx-auto max-w-lg">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-gray-900">Book with {org.name}</h1>
@@ -35,6 +36,7 @@ export default async function BookingPage({ searchParams }: Props) {
         </div>
         <PublicBookingForm orgId={org.id} services={services} timezone={org.timezone ?? "America/New_York"} />
       </div>
+      <AppFooter />
     </div>
   );
 }

@@ -53,10 +53,23 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const delUser = await db.user.findUnique({ where: { id: session.user.id }, select: { role: true } });
+    if (delUser?.role === "PRACTITIONER" || delUser?.role === "FRONT_DESK") {
+      return NextResponse.json({ error: "You do not have permission to delete" }, { status: 403 });
+    }
+
     const form = await db.intakeForm.findFirst({
       where: { id, organizationId: session.user.organizationId },
+      select: { id: true, isEmailConsent: true },
     });
     if (!form) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    if (form.isEmailConsent) {
+      return NextResponse.json(
+        { error: "The Email Communication Consent form cannot be deleted. It is a permanent record for your organization." },
+        { status: 403 }
+      );
+    }
 
     await db.intakeForm.delete({ where: { id } });
     return new NextResponse(null, { status: 204 });

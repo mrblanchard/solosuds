@@ -45,11 +45,13 @@ export default async function AppointmentDetailPage({ params }: Props) {
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between rounded-xl bg-white/80 backdrop-blur-sm px-4 py-3 -mx-2">
         <div>
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-bold text-gray-900">
-              {appointment.client.firstName} {appointment.client.lastName}
+              {appointment.client
+                ? `${appointment.client.firstName} ${appointment.client.lastName}`
+                : appointment.service?.name ?? "Appointment"}
             </h1>
             <Badge variant={STATUS_VARIANT[appointment.status] ?? "secondary"}>
               {appointment.status}
@@ -66,17 +68,21 @@ export default async function AppointmentDetailPage({ params }: Props) {
 
       {/* Details grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-gray-100 p-4 space-y-3">
+        <div className="rounded-xl border border-gray-100 bg-white p-4 space-y-3">
           <p className="text-xs font-medium uppercase text-gray-400">Appointment Details</p>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">Client</span>
-              <Link
-                href={`/dashboard/clients/${appointment.clientId}`}
-                className="text-indigo-600 hover:underline font-medium"
-              >
-                {appointment.client.firstName} {appointment.client.lastName}
-              </Link>
+              {appointment.client ? (
+                <Link
+                  href={`/dashboard/clients/${appointment.clientId}`}
+                  className="text-indigo-600 hover:underline font-medium"
+                >
+                  {appointment.client.firstName} {appointment.client.lastName}
+                </Link>
+              ) : (
+                <span className="text-gray-400">No client</span>
+              )}
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Practitioner</span>
@@ -105,7 +111,7 @@ export default async function AppointmentDetailPage({ params }: Props) {
           </div>
         </div>
 
-        <div className="rounded-xl border border-gray-100 p-4 space-y-3">
+        <div className="rounded-xl border border-gray-100 bg-white p-4 space-y-3">
           <p className="text-xs font-medium uppercase text-gray-400">Actions</p>
           <AppointmentStatusActions
             appointmentId={appointment.id}
@@ -132,7 +138,7 @@ export default async function AppointmentDetailPage({ params }: Props) {
 
       {/* Notes */}
       {appointment.notes && (
-        <div className="rounded-xl border border-gray-100 p-4">
+        <div className="rounded-xl border border-gray-100 bg-white p-4">
           <p className="text-xs font-medium uppercase text-gray-400 mb-2">Internal Notes</p>
           <p className="text-sm text-gray-700 whitespace-pre-line">{appointment.notes}</p>
         </div>
@@ -140,7 +146,7 @@ export default async function AppointmentDetailPage({ params }: Props) {
 
       {/* SOAP Notes */}
       {appointment.soapNotes.length > 0 && (
-        <div className="rounded-xl border border-gray-100 overflow-hidden">
+        <div className="rounded-xl border border-gray-100 bg-white overflow-hidden">
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
             <p className="text-xs font-medium uppercase text-gray-500">SOAP Notes</p>
           </div>
@@ -167,7 +173,7 @@ export default async function AppointmentDetailPage({ params }: Props) {
 
       {/* Invoices */}
       {appointment.invoices.length > 0 && (
-        <div className="rounded-xl border border-gray-100 overflow-hidden">
+        <div className="rounded-xl border border-gray-100 bg-white overflow-hidden">
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
             <p className="text-xs font-medium uppercase text-gray-500">Invoices</p>
           </div>

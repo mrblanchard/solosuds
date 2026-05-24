@@ -1,22 +1,24 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { ScheduleCalendar } from "@/components/schedule/schedule-calendar";
+import ScheduleCalendar from "@/components/schedule/schedule-calendar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { redirect } from "next/navigation";
 
 const STATUS_COLORS: Record<string, string> = {
-  SCHEDULED: "#6366f1",
-  CONFIRMED: "#22c55e",
-  IN_PROGRESS: "#f59e0b",
-  COMPLETED: "#94a3b8",
-  CANCELLED: "#ef4444",
-  NO_SHOW: "#f97316",
+  SCHEDULED: "#5a4f8a",
+  CONFIRMED: "#16a34a",
+  IN_PROGRESS: "#d97706",
+  COMPLETED: "#64748b",
+  CANCELLED: "#dc2626",
+  NO_SHOW: "#ea580c",
 };
 
 export default async function SchedulePage() {
   const session = await auth();
-  const orgId = session?.user?.organizationId!;
+  if (!session?.user?.organizationId) redirect("/dashboard");
+  const orgId = session.user.organizationId;
 
   // Fetch 3-month window of appointments
   const now = new Date();
@@ -37,13 +39,17 @@ export default async function SchedulePage() {
 
   const events = appointments.map((appt) => ({
     id: appt.id,
-    title: `${appt.client.firstName} ${appt.client.lastName}`,
+    title: appt.client
+      ? `${appt.client.firstName} ${appt.client.lastName}`.trim()
+      : appt.service?.name ?? "Appointment",
     start: appt.startTime.toISOString(),
     end: appt.endTime.toISOString(),
     backgroundColor: STATUS_COLORS[appt.status] ?? "#6366f1",
     borderColor: "transparent",
     extendedProps: {
-      clientName: `${appt.client.firstName} ${appt.client.lastName}`,
+      clientName: appt.client
+        ? `${appt.client.firstName} ${appt.client.lastName}`.trim()
+        : "No client",
       serviceName: appt.service?.name ?? "Session",
       status: appt.status,
     },

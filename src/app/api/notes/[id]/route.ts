@@ -8,6 +8,8 @@ const patchSchema = z.object({
   objective: z.string().optional(),
   assessment: z.string().optional(),
   plan: z.string().optional(),
+  sessionNotes: z.string().optional(),
+  noteFormat: z.enum(["SOAP", "SESSION"]).optional(),
   diagnosisCodes: z.string().optional(),
   procedureCodes: z.string().optional(),
   transcript: z.string().optional(),
@@ -85,14 +87,16 @@ export async function DELETE(
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const delUser = await db.user.findUnique({ where: { id: session.user.id }, select: { role: true } });
+  if (delUser?.role === "PRACTITIONER" || delUser?.role === "FRONT_DESK") {
+    return NextResponse.json({ error: "You do not have permission to delete" }, { status: 403 });
+  }
+
   const { id } = await params;
   const orgId = session.user.organizationId;
 
   const note = await db.soapNote.findFirst({ where: { id, organizationId: orgId } });
   if (!note) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (note.status === "LOCKED") {
-    return NextResponse.json({ error: "Cannot delete a locked note" }, { status: 400 });
-  }
 
   await db.soapNote.delete({ where: { id } });
   return NextResponse.json({ success: true });

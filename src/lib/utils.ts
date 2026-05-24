@@ -15,7 +15,15 @@ export function formatCurrency(cents: number): string {
 }
 
 export function formatDate(date: Date | string, fmt = "MMMM d, yyyy"): string {
-  return format(new Date(date), fmt);
+  // Prisma returns date-only fields as UTC midnight Date objects. Formatting them
+  // with local timezone shifts the day back by 1 in negative-offset zones.
+  // Always use UTC components so the calendar date is preserved regardless of server TZ.
+  if (typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    const [year, month, day] = date.split("-").map(Number);
+    return format(new Date(year, month - 1, day), fmt);
+  }
+  const d = new Date(date);
+  return format(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()), fmt);
 }
 
 export function formatDateTime(date: Date | string): string {

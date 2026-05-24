@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { ClientForm } from "@/components/clients/client-form";
+import ClientForm from "@/components/clients/client-form";
 
 interface Props {
   params: Promise<{ id: string }>;

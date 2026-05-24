@@ -2,19 +2,28 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Users, Plus, Search } from "lucide-react";
-import { formatDate } from "@/lib/utils";
-import ClientRowActions from "@/components/clients/client-row-actions";
+import TableSearch from "@/components/ui/table-search";
+import { Users, Plus, Upload } from "lucide-react";
+import ClientTable from "@/components/clients/client-table";
+import { Prisma } from "@prisma/client";
+
+const SORT_MAP: Record<string, Prisma.ClientOrderByWithRelationInput | Prisma.ClientOrderByWithRelationInput[]> = {
+  name_asc:  [{ lastName: "asc" },  { firstName: "asc" }],
+  name_desc: [{ lastName: "desc" }, { firstName: "desc" }],
+  date_asc:  { createdAt: "asc" },
+  date_desc: { createdAt: "desc" },
+};
 
 export default async function ClientsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; sort?: string }>;
 }) {
   const session = await auth();
   const orgId = session?.user?.organizationId!;
   const params = await searchParams;
+
+  const orderBy = SORT_MAP[params.sort ?? ""] ?? [{ lastName: "asc" }, { firstName: "asc" }];
 
   const clients = await db.client.findMany({
     where: {
@@ -34,7 +43,7 @@ export default async function ClientsPage({
     include: {
       _count: { select: { soapNotes: true, appointments: true } },
     },
-    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+    orderBy,
     take: 100,
   });
 
@@ -45,39 +54,45 @@ export default async function ClientsPage({
           <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
           <p className="mt-1 text-sm text-gray-500">{clients.length} clients</p>
         </div>
-        <Link href="/dashboard/clients/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Client
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/dashboard/clients/import">
+            <Button variant="outline">
+              <Upload className="h-4 w-4 mr-2" />
+              Import CSV
+            </Button>
+          </Link>
+          <Link href="/dashboard/clients/new">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Client
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search + filters */}
       <div className="flex gap-3">
-        <form className="relative flex-1" method="GET">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            name="q"
-            defaultValue={params.q}
-            placeholder="Search by name, email, or phone…"
-            className="h-10 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </form>
+        <TableSearch placeholder="Search by name, email, or phone…" className="flex-1" />
         <div className="flex gap-1">
-          {["", "ACTIVE", "INACTIVE", "ARCHIVED"].map((s) => (
-            <Link
-              key={s}
-              href={`/dashboard/clients${s ? `?status=${s}` : ""}`}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                (params.status ?? "") === s
-                  ? "bg-indigo-600 text-white"
-                  : "border border-gray-300 text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              {s || "All"}
-            </Link>
-          ))}
+          {["", "ACTIVE", "INACTIVE", "ARCHIVED"].map((s) => {
+            const base = new URLSearchParams();
+            if (s) base.set("status", s);
+            if (params.q) base.set("q", params.q);
+            if (params.sort) base.set("sort", params.sort);
+            return (
+              <Link
+                key={s}
+                href={`/dashboard/clients${base.toString() ? `?${base.toString()}` : ""}`}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  (params.status ?? "") === s
+                    ? "bg-indigo-600 text-white"
+                    : "border border-gray-300 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {s || "All"}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
@@ -94,92 +109,20 @@ export default async function ClientsPage({
           </Link>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                  Client
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                  Contact
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                  Notes
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                  Appts
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                  Added
-                </th>
-                <th className="relative px-6 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
-              {clients.map((client) => (
-                <tr key={client.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
-                        {client.firstName[0]}{client.lastName[0]}
-                      </div>
-                      <div>
-                        <Link
-                          href={`/dashboard/clients/${client.id}`}
-                          className="font-medium text-gray-900 hover:text-indigo-600"
-                        >
-                          {client.firstName} {client.lastName}
-                        </Link>
-                        {client.dateOfBirth && (
-                          <p className="text-xs text-gray-400">
-                            DOB: {formatDate(client.dateOfBirth, "MM/dd/yyyy")}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-600">{client.email}</div>
-                    <div className="text-xs text-gray-400">{client.phone}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <ClientStatusBadge status={client.status} />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {client._count.soapNotes}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {client._count.appointments}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-400">
-                    {formatDate(client.createdAt, "MMM d, yyyy")}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <ClientRowActions
-                      clientId={client.id}
-                      clientName={`${client.firstName} ${client.lastName}`}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ClientTable
+          clients={clients.map((c) => ({
+            id: c.id,
+            firstName: c.firstName,
+            lastName: c.lastName,
+            email: c.email,
+            phone: c.phone,
+            dateOfBirth: c.dateOfBirth?.toISOString() ?? null,
+            status: c.status,
+            createdAt: c.createdAt.toISOString(),
+            _count: c._count,
+          }))}
+        />
       )}
     </div>
   );
-}
-
-function ClientStatusBadge({ status }: { status: string }) {
-  const map: Record<string, { variant: "default" | "success" | "secondary" | "destructive"; label: string }> = {
-    ACTIVE: { variant: "success", label: "Active" },
-    INACTIVE: { variant: "secondary", label: "Inactive" },
-    ARCHIVED: { variant: "destructive", label: "Archived" },
-  };
-  const config = map[status] ?? { variant: "secondary" as const, label: status };
-  return <Badge variant={config.variant}>{config.label}</Badge>;
 }

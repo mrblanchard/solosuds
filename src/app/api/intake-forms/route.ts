@@ -16,6 +16,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
 
+    const maxSort = await db.intakeForm.aggregate({
+      where: { organizationId: session.user.organizationId },
+      _max: { sortOrder: true },
+    });
+
     const form = await db.intakeForm.create({
       data: {
         organizationId: session.user.organizationId,
@@ -23,6 +28,7 @@ export async function POST(request: NextRequest) {
         description: description ?? null,
         fields: fields ?? [],
         isActive: true,
+        sortOrder: (maxSort._max.sortOrder ?? -1) + 1,
       },
     });
 

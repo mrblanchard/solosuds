@@ -38,6 +38,7 @@ export default function MessageComposer({ clientId }: Props) {
   return (
     <div className="border-t border-gray-100 p-4 flex gap-3 items-end">
       <Textarea
+        aria-label="Message"
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyDown={onKeyDown}

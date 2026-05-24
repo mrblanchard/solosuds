@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { AppointmentForm } from "@/components/schedule/appointment-form";
+import AppointmentForm from "@/components/schedule/appointment-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -14,18 +14,11 @@ export default async function NewAppointmentPage({
   const orgId = session?.user?.organizationId!;
   const params = await searchParams;
 
-  const [clients, practitioners, services] = await Promise.all([
+  const [clients, services] = await Promise.all([
     db.client.findMany({
       where: { organizationId: orgId, status: "ACTIVE" },
       select: { id: true, firstName: true, lastName: true },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-    }),
-    db.user.findMany({
-      where: {
-        organizationId: orgId,
-        role: { in: ["OWNER", "ADMIN", "PRACTITIONER"] },
-      },
-      select: { id: true, name: true },
     }),
     db.service.findMany({
       where: { organizationId: orgId, isActive: true },
@@ -55,8 +48,8 @@ export default async function NewAppointmentPage({
         <CardContent>
           <AppointmentForm
             clients={clients}
-            practitioners={practitioners}
             services={services}
+            currentUserId={session!.user!.id}
             defaultClientId={params.clientId}
             defaultStartTime={params.start}
           />

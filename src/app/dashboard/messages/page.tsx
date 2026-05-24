@@ -5,17 +5,18 @@ import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import MessageComposer from "@/components/messages/message-composer";
+import { ArrowLeft } from "lucide-react";
 
 interface Props {
-  searchParams: { clientId?: string };
+  searchParams: Promise<{ clientId?: string }>;
 }
 
 export default async function MessagesPage({ searchParams }: Props) {
   const session = await auth();
-  if (!session?.user?.organizationId) redirect("/login");
+  if (!session?.user?.organizationId) redirect("/dashboard");
 
   const orgId = session.user.organizationId;
-  const selectedClientId = searchParams.clientId;
+  const { clientId: selectedClientId } = await searchParams;
 
   // Get all clients that have messages (or all active clients for composing)
   const [clients, messages] = await Promise.all([
@@ -38,9 +39,9 @@ export default async function MessagesPage({ searchParams }: Props) {
     : null;
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] divide-x divide-gray-100">
-      {/* Client list */}
-      <aside className="w-72 shrink-0 flex flex-col">
+    <div className="flex h-[calc(100vh-4rem)]">
+      {/* Client list — full width on mobile when no client selected; hidden on mobile when thread is open */}
+      <aside className={`flex flex-col border-r border-gray-100 w-full md:w-72 md:flex md:shrink-0 ${selectedClient ? "hidden md:flex" : "flex"}`}>
         <div className="p-4 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-900">Messages</h2>
         </div>
@@ -76,22 +77,32 @@ export default async function MessagesPage({ searchParams }: Props) {
         </div>
       </aside>
 
-      {/* Message thread */}
-      <div className="flex-1 flex flex-col">
+      {/* Message thread — full width on mobile when client selected; hidden on mobile otherwise */}
+      <div className={`flex-1 flex flex-col min-w-0 ${!selectedClient ? "hidden md:flex" : "flex"}`}>
         {selectedClient ? (
           <>
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <div>
-                <h2 className="font-semibold text-gray-900">
-                  {selectedClient.firstName} {selectedClient.lastName}
-                </h2>
-                {selectedClient.email && (
-                  <p className="text-xs text-gray-400">{selectedClient.email}</p>
-                )}
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                {/* Back to client list on mobile */}
+                <Link
+                  href="/dashboard/messages"
+                  className="md:hidden flex items-center justify-center min-h-[44px] min-w-[44px] -ml-2 text-gray-500 hover:text-gray-700"
+                  aria-label="Back to contacts"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+                <div className="min-w-0">
+                  <h2 className="font-semibold text-gray-900 truncate">
+                    {selectedClient.firstName} {selectedClient.lastName}
+                  </h2>
+                  {selectedClient.email && (
+                    <p className="text-xs text-gray-400 truncate">{selectedClient.email}</p>
+                  )}
+                </div>
               </div>
               <Link
                 href={`/dashboard/clients/${selectedClient.id}`}
-                className="text-xs text-indigo-600 hover:underline"
+                className="text-xs text-indigo-600 hover:underline shrink-0"
               >
                 View profile →
               </Link>

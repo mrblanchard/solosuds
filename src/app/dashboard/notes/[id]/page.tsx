@@ -1,12 +1,13 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
-import { SoapNoteEditor } from "@/components/notes/soap-note-editor";
+import NotePagePanels from "@/components/notes/note-page-panels";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import NoteDeleteButton from "@/components/notes/note-delete-button";
 
 export default async function NotePage({
   params,
@@ -15,6 +16,8 @@ export default async function NotePage({
 }) {
   const session = await auth();
   const orgId = session?.user?.organizationId!;
+  const userRole = session?.user?.role;
+  const canDelete = userRole === "OWNER" || userRole === "ADMIN";
   const { id } = await params;
 
   const note = await db.soapNote.findFirst({
@@ -27,6 +30,25 @@ export default async function NotePage({
   });
 
   if (!note) notFound();
+
+  // Fetch upcoming appointments for this client (next 90 days)
+  const upcomingAppointments = await db.appointment.findMany({
+    where: {
+      clientId: note.clientId,
+      organizationId: orgId,
+      startTime: { gte: new Date() },
+      status: { in: ["SCHEDULED", "CONFIRMED"] },
+    },
+    select: {
+      id: true,
+      startTime: true,
+      endTime: true,
+      reminderSentAt: true,
+      service: { select: { name: true } },
+    },
+    orderBy: { startTime: "asc" },
+    take: 3,
+  });
 
   const statusMap: Record<string, { variant: "default" | "success" | "warning" | "secondary" | "destructive"; label: string }> = {
     DRAFT: { variant: "warning", label: "Draft" },
@@ -74,22 +96,34 @@ export default async function NotePage({
               </Button>
             </Link>
           )}
+          {canDelete && <NoteDeleteButton noteId={note.id} />}
         </div>
       </div>
 
-      <SoapNoteEditor
-        noteId={note.id}
-        clientName={`${note.client.firstName} ${note.client.lastName}`}
-        initialData={{
+      <NotePagePanels
+        note={{
+          id: note.id,
+          clientId: note.clientId,
+          clientName: `${note.client.firstName} ${note.client.lastName}`,
+          clientEmail: note.client.email ?? null,
+          sessionDate: note.sessionDate.toISOString(),
           subjective: note.subjective ?? "",
           objective: note.objective ?? "",
           assessment: note.assessment ?? "",
           plan: note.plan ?? "",
+          sessionNotes: note.sessionNotes ?? "",
+          noteFormat: note.noteFormat ?? "SOAP",
           diagnosisCodes: note.diagnosisCodes.join(", "),
           procedureCodes: note.procedureCodes.join(", "),
           status: note.status,
-          transcript: note.transcript ?? "",
         }}
+        upcomingAppointments={upcomingAppointments.map((a) => ({
+          id: a.id,
+          startTime: a.startTime.toISOString(),
+          endTime: a.endTime.toISOString(),
+          serviceName: a.service?.name ?? null,
+          reminderSentAt: a.reminderSentAt?.toISOString() ?? null,
+        }))}
       />
     </div>
   );
