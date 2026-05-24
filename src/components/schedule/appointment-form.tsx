@@ -16,8 +16,11 @@ const schema = z.object({
   serviceId: z.string().optional(),
   startTime: z.string().min(1, "Start time is required"),
   endTime: z.string().min(1, "End time is required"),
-  notes: z.string().optional(),
+  notes: z.string().max(5000, "Notes are too long").optional(),
   sendReminder: z.boolean().optional(),
+}).refine((d) => !d.startTime || !d.endTime || new Date(d.endTime) > new Date(d.startTime), {
+  message: "End time must be after start time",
+  path: ["endTime"],
 });
 
 type FormValues = z.infer<typeof schema>;

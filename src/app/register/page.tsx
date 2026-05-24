@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -10,12 +10,13 @@ import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { passwordSchema, PASSWORD_RULES } from "@/lib/utils";
 
 const registerSchema = z.object({
-  organizationName: z.string().min(2, "Organization name is required"),
-  name: z.string().min(2, "Your name is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  organizationName: z.string().min(2, "Organization name is required").max(200, "Organization name is too long"),
+  name: z.string().min(2, "Your name is required").max(200, "Name is too long"),
+  email: z.string().email("Invalid email address").max(254, "Email is too long"),
+  password: passwordSchema,
   acceptBaa: z.boolean().refine((v) => v === true, {
     message: "You must accept the BAA to continue",
   }),
@@ -24,16 +25,38 @@ const registerSchema = z.object({
 type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
+  return <RegisterContent />;
+}
+
+function RegisterContent() {
   const router = useRouter();
+  const [fromGoogle, setFromGoogle] = useState(false);
+  const [prefillEmail, setPrefillEmail] = useState("");
+  const [prefillName, setPrefillName] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  const schema = fromGoogle
+    ? registerSchema.extend({ password: z.string().optional() })
+    : registerSchema;
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(schema),
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const fg = params.get("fromGoogle") === "1";
+    const email = params.get("email") ?? "";
+    const name = params.get("name") ?? "";
+    setFromGoogle(fg);
+    if (email) { setPrefillEmail(email); setValue("email", email); }
+    if (name) { setPrefillName(name); setValue("name", name); }
+  }, [setValue]);
 
   async function onSubmit(data: RegisterForm) {
     setError(null);
@@ -41,14 +64,20 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, fromGoogle }),
       });
       const json = await res.json();
       if (!res.ok) {
         setError(json.error ?? "Registration failed");
         return;
       }
-      router.push("/login?registered=1");
+      if (fromGoogle) {
+        // Sign in via Google now that the account exists
+        const { signIn } = await import("next-auth/react");
+        await signIn("google", { callbackUrl: "/onboarding" });
+      } else {
+        router.push("/login?registered=1");
+      }
     } catch {
       setError("Something went wrong. Please try again.");
     }
@@ -60,13 +89,18 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Leaf className="h-8 w-8 text-indigo-600" />
-            <span className="text-2xl font-bold text-gray-900">SoapSuds</span>
+            <span className="text-2xl font-bold text-gray-900">SoloSuds</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
           <p className="mt-1 text-sm text-gray-500">Start your 14-day free trial — no credit card required</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          {fromGoogle && (
+            <div className="mb-4 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800">
+              Your Google account (<strong>{prefillEmail}</strong>) isn&apos;t registered yet. Complete the form below to create your free account.
+            </div>
+          )}
           {error && (
             <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
               {error}
@@ -107,6 +141,7 @@ export default function RegisterPage() {
                 type="email"
                 placeholder="jane@clinic.com"
                 className="mt-1"
+                readOnly={fromGoogle}
                 {...register("email")}
               />
               {errors.email && (
@@ -114,19 +149,22 @@ export default function RegisterPage() {
               )}
             </div>
 
+            {!fromGoogle && (
             <div>
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Minimum 8 characters"
+                placeholder="Minimum 12 characters"
                 className="mt-1"
                 {...register("password")}
               />
               {errors.password && (
                 <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
               )}
+              <p className="mt-1 text-xs text-gray-400">{PASSWORD_RULES}</p>
             </div>
+            )}
 
             <div className="flex items-start gap-3">
               <input
@@ -151,7 +189,9 @@ export default function RegisterPage() {
             )}
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Creating account..." : "Create account"}
+              {isSubmitting
+                ? fromGoogle ? "Creating account…" : "Creating account..."
+                : fromGoogle ? "Create account & sign in with Google" : "Create account"}
             </Button>
           </form>
 

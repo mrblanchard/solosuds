@@ -5,7 +5,6 @@ import {
   Leaf,
   CalendarDays,
   Users,
-  Mic,
   Shield,
   CreditCard,
   Smartphone,
@@ -21,7 +20,7 @@ export default function LandingPage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <Leaf className="h-7 w-7 text-indigo-600" />
-            <span className="text-xl font-bold text-gray-900">SoapSuds</span>
+            <span className="text-xl font-bold text-gray-900">SoloSuds</span>
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
             <a href="#features" className="hover:text-gray-900">Features</a>
@@ -43,16 +42,14 @@ export default function LandingPage() {
       <section className="relative overflow-hidden bg-gradient-to-b from-indigo-50 to-white px-4 py-24 text-center">
         <div className="mx-auto max-w-3xl">
           <div className="mb-4 inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
-            HIPAA-compliant · AI-powered · Built for SMBs
+            HIPAA-compliant · Built for SMBs
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-6xl">
             Clinical documentation{" "}
             <span className="text-indigo-600">should be effortless</span>
           </h1>
           <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
-            SoapSuds combines AI-powered SOAP note generation, intelligent
-            scheduling, and integrated billing into one HIPAA-compliant platform
-            built for modern healthcare practices.
+          SoloSuds combines intelligent scheduling, integrated billing, and secure SOAP documentation into one HIPAA-compliant platform built for modern healthcare practices.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/register">
@@ -68,13 +65,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SOAPSuds Acronym Explainer */}
+      {/* SoloSuds Acronym Explainer */}
       <section className="py-20 px-4 bg-gradient-to-b from-white to-indigo-50">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-gray-900">
               What does{" "}
-              <span className="text-indigo-600">SOAPSuds</span> mean?
+              <span className="text-indigo-600">SoloSuds</span> mean?
             </h2>
             <p className="mt-3 text-gray-500 max-w-2xl mx-auto">
               The name tells the whole story.{" "}
@@ -149,7 +146,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900">Everything your practice needs</h2>
             <p className="mt-3 text-gray-500 max-w-xl mx-auto">
-              From first appointment to final invoice, SoapSuds handles the workflow.
+              From first appointment to final invoice, SoloSuds handles the workflow.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -205,9 +202,9 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Leaf className="h-5 w-5 text-indigo-600" />
-            <span className="font-semibold text-gray-900">SoapSuds</span>
+            <span className="font-semibold text-gray-900">SoloSuds</span>
           </div>
-          <p className="text-sm text-gray-400">© {new Date().getFullYear()} SoapSuds. All rights reserved.</p>
+          <p className="text-sm text-gray-400">© {new Date().getFullYear()} SoloSuds. All rights reserved.</p>
           <div className="flex gap-4 text-sm text-gray-500">
             <Link href="/privacy" className="hover:text-gray-700">Privacy</Link>
             <Link href="/terms" className="hover:text-gray-700">Terms</Link>
@@ -263,7 +260,7 @@ const sudsLetters = [
     letter: "D",
     label: "Documentation",
     description:
-      "The SOAP notes themselves — AI-assisted, structured, and stored securely for every session.",
+      "The SOAP notes themselves — structured, stored securely, and accessible for every session.",
   },
   {
     letter: "S",
@@ -274,12 +271,6 @@ const sudsLetters = [
 ];
 
 const features = [
-  {
-    title: "AI SOAP Notes",
-    icon: Mic,
-    description: "Record sessions with your voice. Our AI transcribes and structures everything into SOAP sections automatically.",
-    bullets: ["Whisper-powered transcription", "GPT-4 SOAP generation", "Customizable templates", "Note duplication"],
-  },
   {
     title: "Smart Scheduling",
     icon: CalendarDays,
@@ -308,7 +299,7 @@ const features = [
     title: "Mobile-First",
     icon: Smartphone,
     description: "Document on the go with a fully responsive interface optimized for tablets and smartphones.",
-    bullets: ["Responsive web app", "Touch-friendly calendar", "Voice recording on mobile", "Offline notes"],
+    bullets: ["Responsive web app", "Touch-friendly calendar", "Offline notes"],
   },
 ];
 

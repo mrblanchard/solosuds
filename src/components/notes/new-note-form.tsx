@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { Loader2 } from "lucide-react";
 
 const schema = z.object({
@@ -39,6 +40,8 @@ export function NewNoteForm({
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -89,10 +92,9 @@ export function NewNoteForm({
 
       <div>
         <Label htmlFor="sessionDate">Session Date *</Label>
-        <input
-          type="date"
-          {...register("sessionDate")}
-          className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        <DateWheelPicker
+          value={watch("sessionDate") ?? ""}
+          onChange={(v) => setValue("sessionDate", v, { shouldValidate: true })}
         />
         {errors.sessionDate && (
           <p className="mt-1 text-xs text-red-500">{errors.sessionDate.message}</p>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import IntakeFormEditor from "@/components/intake/intake-form-editor";
 import CopyLinkButton from "@/components/intake/copy-link-button";
+import SendFormButtons from "@/components/intake/send-form-buttons";
 
 export default async function IntakeFormDetailPage({
   params,
@@ -15,10 +16,17 @@ export default async function IntakeFormDetailPage({
   const session = await auth();
   if (!session?.user?.organizationId) notFound();
 
-  const form = await db.intakeForm.findFirst({
-    where: { id, organizationId: session.user.organizationId },
-    include: { _count: { select: { submissions: true } } },
-  });
+  const [form, clients] = await Promise.all([
+    db.intakeForm.findFirst({
+      where: { id, organizationId: session.user.organizationId },
+      include: { _count: { select: { submissions: true } } },
+    }),
+    db.client.findMany({
+      where: { organizationId: session.user.organizationId, status: "ACTIVE" },
+      select: { id: true, firstName: true, lastName: true, email: true, phone: true },
+      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+    }),
+  ]);
 
   if (!form) notFound();
 
@@ -47,6 +55,7 @@ export default async function IntakeFormDetailPage({
           <p className="text-sm text-indigo-900 truncate font-mono">{publicUrl}</p>
         </div>
         <CopyLinkButton url={publicUrl} />
+        <SendFormButtons formId={form.id} clients={clients} />
       </div>
 
       <IntakeFormEditor

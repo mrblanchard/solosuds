@@ -9,14 +9,14 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const db = new PrismaClient({ adapter } as any);
 
 async function main() {
-  const email = "admin@soapsuds.dev";
+  const email = "admin@solosuds.dev";
   const password = "Admin1234!";
-  const orgName = "SoapSuds Demo Practice";
+  const orgName = "SoloSuds Demo Practice";
 
   // Create org
   const org = await db.organization.upsert({
-    where: { slug: "soapsuds-demo" },
-    create: { id: "demo-org", name: orgName, slug: "soapsuds-demo" },
+    where: { slug: "solosuds-demo" },
+    create: { id: "demo-org", name: orgName, slug: "solosuds-demo" },
     update: { name: orgName },
   });
 

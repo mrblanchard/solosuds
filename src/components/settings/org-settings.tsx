@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
+import { formatPhone, stripPhone, normalizeEmail } from "@/lib/utils";
 
 interface OrgData {
   id: string;
@@ -41,10 +43,38 @@ export default function OrgSettings({ org }: Props) {
   async function save() {
     setSaving(true);
     setMessage(null);
+
+    if (!form.name.trim()) {
+      setMessage("Organization name is required.");
+      setSaving(false);
+      return;
+    }
+    if (form.name.length > 200) {
+      setMessage("Organization name is too long.");
+      setSaving(false);
+      return;
+    }
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setMessage("Invalid email address.");
+      setSaving(false);
+      return;
+    }
+    if (form.phone && !/^[+]?[\d-]{7,20}$/.test(stripPhone(form.phone))) {
+      setMessage("Invalid phone number.");
+      setSaving(false);
+      return;
+    }
+
+    const payload = {
+      ...form,
+      email: form.email ? normalizeEmail(form.email) : form.email,
+      phone: form.phone ? stripPhone(form.phone) : form.phone,
+    };
+
     const res = await fetch("/api/settings/organization", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     });
     setSaving(false);
     if (res.ok) {
@@ -74,12 +104,38 @@ export default function OrgSettings({ org }: Props) {
         {fields.map((f) => (
           <div key={f.key}>
             <Label>{f.label}</Label>
-            <Input
-              type={f.type ?? "text"}
-              value={form[f.key]}
-              onChange={(e) => set(f.key, e.target.value)}
-              className="mt-1"
-            />
+            {f.key === "address" ? (
+              <AddressAutocomplete
+                value={form.address}
+                onChange={(v) => set("address", v)}
+                onSelect={(parsed) => set("address", [parsed.address, parsed.city, parsed.state, parsed.zip, parsed.country].filter(Boolean).join(", "))}
+                placeholder="Start typing an address…"
+                className="mt-1"
+              />
+            ) : f.key === "phone" ? (
+              <Input
+                type="tel"
+                value={form.phone}
+                onChange={(e) => set("phone", formatPhone(e.target.value))}
+                placeholder="802-258-0000"
+                className="mt-1"
+              />
+            ) : f.key === "email" ? (
+              <Input
+                type="email"
+                value={form.email}
+                onChange={(e) => set("email", e.target.value)}
+                onBlur={(e) => set("email", normalizeEmail(e.target.value))}
+                className="mt-1"
+              />
+            ) : (
+              <Input
+                type={f.type ?? "text"}
+                value={form[f.key]}
+                onChange={(e) => set(f.key, e.target.value)}
+                className="mt-1"
+              />
+            )}
           </div>
         ))}
         {message && (

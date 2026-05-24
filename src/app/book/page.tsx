@@ -18,7 +18,7 @@ export default async function BookingPage({ searchParams }: Props) {
     db.service.findMany({
       where: { organizationId: orgId, isActive: true },
       orderBy: { name: "asc" },
-      select: { id: true, name: true, duration: true, price: true, description: true },
+      select: { id: true, name: true, durationMinutes: true, price: true, description: true },
     }),
   ]);
 

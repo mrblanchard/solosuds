@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
+import { formatPhone, normalizeEmail } from "@/lib/utils";
 
 interface Field {
   id: string;
-  type: "text" | "textarea" | "select" | "checkbox" | "date" | "heading";
+  type: "text" | "textarea" | "select" | "checkbox" | "date" | "heading" | "phone" | "email";
   label: string;
   placeholder?: string;
   required: boolean;
@@ -105,6 +107,25 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
                 className="mt-1"
               />
             )}
+            {field.type === "phone" && (
+              <Input
+                type="tel"
+                value={(values[field.id] as string) ?? ""}
+                onChange={(e) => set(field.id, formatPhone(e.target.value))}
+                placeholder={field.placeholder ?? "802-258-0000"}
+                className="mt-1"
+              />
+            )}
+            {field.type === "email" && (
+              <Input
+                type="email"
+                value={(values[field.id] as string) ?? ""}
+                onChange={(e) => set(field.id, e.target.value)}
+                onBlur={(e) => set(field.id, normalizeEmail(e.target.value))}
+                placeholder={field.placeholder ?? "jane@example.com"}
+                className="mt-1"
+              />
+            )}
             {field.type === "textarea" && (
               <Textarea
                 value={(values[field.id] as string) ?? ""}
@@ -114,11 +135,9 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
               />
             )}
             {field.type === "date" && (
-              <Input
-                type="date"
+              <DateWheelPicker
                 value={(values[field.id] as string) ?? ""}
-                onChange={(e) => set(field.id, e.target.value)}
-                className="mt-1"
+                onChange={(v) => set(field.id, v)}
               />
             )}
             {field.type === "select" && (

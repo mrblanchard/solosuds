@@ -5,11 +5,12 @@ import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Copy, Trash2, Send } from "lucide-react";
+import { Plus, Send } from "lucide-react";
+import CopyLinkButton from "@/components/intake/copy-link-button";
 
 export default async function IntakeFormsPage() {
   const session = await auth();
-  if (!session?.user?.organizationId) redirect("/login");
+  if (!session?.user?.organizationId) redirect("/dashboard");
 
   const forms = await db.intakeForm.findMany({
     where: { organizationId: session.user.organizationId },
@@ -72,13 +73,9 @@ export default async function IntakeFormsPage() {
                 <Link href={`/dashboard/intake/${form.id}/submissions`}>
                   <Button size="sm" variant="ghost">Submissions</Button>
                 </Link>
-                <button
-                  title="Copy link"
-                  className="ml-auto text-gray-400 hover:text-indigo-600 transition-colors"
-                  onClick={() => navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_APP_URL}/intake/${form.id}`)}
-                >
-                  <Copy className="h-4 w-4" />
-                </button>
+                <div className="ml-auto">
+                  <CopyLinkButton url={`${process.env.NEXT_PUBLIC_APP_URL}/intake/${form.id}`} />
+                </div>
               </div>
             </div>
           ))}

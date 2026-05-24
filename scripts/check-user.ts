@@ -10,7 +10,7 @@ const db = new PrismaClient({ adapter } as any);
 
 async function main() {
   const user = await db.user.findUnique({
-    where: { email: "admin@soapsuds.dev" },
+    where: { email: "admin@solosuds.dev" },
     select: { id: true, email: true, hashedPassword: true, role: true, organizationId: true },
   });
 

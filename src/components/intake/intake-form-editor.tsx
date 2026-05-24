@@ -7,11 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, GripVertical } from "lucide-react";
 
 interface Field {
   id: string;
-  type: "text" | "textarea" | "select" | "checkbox" | "date" | "heading";
+  type: "text" | "textarea" | "select" | "checkbox" | "date" | "heading" | "phone" | "email";
   label: string;
   placeholder?: string;
   required: boolean;
@@ -34,7 +34,88 @@ const FIELD_TYPES = [
   { value: "select", label: "Dropdown" },
   { value: "checkbox", label: "Checkbox" },
   { value: "date", label: "Date" },
+  { value: "phone", label: "Phone number" },
+  { value: "email", label: "Email" },
   { value: "heading", label: "Section heading" },
+];
+
+const COMMON_FIELD_TEMPLATES: { label: string; description: string; fields: Omit<Field, "id">[] }[] = [
+  {
+    label: "Personal Information",
+    description: "Name, DOB, gender, pronouns",
+    fields: [
+      { type: "heading", label: "Personal Information", required: false },
+      { type: "text", label: "Full Name", placeholder: "Jane Smith", required: true },
+      { type: "date", label: "Date of Birth", required: true },
+      { type: "select", label: "Gender", required: false, options: "Female\nMale\nNon-binary\nPrefer not to say\nOther" },
+      { type: "text", label: "Pronouns", placeholder: "e.g. she/her, they/them", required: false },
+    ],
+  },
+  {
+    label: "Contact Information",
+    description: "Phone, email, address",
+    fields: [
+      { type: "heading", label: "Contact Information", required: false },
+      { type: "phone", label: "Phone Number", placeholder: "802-258-0000", required: true },
+      { type: "email", label: "Email Address", placeholder: "jane@example.com", required: true },
+      { type: "text", label: "Street Address", placeholder: "123 Main St", required: false },
+      { type: "text", label: "City", placeholder: "Burlington", required: false },
+      { type: "text", label: "State", placeholder: "VT", required: false },
+      { type: "text", label: "ZIP Code", placeholder: "05401", required: false },
+    ],
+  },
+  {
+    label: "Emergency Contact",
+    description: "Name, phone, relationship",
+    fields: [
+      { type: "heading", label: "Emergency Contact", required: false },
+      { type: "text", label: "Emergency Contact Name", placeholder: "John Smith", required: true },
+      { type: "phone", label: "Emergency Contact Phone", placeholder: "802-258-0000", required: true },
+      { type: "text", label: "Relationship to Client", placeholder: "e.g. Spouse, Parent", required: false },
+    ],
+  },
+  {
+    label: "Insurance Information",
+    description: "Carrier, ID, group number",
+    fields: [
+      { type: "heading", label: "Insurance Information", required: false },
+      { type: "text", label: "Insurance Carrier", placeholder: "e.g. Blue Cross Blue Shield", required: false },
+      { type: "text", label: "Policy / Member ID", placeholder: "ABC123456", required: false },
+      { type: "text", label: "Group Number", placeholder: "GRP-001", required: false },
+      { type: "text", label: "Policy Holder Name", placeholder: "If different from client", required: false },
+    ],
+  },
+  {
+    label: "Medical History",
+    description: "Conditions, medications, allergies",
+    fields: [
+      { type: "heading", label: "Medical History", required: false },
+      { type: "textarea", label: "Current Medications", placeholder: "List all medications and dosages", required: false },
+      { type: "textarea", label: "Known Allergies", placeholder: "List any allergies", required: false },
+      { type: "textarea", label: "Past / Current Medical Conditions", placeholder: "List any relevant conditions", required: false },
+      { type: "text", label: "Primary Care Physician", placeholder: "Dr. name", required: false },
+    ],
+  },
+  {
+    label: "Consent & Agreements",
+    description: "HIPAA, consent to treatment",
+    fields: [
+      { type: "heading", label: "Consent & Agreements", required: false },
+      { type: "checkbox", label: "I consent to treatment as discussed with my provider", placeholder: "I agree", required: true },
+      { type: "checkbox", label: "I acknowledge the HIPAA Notice of Privacy Practices", placeholder: "I acknowledge", required: true },
+      { type: "checkbox", label: "I authorize the release of information to my insurance carrier", placeholder: "I authorize", required: false },
+    ],
+  },
+  {
+    label: "Reason for Visit",
+    description: "Chief concern, goals, referral source",
+    fields: [
+      { type: "heading", label: "Reason for Visit", required: false },
+      { type: "textarea", label: "What brings you in today?", placeholder: "Describe your primary concern", required: true },
+      { type: "textarea", label: "Goals for Treatment", placeholder: "What would you like to achieve?", required: false },
+      { type: "text", label: "Referral Source", placeholder: "e.g. Dr. Smith, Google, Friend", required: false },
+    ],
+  },
 ];
 
 function generateId() {
@@ -48,13 +129,43 @@ export default function IntakeFormEditor({ form }: Props) {
   const [description, setDescription] = useState(form.description);
   const [fields, setFields] = useState<Field[]>(form.fields);
   const [isActive, setIsActive] = useState(form.isActive);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   function addField(type: Field["type"]) {
     setFields((f) => [...f, { id: generateId(), type, label: "", required: false }]);
   }
 
+  function addCommonFields(template: typeof COMMON_FIELD_TEMPLATES[number]) {
+    setFields((f) => [
+      ...f,
+      ...template.fields.map((t) => ({ ...t, id: generateId() })),
+    ]);
+  }
+
   function updateField(id: string, changes: Partial<Field>) {
     setFields((f) => f.map((field) => (field.id === id ? { ...field, ...changes } : field)));
+  }
+
+  function handleDragStart(index: number) {
+    setDragIndex(index);
+  }
+
+  function handleDragEnter(index: number) {
+    setDragOverIndex(index);
+  }
+
+  function handleDragEnd() {
+    if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
+      setFields((prev) => {
+        const next = [...prev];
+        const [moved] = next.splice(dragIndex, 1);
+        next.splice(dragOverIndex, 0, moved);
+        return next;
+      });
+    }
+    setDragIndex(null);
+    setDragOverIndex(null);
   }
 
   function removeField(id: string) {
@@ -111,20 +222,42 @@ export default function IntakeFormEditor({ form }: Props) {
         </CardHeader>
         <CardContent className="space-y-4">
           {fields.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-4">No fields yet. Add some below.</p>
+            <p className="text-sm text-gray-400">No fields yet. Add one below.</p>
           )}
-          {fields.map((field) => (
-            <div key={field.id} className="rounded-lg border border-gray-100 p-4 space-y-3">
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragEnter={() => handleDragEnter(index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => e.preventDefault()}
+              className={`rounded-lg border p-4 space-y-3 transition-all ${
+                dragIndex === index
+                  ? "opacity-40 border-dashed border-indigo-300 bg-indigo-50"
+                  : dragOverIndex === index && dragIndex !== index
+                  ? "border-indigo-400 border-2 shadow-sm"
+                  : "border-gray-100"
+              }`}
+            >
               <div className="flex items-center justify-between">
-                <select
-                  value={field.type}
-                  onChange={(e) => updateField(field.id, { type: e.target.value as Field["type"] })}
-                  className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600"
-                >
-                  {FIELD_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 touch-none"
+                    title="Drag to reorder"
+                  >
+                    <GripVertical className="h-4 w-4" />
+                  </span>
+                  <select
+                    value={field.type}
+                    onChange={(e) => updateField(field.id, { type: e.target.value as Field["type"] })}
+                    className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600"
+                  >
+                    {FIELD_TYPES.map((t) => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                </div>
                 <button onClick={() => removeField(field.id)} className="text-gray-400 hover:text-red-500">
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -167,6 +300,23 @@ export default function IntakeFormEditor({ form }: Props) {
                 {t.label}
               </Button>
             ))}
+          </div>
+
+          <div className="pt-4 border-t border-gray-100">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Common Intake Sections</p>
+            <div className="grid grid-cols-2 gap-2">
+              {COMMON_FIELD_TEMPLATES.map((tpl) => (
+                <button
+                  key={tpl.label}
+                  type="button"
+                  onClick={() => addCommonFields(tpl)}
+                  className="text-left rounded-lg border border-gray-200 px-3 py-2 hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
+                >
+                  <p className="text-sm font-medium text-gray-800">{tpl.label}</p>
+                  <p className="text-xs text-gray-500">{tpl.description}</p>
+                </button>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>

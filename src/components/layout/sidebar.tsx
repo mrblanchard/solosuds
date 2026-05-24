@@ -36,7 +36,7 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex h-16 items-center gap-2 border-b border-gray-200 px-6">
         <Leaf className="h-7 w-7 text-indigo-600" />
-        <span className="text-xl font-bold text-gray-900">SoapSuds</span>
+        <span className="text-xl font-bold text-gray-900">SoloSuds</span>
       </div>
 
       {/* Navigation */}

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { validatePassword, PASSWORD_RULES } from "@/lib/utils";
 
 interface Props {
   user: { id: string; name: string | null; email: string | null; role: string };
@@ -22,6 +23,26 @@ export default function ProfileSettings({ user }: Props) {
   async function saveProfile() {
     setSaving(true);
     setMessage(null);
+
+    if (!name.trim()) {
+      setMessage("Name is required.");
+      setSaving(false);
+      return;
+    }
+    if (name.length > 200) {
+      setMessage("Name is too long.");
+      setSaving(false);
+      return;
+    }
+    if (newPassword) {
+      const pwError = validatePassword(newPassword);
+      if (pwError) {
+        setMessage(pwError);
+        setSaving(false);
+        return;
+      }
+    }
+
     const body: Record<string, string> = { name };
     if (newPassword) {
       body.currentPassword = currentPassword;
@@ -79,8 +100,9 @@ export default function ProfileSettings({ user }: Props) {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="mt-1"
-                placeholder="Minimum 8 characters"
+                placeholder="Minimum 12 characters"
               />
+              <p className="mt-1 text-xs text-gray-400">{PASSWORD_RULES}</p>
             </div>
           </div>
         </div>

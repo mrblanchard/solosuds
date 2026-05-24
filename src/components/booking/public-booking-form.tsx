@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { formatCurrency } from "@/lib/utils";
+import { formatPhone, stripPhone, titleCase, normalizeEmail } from "@/lib/utils";
 import { CheckCircle } from "lucide-react";
 
 interface Service {
   id: string;
   name: string;
-  duration: number;
+  durationMinutes: number;
   price: number | null;
   description: string | null;
 }
@@ -41,12 +43,28 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
       setError("Please fill in all required fields.");
       return;
     }
+    if (firstName.length > 100 || lastName.length > 100) {
+      setError("Name is too long.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if (phone && !/^[+]?[\d-]{7,20}$/.test(stripPhone(phone))) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+    if (notes.length > 5000) {
+      setError("Notes are too long.");
+      return;
+    }
 
     setError(null);
     setSubmitting(true);
 
     const startTime = new Date(`${date}T${time}`);
-    const endTime = new Date(startTime.getTime() + selectedService.duration * 60000);
+    const endTime = new Date(startTime.getTime() + selectedService.durationMinutes * 60000);
 
     const res = await fetch("/api/book", {
       method: "POST",
@@ -56,10 +74,10 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
         serviceId: selectedService.id,
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
-        clientFirstName: firstName,
-        clientLastName: lastName,
-        clientEmail: email,
-        clientPhone: phone,
+        clientFirstName: firstName.trim(),
+        clientLastName: lastName.trim(),
+        clientEmail: normalizeEmail(email),
+        clientPhone: stripPhone(phone),
         notes,
       }),
     });
@@ -120,7 +138,7 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
                       {service.description && (
                         <p className="mt-1 text-sm text-gray-500">{service.description}</p>
                       )}
-                      <p className="mt-1 text-xs text-gray-400">{service.duration} minutes</p>
+                      <p className="mt-1 text-xs text-gray-400">{service.durationMinutes} minutes</p>
                     </div>
                     {service.price != null && (
                       <span className="font-semibold text-indigo-600">
@@ -152,13 +170,16 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
           <CardContent className="space-y-4">
             <div className="rounded-lg bg-indigo-50 px-3 py-2 text-sm">
               <span className="font-medium text-indigo-900">{selectedService.name}</span>
-              <span className="text-indigo-600 ml-2">· {selectedService.duration} min</span>
+              <span className="text-indigo-600 ml-2">· {selectedService.durationMinutes} min</span>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Date <span className="text-red-500">*</span></Label>
-                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-1" />
+                <DateWheelPicker
+                  value={date}
+                  onChange={setDate}
+                />
               </div>
               <div>
                 <Label>Time <span className="text-red-500">*</span></Label>
@@ -169,22 +190,44 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>First name <span className="text-red-500">*</span></Label>
-                <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="mt-1" />
+                <Input
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  onBlur={(e) => setFirstName(titleCase(e.target.value.trim()))}
+                  className="mt-1"
+                />
               </div>
               <div>
                 <Label>Last name <span className="text-red-500">*</span></Label>
-                <Input value={lastName} onChange={(e) => setLastName(e.target.value)} className="mt-1" />
+                <Input
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  onBlur={(e) => setLastName(titleCase(e.target.value.trim()))}
+                  className="mt-1"
+                />
               </div>
             </div>
 
             <div>
               <Label>Email <span className="text-red-500">*</span></Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1" />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={(e) => setEmail(normalizeEmail(e.target.value))}
+                className="mt-1"
+              />
             </div>
 
             <div>
               <Label>Phone</Label>
-              <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1" />
+              <Input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(formatPhone(e.target.value))}
+                placeholder="802-258-0000"
+                className="mt-1"
+              />
             </div>
 
             <div>

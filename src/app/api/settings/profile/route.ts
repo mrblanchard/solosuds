@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { validatePassword } from "@/lib/utils";
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -21,15 +22,19 @@ export async function PATCH(request: NextRequest) {
       if (!currentPassword) {
         return NextResponse.json({ error: "Current password is required" }, { status: 400 });
       }
-      if (!user.password) {
+      if (!user.hashedPassword) {
         return NextResponse.json({ error: "Cannot set password for OAuth accounts" }, { status: 400 });
       }
-      const valid = await bcrypt.compare(currentPassword, user.password);
+      const valid = await bcrypt.compare(currentPassword, user.hashedPassword);
       if (!valid) {
         return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 });
       }
       if (newPassword.length < 8) {
         return NextResponse.json({ error: "New password must be at least 8 characters" }, { status: 400 });
+      }
+      const pwError = validatePassword(newPassword);
+      if (pwError) {
+        return NextResponse.json({ error: pwError }, { status: 400 });
       }
     }
 
@@ -39,7 +44,7 @@ export async function PATCH(request: NextRequest) {
       where: { id: session.user.id },
       data: {
         ...(name !== undefined && { name }),
-        ...(hashedPassword !== undefined && { password: hashedPassword }),
+        ...(hashedPassword !== undefined && { hashedPassword }),      
       },
       select: { id: true, name: true, email: true },
     });

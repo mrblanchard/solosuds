@@ -3,24 +3,26 @@ import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+const optionalPhone = z.string().regex(/^[+]?[\d\s()-]{7,20}$/, "Invalid phone number").or(z.literal("")).optional();
+
 const clientSchema = z.object({
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
-  email: z.string().email().optional().or(z.literal("")),
-  phone: z.string().optional(),
-  dateOfBirth: z.string().optional(),
-  gender: z.string().optional(),
-  pronouns: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  zip: z.string().optional(),
-  country: z.string().optional(),
-  emergencyName: z.string().optional(),
-  emergencyPhone: z.string().optional(),
-  referralSource: z.string().optional(),
-  internalNotes: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().min(1).max(100),
+  email: z.string().email().max(254).optional().or(z.literal("")),
+  phone: optionalPhone,
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).or(z.literal("")).optional(),
+  gender: z.string().max(50).optional(),
+  pronouns: z.string().max(50).optional(),
+  address: z.string().max(500).optional(),
+  city: z.string().max(100).optional(),
+  state: z.string().max(100).optional(),
+  zip: z.string().regex(/^[A-Za-z0-9\s-]{3,10}$/).or(z.literal("")).optional(),
+  country: z.string().max(100).optional(),
+  emergencyName: z.string().max(200).optional(),
+  emergencyPhone: optionalPhone,
+  referralSource: z.string().max(200).optional(),
+  internalNotes: z.string().max(5000).optional(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
 });
 
 export async function POST(req: Request) {

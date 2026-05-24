@@ -6,9 +6,9 @@ import { SessionProvider } from "next-auth/react";
 const nunito = Nunito({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
-  title: "SoapSuds — Clinical Documentation for Modern Practices",
+  title: "SoloSuds — Scheduling Unified Documentation Sync",
   description:
-    "SOAP notes, scheduling, client management, and billing for healthcare SMBs.",
+    "SOAP notes, scheduling, client management, and invoicing for SMBs.",
 };
 
 export default function RootLayout({

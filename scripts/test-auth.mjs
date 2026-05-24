@@ -7,7 +7,7 @@ console.log("Cookies:", csrfCookies);
 
 // Try to sign in, sending the cookies back
 const body = new URLSearchParams({
-  email: "admin@soapsuds.dev",
+  email: "admin@solosuds.dev",
   password: "Admin1234!",
   csrfToken,
   callbackUrl: "http://localhost:3000/dashboard",
