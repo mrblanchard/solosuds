@@ -1,4 +1,4 @@
-// First get the CSRF token + capture cookies
+﻿// First get the CSRF token + capture cookies
 const csrfRes = await fetch("http://localhost:3000/api/auth/csrf");
 const { csrfToken } = await csrfRes.json();
 const csrfCookies = csrfRes.headers.getSetCookie?.() ?? csrfRes.headers.get("set-cookie") ?? "";
@@ -7,7 +7,7 @@ console.log("Cookies:", csrfCookies);
 
 // Try to sign in, sending the cookies back
 const body = new URLSearchParams({
-  email: "admin@solosuds.dev",
+  email: "admin@SoloSuds.dev",
   password: "Admin1234!",
   csrfToken,
   callbackUrl: "http://localhost:3000/dashboard",

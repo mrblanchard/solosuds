@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 const schema = z.object({
   clientId: z.string().min(1, "Please select a client"),
@@ -21,13 +22,13 @@ type FormValues = z.infer<typeof schema>;
 
 interface NewNoteFormProps {
   clients: { id: string; firstName: string; lastName: string }[];
-  templates: { id: string; name: string }[];
+  templates: { id: string; name: string; isDefault: boolean }[];
   defaultClientId?: string;
   defaultAppointmentId?: string;
   duplicateFromId?: string;
 }
 
-export function NewNoteForm({
+export default function NewNoteForm({
   clients,
   templates,
   defaultClientId,
@@ -48,6 +49,7 @@ export function NewNoteForm({
     defaultValues: {
       clientId: defaultClientId ?? "",
       sessionDate: new Date().toISOString().split("T")[0],
+      templateId: templates.find((t) => t.isDefault)?.id ?? "",
       appointmentId: defaultAppointmentId ?? "",
     },
   });
@@ -75,6 +77,7 @@ export function NewNoteForm({
       <div>
         <Label htmlFor="clientId">Client *</Label>
         <select
+          id="clientId"
           {...register("clientId")}
           className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
@@ -93,6 +96,7 @@ export function NewNoteForm({
       <div>
         <Label htmlFor="sessionDate">Session Date *</Label>
         <DateWheelPicker
+          id="sessionDate"
           value={watch("sessionDate") ?? ""}
           onChange={(v) => setValue("sessionDate", v, { shouldValidate: true })}
         />
@@ -102,15 +106,21 @@ export function NewNoteForm({
       </div>
 
       <div>
-        <Label htmlFor="templateId">Template (optional)</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="templateId">Template (optional)</Label>
+          <Link href="/dashboard/notes/templates" className="text-xs text-indigo-600 hover:text-indigo-700">
+            Manage templates
+          </Link>
+        </div>
         <select
+          id="templateId"
           {...register("templateId")}
           className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">No template</option>
           {templates.map((t) => (
             <option key={t.id} value={t.id}>
-              {t.name}
+              {t.name}{t.isDefault ? " ★" : ""}
             </option>
           ))}
         </select>

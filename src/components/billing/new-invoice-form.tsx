@@ -167,6 +167,7 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
         </div>
 
         <div className="rounded-xl border border-gray-100 overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
@@ -182,6 +183,7 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
                 <tr key={i}>
                   <td className="px-3 py-2">
                     <Input
+                      aria-label={`Row ${i + 1} description`}
                       placeholder="Service description"
                       value={item.description}
                       onChange={(e) => updateItem(i, "description", e.target.value)}
@@ -191,6 +193,7 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
                   </td>
                   <td className="px-3 py-2">
                     <Input
+                      aria-label={`Row ${i + 1} CPT code`}
                       placeholder="99213"
                       value={item.cptCode}
                       onChange={(e) => updateItem(i, "cptCode", e.target.value)}
@@ -199,6 +202,7 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
                   </td>
                   <td className="px-3 py-2">
                     <Input
+                      aria-label={`Row ${i + 1} quantity`}
                       type="number"
                       min={1}
                       value={item.quantity}
@@ -210,6 +214,7 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
                     <div className="flex items-center">
                       <span className="text-gray-500 mr-1">$</span>
                       <Input
+                        aria-label={`Row ${i + 1} unit price`}
                         type="number"
                         min="0"
                         step="0.01"
@@ -225,6 +230,7 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
                     {lineItems.length > 1 && (
                       <button
                         type="button"
+                        aria-label={`Remove item ${i + 1}`}
                         onClick={() => removeItem(i)}
                         className="text-gray-400 hover:text-red-500 text-lg leading-none"
                       >
@@ -236,6 +242,7 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 
@@ -272,10 +279,11 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
               <span>${subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-500">Tax ($)</span>
+              <Label htmlFor="tax">Tax ($)</Label>
               <div className="flex items-center">
                 <span className="text-gray-500 mr-1">$</span>
                 <Input
+                  id="tax"
                   type="number"
                   min="0"
                   step="0.01"

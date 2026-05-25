@@ -243,7 +243,8 @@ export default function IntakeFormEditor({ form }: Props) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span
-                    className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 touch-none"
+                    className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 touch-none select-none"
+                    aria-label="Drag to reorder"
                     title="Drag to reorder"
                   >
                     <GripVertical className="h-4 w-4" />
@@ -321,7 +322,7 @@ export default function IntakeFormEditor({ form }: Props) {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end gap-3">
+      <div className="flex items-center justify-between gap-3">
         <Button variant="outline" onClick={() => router.push("/dashboard/intake")}>Back to list</Button>
         <Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save Changes"}</Button>
       </div>

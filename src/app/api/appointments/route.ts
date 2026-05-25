@@ -61,14 +61,11 @@ export async function POST(req: Request) {
   }
 
   let appointment;
-  if (!resolvedClientId) {
-    return NextResponse.json({ error: "A client is required to book an appointment" }, { status: 422 });
-  }
   try {
     appointment = await db.appointment.create({
       data: {
         organizationId: orgId,
-        clientId: resolvedClientId,
+        ...(resolvedClientId && { clientId: resolvedClientId }),
         practitionerId: resolvedPractitionerId,
         startTime: new Date(startTime),
         endTime: new Date(endTime),

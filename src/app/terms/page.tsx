@@ -1,16 +1,17 @@
-import Link from "next/link";
-import { Leaf } from "lucide-react";
+﻿import Link from "next/link";
+import { AppFooter } from "@/components/layout/app-footer";
+import { auth } from "@/lib/auth";
 
 export const metadata = { title: "Terms of Service — SoloSuds" };
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const session = await auth();
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-12">
+    <div className="min-h-dvh bg-gray-50 px-4 py-12">
       <div className="mx-auto max-w-3xl">
         <div className="mb-8 flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2 text-gray-900 hover:text-indigo-600">
-            <Leaf className="h-6 w-6 text-indigo-600" />
-            <span className="text-xl font-bold">SoloSuds</span>
+          <Link href="/" className="flex items-center">
+            <img src="/logo.png" alt="SoloSuds" className="h-10 w-auto" />
           </Link>
         </div>
 
@@ -51,8 +52,8 @@ export default function TermsPage() {
               <p>
                 You are responsible for maintaining the confidentiality of your login credentials and for all
                 activity that occurs under your account. You agree to notify us immediately at{" "}
-                <a href="mailto:support@solosuds.app" className="text-indigo-600 hover:underline">
-                  support@solosuds.app
+                <a href="mailto:support@solosuds.com" className="text-indigo-600 hover:underline">
+                  support@solosuds.com
                 </a>{" "}
                 of any unauthorized use of your account. We reserve the right to suspend or terminate accounts
                 that violate these Terms.
@@ -74,21 +75,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">5. HIPAA Compliance</h2>
-              <p>
-                You acknowledge that you may use the Service to store and transmit Protected Health Information
-                (PHI). By creating an account, you agree to enter into a Business Associate Agreement (BAA) with
-                SoloSuds as required by HIPAA. The BAA is incorporated by reference into these Terms and is
-                available at{" "}
-                <Link href="/hipaa" className="text-indigo-600 hover:underline">
-                  solosuds.app/hipaa
-                </Link>. You are solely responsible for ensuring your use of the Service complies with all
-                applicable federal and state healthcare privacy laws.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">6. Acceptable Use</h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-2">5. Acceptable Use</h2>
               <p>You agree not to:</p>
               <ul className="list-disc pl-5 mt-2 space-y-1">
                 <li>Use the Service for any unlawful purpose or in violation of any applicable regulations.</li>
@@ -96,12 +83,11 @@ export default function TermsPage() {
                 <li>Upload or transmit malware, viruses, or any malicious code.</li>
                 <li>Resell, sublicense, or redistribute access to the Service without our written consent.</li>
                 <li>Scrape, data-mine, or systematically extract data from the Service.</li>
-                <li>Use the Service to store or transmit PHI of patients who have not provided appropriate authorizations.</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">7. Data Ownership</h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-2">6. Data Ownership</h2>
               <p>
                 You retain full ownership of all data you input into the Service, including patient records and
                 clinical notes. You grant SoloSuds a limited license to process your data solely to provide and
@@ -110,7 +96,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">8. Data Export and Portability</h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-2">7. Data Export and Portability</h2>
               <p>
                 You may export your data at any time from your account settings. Upon cancellation, your data
                 will remain accessible for 30 days, after which it may be permanently deleted. We recommend
@@ -119,7 +105,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">9. Uptime and Service Availability</h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-2">8. Uptime and Service Availability</h2>
               <p>
                 We target 99.9% monthly uptime and will notify customers of planned maintenance in advance.
                 SoloSuds shall not be liable for interruptions due to circumstances beyond our reasonable control,
@@ -128,7 +114,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">10. Disclaimer of Warranties</h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-2">9. Disclaimer of Warranties</h2>
               <p>
                 The Service is provided &ldquo;as is&rdquo; and &ldquo;as available.&rdquo; SoloSuds makes no
                 warranties, express or implied, regarding the Service, including warranties of merchantability,
@@ -138,7 +124,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">11. Limitation of Liability</h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-2">10. Limitation of Liability</h2>
               <p>
                 To the fullest extent permitted by law, SoloSuds shall not be liable for any indirect,
                 incidental, special, consequential, or punitive damages, or for any loss of profits or data.
@@ -148,7 +134,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">12. Termination</h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-2">11. Termination</h2>
               <p>
                 You may cancel your account at any time from your account settings. We reserve the right to
                 suspend or terminate your account immediately for violation of these Terms. Upon termination,
@@ -158,7 +144,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">13. Governing Law</h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-2">12. Governing Law</h2>
               <p>
                 These Terms are governed by the laws of the State of Delaware, without regard to its conflict of
                 law provisions. Any disputes shall be resolved in the state or federal courts located in
@@ -167,7 +153,7 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">14. Changes to These Terms</h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-2">13. Changes to These Terms</h2>
               <p>
                 We may update these Terms from time to time. We will notify you of material changes by email or
                 in-app notice at least 14 days before they take effect. Continued use of the Service after the
@@ -179,9 +165,14 @@ export default function TermsPage() {
         </div>
 
         <p className="mt-6 text-center text-sm text-gray-400">
-          <Link href="/register" className="text-indigo-600 hover:underline">← Back to registration</Link>
+          {session?.user?.organizationId ? (
+            <Link href="/dashboard" className="text-indigo-600 hover:underline">← Back to dashboard</Link>
+          ) : (
+            <Link href="/register" className="text-indigo-600 hover:underline">← Back</Link>
+          )}
         </p>
       </div>
+      <AppFooter />
     </div>
   );
 }

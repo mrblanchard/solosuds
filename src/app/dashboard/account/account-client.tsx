@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Bell, CreditCard, Trash2, AlertTriangle, CheckCircle } from "lucide-react";
+import { Bell, CreditCard, Trash2, AlertTriangle, CheckCircle, PauseCircle, PlayCircle, ArrowUpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -21,6 +21,9 @@ interface Org {
   name: string;
   subscriptionStatus: string | null;
   stripeSubscriptionId: string | null;
+  stripeCustomerId: string | null;
+  subscriptionPeriodEnd: Date | null;
+  plan: string | null;
   createdAt: Date;
 }
 
@@ -35,6 +38,7 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "success" | "warn
   canceling: "warning",
   canceled: "destructive",
   past_due: "destructive",
+  paused: "secondary",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -43,6 +47,7 @@ const STATUS_LABEL: Record<string, string> = {
   canceling: "Canceling",
   canceled: "Canceled",
   past_due: "Past Due",
+  paused: "Paused",
 };
 
 export default function AccountClient({ user, org }: Props) {
@@ -55,6 +60,11 @@ export default function AccountClient({ user, org }: Props) {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelResult, setCancelResult] = useState<{ expiresAt: string } | null>(null);
 
+  // Pause subscription state
+  const [pauseLoading, setPauseLoading] = useState(false);
+  const [showPauseConfirm, setShowPauseConfirm] = useState(false);
+  const [pauseMonths, setPauseMonths] = useState(1);
+
   // Delete account state
   const [deleteStep, setDeleteStep] = useState(0); // 0=hidden, 1=warn1, 2=warn2, 3=confirm
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -63,6 +73,12 @@ export default function AccountClient({ user, org }: Props) {
 
   const status = org.subscriptionStatus ?? "unknown";
   const isOwnerOrAdmin = user.role === "OWNER" || user.role === "ADMIN";
+
+  // Trial days remaining
+  const TRIAL_DAYS = 14;
+  const trialDaysLeft = status === "trialing"
+    ? Math.max(0, Math.ceil((new Date(org.createdAt).getTime() + TRIAL_DAYS * 86400000 - Date.now()) / 86400000))
+    : 0;
 
   async function toggleNotifications(val: boolean) {
     setSavingNotif(true);
@@ -92,6 +108,30 @@ export default function AccountClient({ user, org }: Props) {
     router.refresh();
   }
 
+  async function pauseSubscription() {
+    setPauseLoading(true);
+    const res = await fetch("/api/account/subscription", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ months: pauseMonths }),
+    });
+    setPauseLoading(false);
+    if (res.ok) {
+      setShowPauseConfirm(false);
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error ?? "Failed to pause membership");
+    }
+  }
+
+  async function resumeSubscription() {
+    setPauseLoading(true);
+    const res = await fetch("/api/account/subscription", { method: "PUT" });
+    setPauseLoading(false);
+    if (res.ok) router.refresh();
+  }
+
   async function deleteAccount() {
     if (deleteConfirmText !== "DELETE MY ACCOUNT") return;
     setDeleteLoading(true);
@@ -114,7 +154,7 @@ export default function AccountClient({ user, org }: Props) {
       </div>
 
       {/* Profile info */}
-      <section className="rounded-2xl border border-gray-100 p-6 space-y-4">
+      <section className="rounded-2xl border border-gray-100 bg-white p-6 space-y-4">
         <h2 className="text-base font-semibold text-gray-900">Profile</h2>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
@@ -142,7 +182,7 @@ export default function AccountClient({ user, org }: Props) {
       </section>
 
       {/* Notification preferences */}
-      <section className="rounded-2xl border border-gray-100 p-6 space-y-4">
+      <section className="rounded-2xl border border-gray-100 bg-white p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Bell className="h-5 w-5 text-gray-400" />
           <h2 className="text-base font-semibold text-gray-900">Notifications</h2>
@@ -170,7 +210,7 @@ export default function AccountClient({ user, org }: Props) {
 
       {/* Subscription */}
       {isOwnerOrAdmin && (
-        <section className="rounded-2xl border border-gray-100 p-6 space-y-4">
+        <section className="rounded-2xl border border-gray-100 bg-white p-6 space-y-4">
           <div className="flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-gray-400" />
             <h2 className="text-base font-semibold text-gray-900">Subscription</h2>
@@ -183,11 +223,30 @@ export default function AccountClient({ user, org }: Props) {
                 <Badge variant={STATUS_VARIANT[status] ?? "secondary"}>
                   {STATUS_LABEL[status] ?? status}
                 </Badge>
+                {org.plan && (
+                  <span className="ml-2 text-xs text-gray-500 capitalize">({org.plan} plan)</span>
+                )}
               </p>
+              {status === "trialing" && (
+                <p className="text-sm text-amber-700 font-medium mt-1">
+                  {trialDaysLeft > 0
+                    ? `${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining in your free trial`
+                    : "Your free trial has ended"}
+                </p>
+              )}
               <p className="text-xs text-gray-500 mt-1">
                 Organization created {new Date(org.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
               </p>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/dashboard/account/plan")}
+              className="shrink-0 gap-1.5"
+            >
+              <ArrowUpCircle className="h-4 w-4" />
+              {status === "active" || status === "trialing" ? "Change plan" : "View plans"}
+            </Button>
           </div>
 
           {cancelResult && (
@@ -197,6 +256,22 @@ export default function AccountClient({ user, org }: Props) {
                 Your subscription has been canceled. You'll retain access until{" "}
                 <strong>{new Date(cancelResult.expiresAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</strong>. No refunds are issued for monthly subscriptions.
               </p>
+            </div>
+          )}
+
+          {status === "paused" && (
+            <div className="rounded-lg bg-gray-50 border border-gray-200 px-4 py-3 text-sm text-gray-700">
+              <div className="flex items-start gap-2">
+                <PauseCircle className="h-4 w-4 mt-0.5 shrink-0 text-gray-500" />
+                <div>
+                  <p className="font-medium">Your membership is paused.</p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {org.subscriptionPeriodEnd
+                      ? <>Billing resumes automatically on <strong>{new Date(org.subscriptionPeriodEnd).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</strong>. Resume early to regain access now.</>
+                      : "Resume anytime to regain access to your account."}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -215,15 +290,82 @@ export default function AccountClient({ user, org }: Props) {
             </div>
           )}
 
-          {status !== "canceling" && status !== "canceled" && org.stripeSubscriptionId && !showCancelConfirm && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowCancelConfirm(true)}
-              className="text-red-600 border-red-200 hover:bg-red-50"
-            >
-              Cancel subscription
-            </Button>
+          {status !== "canceling" && status !== "canceled" && status !== "paused" && org.stripeSubscriptionId && !showCancelConfirm && !showPauseConfirm && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPauseConfirm(true)}
+                className="text-gray-600 border-gray-200 hover:bg-gray-50"
+              >
+                <PauseCircle className="h-4 w-4 mr-1" />
+                Pause membership
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCancelConfirm(true)}
+                className="text-red-600 border-red-200 hover:bg-red-50"
+              >
+                Cancel membership
+              </Button>
+            </div>
+          )}
+
+          {showPauseConfirm && (
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-3">
+              <div className="flex items-start gap-2">
+                <PauseCircle className="h-5 w-5 text-gray-600 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-800">Pause your membership</p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Your account will be inaccessible during the pause. Your data is preserved. Billing stops and resumes when you reactivate.
+                  </p>
+                  <div className="mt-3">
+                    <label className="text-xs font-medium text-gray-700 block mb-1.5">How long would you like to pause?</label>
+                    <div className="flex flex-wrap gap-2">
+                      {[1, 2, 3, 6, 12].map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => setPauseMonths(m)}
+                          className={`px-3 py-1 rounded-full text-xs border transition-colors ${
+                            pauseMonths === m
+                              ? "bg-gray-800 text-white border-gray-800"
+                              : "bg-white text-gray-600 border-gray-300 hover:border-gray-500"
+                          }`}
+                        >
+                          {m === 12 ? "1 year" : `${m} month${m > 1 ? "s" : ""}`}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Paused until{" "}
+                      <strong>
+                        {new Date(Date.now() + pauseMonths * 30 * 86400000).toLocaleDateString("en-US", {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </strong>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => setShowPauseConfirm(false)} disabled={pauseLoading}>
+                  Keep active
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={pauseSubscription}
+                  disabled={pauseLoading}
+                  className="bg-gray-700 hover:bg-gray-800 text-white"
+                >
+                  {pauseLoading ? "Pausing…" : `Pause for ${pauseMonths === 12 ? "1 year" : `${pauseMonths} month${pauseMonths > 1 ? "s" : ""}`}`}
+                </Button>
+              </div>
+            </div>
           )}
 
           {showCancelConfirm && (
@@ -257,7 +399,7 @@ export default function AccountClient({ user, org }: Props) {
 
       {/* Delete account */}
       {user.role === "OWNER" && (
-        <section className="rounded-2xl border border-red-100 p-6 space-y-4">
+        <section className="rounded-2xl border border-red-100 bg-white p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Trash2 className="h-5 w-5 text-red-400" />
             <h2 className="text-base font-semibold text-red-700">Danger Zone</h2>

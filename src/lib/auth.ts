@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { createHmac } from "crypto";
 // UserRole will be typed inline as string until prisma generate is run
 
 const prismaAdapter = PrismaAdapter(db);
@@ -74,9 +75,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        cfToken: { label: "CF Token", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
+
+        // Check for post-registration bypass token (internal:expiry:sig)
+        const cfToken = credentials.cfToken as string | undefined;
+        if (cfToken?.startsWith("internal:")) {
+          const parts = cfToken.split(":");
+          if (parts.length !== 3) return null;
+          const [, expiry, sig] = parts;
+          const secret = (process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET)!;
+          const expectedSig = createHmac("sha256", secret)
+            .update(`${credentials.email}:${expiry}`)
+            .digest("hex");
+          const valid = sig === expectedSig && Date.now() < parseInt(expiry);
+          if (!valid) return null;
+          // Token is valid — skip CAPTCHA and proceed to password check
+        } else {
+          // Normal login flow — verify Turnstile CAPTCHA
+          const { verifyTurnstile } = await import("@/lib/turnstile");
+          const captchaOk = await verifyTurnstile(cfToken);
+          if (!captchaOk) return null;
+        }
 
         const user = await db.user.findUnique({
           where: { email: credentials.email as string },
@@ -117,16 +139,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     async jwt({ token, user, trigger }) {
-      if (user || trigger === "signIn" || trigger === "update" || !token.organizationId) {
+      // Only re-query the DB on actual sign-in/sign-up events or explicit updates,
+      // NOT on every request. The JWT is cached — this is called during token
+      // verification server-side, so an unnecessary DB call here costs ~300ms per page.
+      const needsRefresh = !!user || trigger === "signIn" || trigger === "update" || !token.role;
+      if (needsRefresh) {
         const id = (user?.id ?? token.sub) as string;
         if (id) {
           const dbUser = await db.user.findUnique({
             where: { id },
-            select: { role: true, organizationId: true },
+            select: {
+              role: true,
+              organizationId: true,
+              organization: { select: { practiceType: true } },
+            },
           });
           if (dbUser) {
             token.role = dbUser.role;
-            token.organizationId = dbUser.organizationId;
+            token.organizationId = dbUser.organizationId ?? undefined;
+            token.practiceType = dbUser.organization?.practiceType ?? undefined;
           }
         }
       }
@@ -135,8 +166,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub!;
-        session.user.role = token.role as string;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        session.user.role = token.role as any;
         session.user.organizationId = token.organizationId as string;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        session.user.practiceType = token.practiceType as any;
       }
       return session;
     },

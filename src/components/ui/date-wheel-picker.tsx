@@ -40,12 +40,14 @@ interface DateWheelPickerProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  id?: string;
 }
 
 export function DateWheelPicker({
   value,
   onChange,
   placeholder = "Select date",
+  id,
 }: DateWheelPickerProps) {
   const [open, setOpen] = useState(false);
   const [pickerVal, setPickerVal] = useState<PickerValue>(() =>
@@ -97,6 +99,7 @@ export function DateWheelPicker({
   return (
     <>
       <button
+        id={id}
         type="button"
         onClick={handleOpen}
         className="flex w-full items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-left focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -109,11 +112,11 @@ export function DateWheelPicker({
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50"
+          className="fixed inset-x-0 top-0 h-dvh z-50 flex items-end justify-center bg-black/50 sm:items-start sm:pt-[200px]"
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-sm rounded-t-2xl bg-white"
+            className="w-full max-w-sm rounded-t-2xl bg-white sm:rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}

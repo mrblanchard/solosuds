@@ -95,7 +95,7 @@ export default function NotificationsPanel() {
     <div className="relative" ref={panelRef}>
       <button
         onClick={handleOpen}
-        className="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 transition-colors"
+        className="relative min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
@@ -107,7 +107,7 @@ export default function NotificationsPanel() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-96 rounded-2xl border border-gray-100 bg-white shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-[min(24rem,calc(100vw-1rem))] rounded-2xl border border-gray-100 bg-white shadow-xl z-50 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>

@@ -1,13 +1,33 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Search } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Search, Menu } from "lucide-react";
 import SearchModal from "@/components/layout/search-modal";
 import NotificationsPanel from "@/components/layout/notifications-panel";
 import AccountMenu from "@/components/layout/account-menu";
 
-export function Topbar() {
+interface TopbarProps {
+  onMenuClick?: () => void;
+  branding?: { name: string; logoUrl: string | null; primaryColor: string | null } | null;
+}
+
+const PRACTICE_LABELS: Record<string, string> = {
+  THERAPY: "Therapy & Bodywork",
+  SALON:   "Salon & Beauty",
+  MEDICAL: "Medical Practice",
+  FITNESS: "Fitness & Wellness",
+  OTHER:   "General Practice",
+};
+
+export function Topbar({ onMenuClick, branding }: TopbarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const { data: session } = useSession();
+  const practiceType = session?.user?.practiceType;
+
+  // Use org name if available, fall back to practice type label
+  const displayLabel = branding?.name
+    ?? (practiceType ? PRACTICE_LABELS[practiceType] : undefined);
 
   // ⌘K / Ctrl+K opens search
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -24,7 +44,26 @@ export function Topbar() {
 
   return (
     <>
-      <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
+      <header className="flex h-16 items-center bg-white px-4 sm:px-6 border-b-primary">
+        {/* Hamburger - mobile only */}
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden mr-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          aria-label="Open menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+
+        {/* Practice / org name */}
+        {displayLabel && (
+          <span
+            className="text-xl font-bold text-indigo-600 truncate"
+            style={branding?.primaryColor ? { color: branding.primaryColor } : undefined}
+          >
+            {displayLabel}
+          </span>
+        )}
+
         <div className="flex items-center gap-4 ml-auto">
           {/* Search trigger */}
           <button

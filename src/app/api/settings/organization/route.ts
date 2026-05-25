@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, phone, email, address, website, timezone } = body;
+    const { name, phone, email, address, website, timezone, practiceType, noteType, defaultIntakeFormId, primaryColor, logoUrl, faviconUrl, brandFont, emailSignature, replyToEmail } = body;
 
     if (name !== undefined && name.trim() === "") {
       return NextResponse.json({ error: "Organization name cannot be empty" }, { status: 400 });
@@ -27,8 +27,23 @@ export async function PATCH(request: NextRequest) {
     if (email !== undefined && email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
     }
+    if (replyToEmail !== undefined && replyToEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyToEmail)) {
+      return NextResponse.json({ error: "Invalid reply-to email address" }, { status: 400 });
+    }
     if (phone !== undefined && phone && !/^[+]?[\d\s()-]{7,20}$/.test(phone)) {
       return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
+    }
+    if (primaryColor !== undefined && primaryColor && !/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(primaryColor)) {
+      return NextResponse.json({ error: "Invalid color — use a hex value like #5a4f8a" }, { status: 400 });
+    }
+
+    const validPracticeTypes = ["THERAPY", "SALON", "MEDICAL", "FITNESS", "OTHER"];
+    if (practiceType !== undefined && !validPracticeTypes.includes(practiceType)) {
+      return NextResponse.json({ error: "Invalid practice type" }, { status: 400 });
+    }
+
+    if (noteType !== undefined && noteType !== "SOAP" && noteType !== "SESSION") {
+      return NextResponse.json({ error: "Invalid note type" }, { status: 400 });
     }
 
     const updated = await db.organization.update({
@@ -40,6 +55,15 @@ export async function PATCH(request: NextRequest) {
         ...(address !== undefined && { address: address || null }),
         ...(website !== undefined && { website: website || null }),
         ...(timezone !== undefined && { timezone: timezone || null }),
+        ...(practiceType !== undefined && { practiceType }),
+        ...(noteType !== undefined && { noteType }),
+        ...(defaultIntakeFormId !== undefined && { defaultIntakeFormId: defaultIntakeFormId || null }),
+        ...(primaryColor !== undefined && { primaryColor: primaryColor || null }),
+        ...(logoUrl !== undefined && { logoUrl: logoUrl || null }),
+        ...(faviconUrl !== undefined && { faviconUrl: faviconUrl || null }),
+        ...(brandFont !== undefined && { brandFont: brandFont || null }),
+        ...(emailSignature !== undefined && { emailSignature: emailSignature || null }),
+        ...(replyToEmail !== undefined && { replyToEmail: replyToEmail || null }),
       },
     });
 

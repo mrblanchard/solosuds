@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+﻿import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import * as dotenv from "dotenv";
@@ -10,7 +10,7 @@ const db = new PrismaClient({ adapter } as any);
 
 async function main() {
   const user = await db.user.findUnique({
-    where: { email: "admin@solosuds.dev" },
+    where: { email: "admin@SoloSuds.dev" },
     select: { id: true, email: true, hashedPassword: true, role: true, organizationId: true },
   });
 

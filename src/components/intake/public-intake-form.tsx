@@ -11,19 +11,29 @@ import { formatPhone, normalizeEmail } from "@/lib/utils";
 
 interface Field {
   id: string;
-  type: "text" | "textarea" | "select" | "checkbox" | "date" | "heading" | "phone" | "email";
+  type: "text" | "textarea" | "select" | "checkbox" | "date" | "heading" | "phone" | "email" | "info";
   label: string;
   placeholder?: string;
   required: boolean;
   options?: string;
+  /** Rendered as formatted prose for type "info". Supports **bold** via <strong> tags. */
+  content?: InfoBlock[];
+}
+
+interface InfoBlock {
+  heading?: string;
+  body: string;
 }
 
 interface Props {
   formId: string;
   fields: Field[];
+  clientId?: string;
+  isEmailConsent?: boolean;
+  practiceName?: string;
 }
 
-export default function PublicIntakeForm({ formId, fields }: Props) {
+export default function PublicIntakeForm({ formId, fields, clientId, isEmailConsent, practiceName }: Props) {
   const [values, setValues] = useState<Record<string, string | boolean>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -50,7 +60,7 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
     const res = await fetch(`/api/intake-forms/${formId}/submit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ responses: values }),
+      body: JSON.stringify({ responses: values, clientId: clientId || undefined }),
     });
     setSubmitting(false);
 
@@ -66,9 +76,13 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
     return (
       <div className="rounded-2xl bg-white border border-gray-100 p-12 text-center shadow-sm">
         <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
-        <h2 className="text-xl font-semibold text-gray-900">Form Submitted!</h2>
+        <h2 className="text-xl font-semibold text-gray-900">
+          {isEmailConsent ? "Consent Recorded!" : "Form Submitted!"}
+        </h2>
         <p className="mt-2 text-sm text-gray-500">
-          Thank you. We&apos;ll see you at your appointment.
+          {isEmailConsent
+            ? `Thank you. Your consent has been recorded. ${practiceName ?? "Your provider"} can now communicate with you via email.`
+            : "Thank you. We\u2019ll see you at your appointment."}
         </p>
       </div>
     );
@@ -91,16 +105,33 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
           );
         }
 
+        if (field.type === "info") {
+          return (
+            <div key={field.id} className="rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 space-y-3 text-sm text-gray-700">
+              <p className="font-semibold text-amber-800">{field.label}</p>
+              {(field.content ?? []).map((block, i) => (
+                <div key={i}>
+                  {block.heading && (
+                    <p className="font-semibold text-gray-800 mb-0.5">{block.heading}</p>
+                  )}
+                  <p className="leading-relaxed">{block.body}</p>
+                </div>
+              ))}
+            </div>
+          );
+        }
+
         const selectOptions = field.options?.split("\n").filter(Boolean) ?? [];
 
         return (
           <div key={field.id}>
-            <Label>
+            <Label htmlFor={field.id}>
               {field.label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </Label>
             {field.type === "text" && (
               <Input
+                id={field.id}
                 value={(values[field.id] as string) ?? ""}
                 onChange={(e) => set(field.id, e.target.value)}
                 placeholder={field.placeholder}
@@ -109,6 +140,7 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
             )}
             {field.type === "phone" && (
               <Input
+                id={field.id}
                 type="tel"
                 value={(values[field.id] as string) ?? ""}
                 onChange={(e) => set(field.id, formatPhone(e.target.value))}
@@ -118,6 +150,7 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
             )}
             {field.type === "email" && (
               <Input
+                id={field.id}
                 type="email"
                 value={(values[field.id] as string) ?? ""}
                 onChange={(e) => set(field.id, e.target.value)}
@@ -128,6 +161,7 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
             )}
             {field.type === "textarea" && (
               <Textarea
+                id={field.id}
                 value={(values[field.id] as string) ?? ""}
                 onChange={(e) => set(field.id, e.target.value)}
                 placeholder={field.placeholder}
@@ -136,12 +170,14 @@ export default function PublicIntakeForm({ formId, fields }: Props) {
             )}
             {field.type === "date" && (
               <DateWheelPicker
+                id={field.id}
                 value={(values[field.id] as string) ?? ""}
                 onChange={(v) => set(field.id, v)}
               />
             )}
             {field.type === "select" && (
               <select
+                id={field.id}
                 value={(values[field.id] as string) ?? ""}
                 onChange={(e) => set(field.id, e.target.value)}
                 className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"

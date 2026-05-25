@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -9,8 +9,10 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Leaf, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { AppFooter } from "@/components/layout/app-footer";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const schema = z.object({
   email: z.string().email("Invalid email address").max(254, "Email is too long"),
@@ -40,6 +42,8 @@ function LoginForm() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [urlErrorMessage, setUrlErrorMessage] = useState<string | null>(null);
+  const [cfToken, setCfToken] = useState<string | null>(null);
+  const turnstileRef = useRef<{ reset: () => void } | null>(null);
 
   // Read URL error only after mount to avoid server/client hydration mismatch
   useEffect(() => {
@@ -73,11 +77,15 @@ function LoginForm() {
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
+        cfToken: cfToken ?? "",
         redirect: false,
       });
 
       if (result?.error) {
         setFormError("Invalid email or password.");
+        // Reset CAPTCHA so user must solve it again
+        turnstileRef.current?.reset();
+        setCfToken(null);
         return;
       }
 
@@ -94,16 +102,14 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md">
+    <div className="flex min-h-dvh flex-col bg-gray-50">
+      <div className="flex flex-1 items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 shadow-lg mb-3">
-            <Leaf className="h-8 w-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">SoloSuds</h1>
+          <img src="/logo.png" alt="SoloSuds" className="h-15 w-auto mb-2" />
           <p className="mt-1 text-sm text-gray-500">
-            Clinical documentation made simple
+            Care without the chaos
           </p>
         </div>
 
@@ -193,7 +199,22 @@ function LoginForm() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                onSuccess={(token) => setCfToken(token)}
+                onExpire={() => setCfToken(null)}
+                onError={() => setCfToken(null)}
+                options={{ theme: "light" }}
+              />
+            )}
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || (!!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !cfToken)}
+            >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
@@ -213,16 +234,18 @@ function LoginForm() {
         </div>
 
         <p className="mt-4 text-center text-xs text-gray-400">
-          HIPAA-compliant · End-to-end encrypted · SOC 2 Type II
+          Your data is private and secure
         </p>
+        </div>
       </div>
+      <AppFooter />
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-gray-50" />}>
+    <Suspense fallback={<div className="flex min-h-dvh items-center justify-center bg-gray-50" />}>
       <LoginForm />
     </Suspense>
   );

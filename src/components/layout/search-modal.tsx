@@ -117,7 +117,7 @@ export default function SearchModal({ open, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4"
+      className="fixed inset-x-0 top-0 h-dvh z-50 flex items-start justify-center pt-20 px-4"
       onClick={onClose}
     >
       {/* Backdrop */}

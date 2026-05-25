@@ -44,21 +44,40 @@ model VerificationToken {
 
 // ─── Organizations / Practices ───────────────────────────────────────────────
 
+enum PracticeType {
+  THERAPY   // Massage, PT, chiro, body work — SOAP notes heavy
+  SALON     // Hair, nail, beauty — booking & payments heavy
+  MEDICAL   // Doctors, clinics — HIPAA & intake heavy
+  FITNESS   // Personal training, yoga, pilates — scheduling heavy
+  LESSONS   // Music, tutoring, coaching — scheduling heavy, minimal notes
+  OTHER     // Generic
+}
+
 model Organization {
-  id                   String    @id @default(cuid())
+  id                   String       @id @default(cuid())
   name                 String
-  slug                 String    @unique
+  slug                 String       @unique
+  practiceType         PracticeType @default(OTHER)
   phone                String?
   email                String?
   address              String?
   website              String?
   logoUrl              String?
+  faviconUrl           String?
   primaryColor         String?
+  brandFont            String?   @default("Inter")
+  emailSignature       String?
+  replyToEmail         String?
   timezone             String    @default("America/New_York")
+  noteType             String    @default("SOAP")   // SOAP | SESSION
+  defaultIntakeFormId  String?
+  inviteCode           String?   @unique
   hipaaAcceptedAt      DateTime?
   stripeCustomerId     String?   @unique
   stripeSubscriptionId String?   @unique
   subscriptionStatus   String?   @default("trialing")
+  subscriptionPeriodEnd DateTime?
+  plan                 String?   @default("solo")  // solo | practice | clinic
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
@@ -72,6 +91,9 @@ model Organization {
   services      Service[]
   invoices      Invoice[]
   messages      Message[]
+  tasks         Task[]
+  emails        Email[]
+  documents     Document[]
 }
 
 // ─── Users / Practitioners ────────────────────────────────────────────────────
@@ -101,6 +123,8 @@ model User {
   outlookCalendarToken Json?
   notificationsEnabled Boolean       @default(true)
   notificationsSeenAt  DateTime?
+  smsForwardNumber     String?
+  theme                String        @default("lavender")
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
 
@@ -109,6 +133,8 @@ model User {
   appointments Appointment[]
   soapNotes    SoapNote[]
   sentMessages Message[]     @relation("SentMessages")
+  sentEmails   Email[]       @relation("SentEmails")
+  tasks        Task[]
 }
 
 // ─── Clients / Patients ───────────────────────────────────────────────────────
@@ -117,6 +143,13 @@ enum ClientStatus {
   ACTIVE
   INACTIVE
   ARCHIVED
+}
+
+enum EmailConsentStatus {
+  NONE      // No consent form sent yet
+  PENDING   // Consent form sent, awaiting client response
+  CONSENTED // Client has signed the consent form
+  REVOKED   // Practitioner has revoked email access
 }
 
 model Client {
@@ -139,10 +172,11 @@ model Client {
   emergencyPhone   String?
   referralSource   String?
   internalNotes    String?      @db.Text
-  status           ClientStatus @default(ACTIVE)
-  stripeCustomerId String?      @unique
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  status              ClientStatus       @default(ACTIVE)
+  emailConsentStatus  EmailConsentStatus @default(NONE)
+  stripeCustomerId    String?            @unique
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
   appointments      Appointment[]
   soapNotes         SoapNote[]
@@ -150,6 +184,8 @@ model Client {
   invoices          Invoice[]
   messages          Message[]
   tags              ClientTag[]
+  emails            Email[]
+  documents         Document[]
 }
 
 model ClientTag {
@@ -203,10 +239,10 @@ model Appointment {
   id             String            @id @default(cuid())
   organizationId String
   organization   Organization      @relation(fields: [organizationId], references: [id])
-  clientId       String
-  client         Client            @relation(fields: [clientId], references: [id])
-  practitionerId String
-  practitioner   User              @relation(fields: [practitionerId], references: [id])
+  clientId       String?
+  client         Client?           @relation(fields: [clientId], references: [id])
+  practitionerId String?
+  practitioner   User?             @relation(fields: [practitionerId], references: [id])
   serviceId      String?
   service        Service?          @relation(fields: [serviceId], references: [id])
   roomId         String?
@@ -248,11 +284,15 @@ model SoapNote {
   template       NoteTemplate? @relation(fields: [templateId], references: [id])
   sessionDate    DateTime
   status         NoteStatus    @default(DRAFT)
+  noteFormat     String        @default("SOAP") // SOAP | SESSION
 
   subjective String? @db.Text
   objective  String? @db.Text
   assessment String? @db.Text
   plan       String? @db.Text
+
+  // Session notes fields (alternative to SOAP)
+  sessionNotes String? @db.Text
 
   transcript    String?  @db.Text
   aiSuggestions Json?
@@ -296,6 +336,8 @@ model IntakeForm {
   description    String?
   fields         Json
   isActive       Boolean      @default(true)
+  isEmailConsent Boolean      @default(false)
+  sortOrder      Int          @default(0)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -309,6 +351,7 @@ model IntakeSubmission {
   clientId    String?
   client      Client?    @relation(fields: [clientId], references: [id])
   responses   Json
+  isProtected Boolean    @default(false)
   submittedAt DateTime   @default(now())
   createdAt   DateTime   @default(now())
 }
@@ -361,4 +404,111 @@ model Message {
   status         String       @default("SENT")     // SENT | DELIVERED | FAILED
   externalId     String?
   createdAt      DateTime     @default(now())
+}
+
+// ─── Emails ───────────────────────────────────────────────────────────────────
+
+model Email {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  senderId       String?
+  sender         User?        @relation("SentEmails", fields: [senderId], references: [id])
+  clientId       String?
+  client         Client?      @relation(fields: [clientId], references: [id])
+  direction      String       @default("OUTBOUND") // OUTBOUND | INBOUND
+  fromEmail      String?
+  toEmail        String
+  subject        String
+  htmlBody       String       @db.Text
+  textBody       String?      @db.Text
+  attachments    Json?        // [{filename, contentType, size}]
+  resendId       String?
+  read           Boolean      @default(false)
+  archived       Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+}
+
+// ─── Tasks ────────────────────────────────────────────────────────────────────
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskRecurrence {
+  NONE
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+model Task {
+  id             String          @id @default(cuid())
+  organizationId String
+  organization   Organization    @relation(fields: [organizationId], references: [id])
+  assigneeId     String?
+  assignee       User?           @relation(fields: [assigneeId], references: [id])
+  title          String
+  description    String?         @db.Text
+  status         TaskStatus      @default(TODO)
+  priority       TaskPriority    @default(MEDIUM)
+  recurrence     TaskRecurrence  @default(NONE)
+  dueDate        DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+// ─── Document Portal ──────────────────────────────────────────────────────────
+
+enum DocumentDirection {
+  CLIENT_TO_PRACTICE  // client uploaded to practice
+  PRACTICE_TO_CLIENT  // practice shared with client
+}
+
+model Document {
+  id             String            @id @default(cuid())
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id])
+  clientId       String?
+  client         Client?           @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  name           String
+  mimeType       String
+  sizeBytes      Int
+  storageKey     String            // R2 object key
+  direction      DocumentDirection @default(CLIENT_TO_PRACTICE)
+  uploadedBy     String?           // "client" | User.id
+  createdAt      DateTime          @default(now())
+
+  auditLogs DocumentAuditLog[]
+}
+
+model DocumentAuditLog {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  action     String   // "uploaded" | "downloaded" | "deleted" | "shared"
+  actor      String   // "client" | userId
+  ip         String?
+  at         DateTime @default(now())
+}
+
+model ClientPortalOTP {
+  id        String   @id @default(cuid())
+  clientId  String
+  orgId     String
+  codeHash  String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

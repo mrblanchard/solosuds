@@ -173,24 +173,27 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
               <span className="text-indigo-600 ml-2">· {selectedService.durationMinutes} min</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={(e) => { e.preventDefault(); submit(); }} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label>Date <span className="text-red-500">*</span></Label>
+                <Label htmlFor="bookingDate">Date <span className="text-red-500">*</span></Label>
                 <DateWheelPicker
+                  id="bookingDate"
                   value={date}
                   onChange={setDate}
                 />
               </div>
               <div>
-                <Label>Time <span className="text-red-500">*</span></Label>
-                <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="mt-1" />
+                <Label htmlFor="bookingTime">Time <span className="text-red-500">*</span></Label>
+                <Input id="bookingTime" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="mt-1" />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label>First name <span className="text-red-500">*</span></Label>
+                <Label htmlFor="firstName">First name <span className="text-red-500">*</span></Label>
                 <Input
+                  id="firstName"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   onBlur={(e) => setFirstName(titleCase(e.target.value.trim()))}
@@ -198,8 +201,9 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
                 />
               </div>
               <div>
-                <Label>Last name <span className="text-red-500">*</span></Label>
+                <Label htmlFor="lastName">Last name <span className="text-red-500">*</span></Label>
                 <Input
+                  id="lastName"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   onBlur={(e) => setLastName(titleCase(e.target.value.trim()))}
@@ -209,8 +213,9 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
             </div>
 
             <div>
-              <Label>Email <span className="text-red-500">*</span></Label>
+              <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
               <Input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -220,8 +225,9 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
             </div>
 
             <div>
-              <Label>Phone</Label>
+              <Label htmlFor="phone">Phone</Label>
               <Input
+                id="phone"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(formatPhone(e.target.value))}
@@ -231,13 +237,14 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
             </div>
 
             <div>
-              <Label>Notes for the practitioner</Label>
-              <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" className="mt-1" />
+              <Label htmlFor="bookingNotes">Notes for the practitioner</Label>
+              <Input id="bookingNotes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" className="mt-1" />
             </div>
 
-            <Button onClick={submit} className="w-full" disabled={submitting}>
+            <Button type="submit" className="w-full" disabled={submitting}>
               {submitting ? "Booking…" : "Confirm Booking"}
             </Button>
+            </form>
           </CardContent>
         </Card>
       )}

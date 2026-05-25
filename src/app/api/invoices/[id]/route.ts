@@ -54,7 +54,7 @@ export async function GET(
 
     const invoice = await db.invoice.findFirst({
       where: { id, organizationId: session.user.organizationId },
-      include: { client: true, appointment: true },
+      include: { client: true, soapNote: true, appointment: true },
     });
 
     if (!invoice) {

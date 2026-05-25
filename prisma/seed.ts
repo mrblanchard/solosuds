@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+﻿import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import * as dotenv from "dotenv";
@@ -9,14 +9,14 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const db = new PrismaClient({ adapter } as any);
 
 async function main() {
-  const email = "admin@solosuds.dev";
+  const email = "admin@SoloSuds.dev";
   const password = "Admin1234!";
   const orgName = "SoloSuds Demo Practice";
 
   // Create org
   const org = await db.organization.upsert({
-    where: { slug: "solosuds-demo" },
-    create: { id: "demo-org", name: orgName, slug: "solosuds-demo" },
+    where: { slug: "SoloSuds-demo" },
+    create: { id: "demo-org", name: orgName, slug: "SoloSuds-demo" },
     update: { name: orgName },
   });
 

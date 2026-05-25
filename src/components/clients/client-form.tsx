@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { AddressAutocomplete, type ParsedAddress } from "@/components/ui/address-autocomplete";
+import { Loader2 } from "lucide-react";
 import { formatPhone, stripPhone, titleCase, normalizeEmail, formatZip, normalizeWhitespace } from "@/lib/utils";
 
 const optionalPhone = z.string().regex(/^[+]?[\d-]{7,20}$/, "Invalid phone number").or(z.literal("")).optional();
@@ -42,7 +43,7 @@ interface ClientFormProps {
   clientId?: string;
 }
 
-export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
+export default function ClientForm({ defaultValues, clientId }: ClientFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -96,34 +97,37 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
           <CardTitle>Personal Information</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="First Name *" error={errors.firstName?.message}>
+          <FormField label="First Name *" fieldId="firstName" error={errors.firstName?.message}>
             <Input
+              id="firstName"
               {...register("firstName")}
               placeholder="Jane"
               onBlur={(e) => setValue("firstName", titleCase(e.target.value.trim()))}
             />
           </FormField>
-          <FormField label="Last Name *" error={errors.lastName?.message}>
+          <FormField label="Last Name *" fieldId="lastName" error={errors.lastName?.message}>
             <Input
+              id="lastName"
               {...register("lastName")}
               placeholder="Smith"
               onBlur={(e) => setValue("lastName", titleCase(e.target.value.trim()))}
             />
           </FormField>
-          <FormField label="Date of Birth" error={errors.dateOfBirth?.message}>
+          <FormField label="Date of Birth" fieldId="dob" error={errors.dateOfBirth?.message}>
             <DateWheelPicker
+              id="dob"
               value={watch("dateOfBirth") ?? ""}
               onChange={(v) => setValue("dateOfBirth", v, { shouldValidate: true })}
             />
           </FormField>
-          <FormField label="Gender">
-            <Input {...register("gender")} placeholder="e.g. Female, Male, Non-binary" />
+          <FormField label="Gender" fieldId="gender">
+            <Input id="gender" {...register("gender")} placeholder="e.g. Female, Male, Non-binary" />
           </FormField>
-          <FormField label="Pronouns">
-            <Input {...register("pronouns")} placeholder="e.g. she/her, they/them" />
+          <FormField label="Pronouns" fieldId="pronouns">
+            <Input id="pronouns" {...register("pronouns")} placeholder="e.g. she/her, they/them" />
           </FormField>
-          <FormField label="Referral Source">
-            <Input {...register("referralSource")} placeholder="e.g. Google, Friend" />
+          <FormField label="Referral Source" fieldId="referralSource">
+            <Input id="referralSource" {...register("referralSource")} placeholder="e.g. Google, Friend" />
           </FormField>
         </CardContent>
       </Card>
@@ -134,24 +138,28 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
           <CardTitle>Contact Information</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="Email" error={errors.email?.message}>
+          <FormField label="Email" fieldId="email" error={errors.email?.message}>
             <Input
+              id="email"
               type="email"
               {...register("email")}
               placeholder="jane@example.com"
               onBlur={(e) => setValue("email", normalizeEmail(e.target.value))}
             />
           </FormField>
-          <FormField label="Phone">
+          <FormField label="Phone" fieldId="phone">
             <Input
+              id="phone"
               type="tel"
+              name="phone"
               value={watch("phone") ?? ""}
               onChange={(e) => setValue("phone", formatPhone(e.target.value))}
               placeholder="802-258-0000"
             />
           </FormField>
-          <FormField label="Address" className="sm:col-span-2">
+          <FormField label="Address" fieldId="address" className="sm:col-span-2">
             <AddressAutocomplete
+              id="address"
               value={watch("address") ?? ""}
               onChange={(v) => setValue("address", v)}
               onSelect={(parsed: ParsedAddress) => {
@@ -164,21 +172,23 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
               placeholder="Start typing an address…"
             />
           </FormField>
-          <FormField label="City">
-            <Input {...register("city")} placeholder="New York" />
+          <FormField label="City" fieldId="city">
+            <Input id="city" {...register("city")} placeholder="New York" />
           </FormField>
-          <FormField label="State">
-            <Input {...register("state")} placeholder="NY" />
+          <FormField label="State" fieldId="state">
+            <Input id="state" {...register("state")} placeholder="NY" />
           </FormField>
-          <FormField label="ZIP Code">
+          <FormField label="ZIP Code" fieldId="zip" error={errors.zip?.message}>
             <Input
+              id="zip"
+              name="zip"
               value={watch("zip") ?? ""}
               onChange={(e) => setValue("zip", formatZip(e.target.value))}
               placeholder="10001"
             />
           </FormField>
-          <FormField label="Country">
-            <Input {...register("country")} placeholder="US" />
+          <FormField label="Country" fieldId="country">
+            <Input id="country" {...register("country")} placeholder="US" />
           </FormField>
         </CardContent>
       </Card>
@@ -189,16 +199,19 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
           <CardTitle>Emergency Contact</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="Name">
+          <FormField label="Name" fieldId="emergencyName">
             <Input
+              id="emergencyName"
               {...register("emergencyName")}
               placeholder="John Smith"
               onBlur={(e) => setValue("emergencyName", titleCase(e.target.value.trim()))}
             />
           </FormField>
-          <FormField label="Phone">
+          <FormField label="Phone" fieldId="emergencyPhone">
             <Input
+              id="emergencyPhone"
               type="tel"
+              name="emergencyPhone"
               value={watch("emergencyPhone") ?? ""}
               onChange={(e) => setValue("emergencyPhone", formatPhone(e.target.value))}
               placeholder="802-258-0000"
@@ -210,10 +223,13 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
       {/* Internal Notes */}
       <Card>
         <CardHeader>
-          <CardTitle>Internal Notes</CardTitle>
+          <CardTitle>
+            <label htmlFor="internalNotes">Internal Notes</label>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Textarea
+            id="internalNotes"
             {...register("internalNotes")}
             placeholder="Internal staff notes (not visible to client)…"
             className="min-h-[100px]"
@@ -240,18 +256,20 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
 
 function FormField({
   label,
+  fieldId,
   error,
   children,
   className,
 }: {
   label: string;
+  fieldId?: string;
   error?: string;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
     <div className={className}>
-      <Label className="mb-1.5">{label}</Label>
+      <Label htmlFor={fieldId} className="mb-1.5">{label}</Label>
       {children}
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>

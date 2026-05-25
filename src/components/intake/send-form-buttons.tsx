@@ -85,7 +85,7 @@ export default function SendFormButtons({ formId, clients }: Props) {
       </button>
 
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="fixed inset-x-0 top-0 h-dvh z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl p-6 mx-4">
             {/* Header */}
             <div className="flex items-center justify-between mb-5">

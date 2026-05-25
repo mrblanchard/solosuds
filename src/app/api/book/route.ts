@@ -40,12 +40,6 @@ export async function POST(request: NextRequest) {
     const org = await db.organization.findUnique({ where: { id: orgId } });
     if (!org) return NextResponse.json({ error: "Organization not found" }, { status: 404 });
 
-    const owner = await db.user.findFirst({
-      where: { organizationId: orgId, role: "OWNER" },
-      select: { id: true },
-    });
-    if (!owner) return NextResponse.json({ error: "Organization has no owner" }, { status: 404 });
-
     const service = await db.service.findFirst({
       where: { id: serviceId, organizationId: orgId, isActive: true },
     });
@@ -74,7 +68,6 @@ export async function POST(request: NextRequest) {
         organizationId: orgId,
         clientId: client.id,
         serviceId,
-        practitionerId: owner.id,
         startTime: new Date(startTime),
         endTime: new Date(endTime),
         status: "SCHEDULED",
