@@ -169,8 +169,6 @@ export default function LandingPage() {
       </section>
 
 
-      <PricingSection />
-
       {/* White Label */}
       <section className="py-24 px-4 bg-gradient-to-br from-indigo-600 to-violet-700 text-white">
         <div className="mx-auto max-w-6xl">
@@ -229,6 +227,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <PricingSection />
 
       {/* Footer */}
       <AppFooter />
