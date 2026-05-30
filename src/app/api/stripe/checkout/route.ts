@@ -9,9 +9,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { planKey, interval } = (await req.json()) as {
+  const { planKey, interval, promoCode } = (await req.json()) as {
     planKey: string;
     interval: "monthly" | "annual";
+    promoCode?: string;
   };
 
   // Read price IDs at request time so env changes take effect after restart
@@ -41,7 +42,19 @@ export async function POST(req: Request) {
   });
 
   const baseUrl = process.env.AUTH_URL ?? "http://localhost:3000";
-  const promoCoupon = process.env.STRIPE_COUPON_LAUNCH_PROMO;
+  const defaultCoupon = process.env.STRIPE_COUPON_LAUNCH_PROMO;
+
+  // Resolve discount: user-entered promo code takes priority over default coupon
+  let discounts: { coupon: string }[] | { promotion_code: string }[] | undefined;
+  if (promoCode) {
+    const codes = await stripe.promotionCodes.list({ code: promoCode, active: true, limit: 1 });
+    if (!codes.data.length) {
+      return NextResponse.json({ error: "Invalid or expired promo code." }, { status: 400 });
+    }
+    discounts = [{ promotion_code: codes.data[0].id }];
+  } else if (defaultCoupon) {
+    discounts = [{ coupon: defaultCoupon }];
+  }
 
   try {
     const checkoutSession = await stripe.checkout.sessions.create({
@@ -50,9 +63,7 @@ export async function POST(req: Request) {
       ...(org?.stripeCustomerId
         ? { customer: org.stripeCustomerId }
         : { customer_email: session.user.email ?? undefined }),
-      ...(promoCoupon
-        ? { discounts: [{ coupon: promoCoupon }] }
-        : {}),
+      ...(discounts ? { discounts } : {}),
       subscription_data: {
         metadata: { organizationId: session.user.organizationId, plan: planKey },
       },

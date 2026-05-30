@@ -21,6 +21,8 @@ export default function PricingSection({ showCheckout = false }: { showCheckout?
   const [yearly, setYearly] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState("");
+  const [showPromoField, setShowPromoField] = useState(false);
 
   async function handleCheckout(planKey: string) {
     setLoading(planKey);
@@ -29,7 +31,7 @@ export default function PricingSection({ showCheckout = false }: { showCheckout?
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planKey, interval: yearly ? "annual" : "monthly" }),
+        body: JSON.stringify({ planKey, interval: yearly ? "annual" : "monthly", promoCode: promoCode.trim() || undefined }),
       });
       const data = await res.json();
       if (data.url) {
@@ -107,13 +109,43 @@ export default function PricingSection({ showCheckout = false }: { showCheckout?
               ))}
             </ul>
             {showCheckout ? (
-              <Button
-                className="mt-8 w-full"
-                disabled={loading === "solo"}
-                onClick={() => handleCheckout("solo")}
-              >
-                {loading === "solo" ? "Redirecting…" : "Subscribe now"}
-              </Button>
+              <>
+                <div className="mt-6">
+                  {!showPromoField ? (
+                    <button
+                      type="button"
+                      className="text-xs text-indigo-600 hover:underline"
+                      onClick={() => setShowPromoField(true)}
+                    >
+                      Have a promo code?
+                    </button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
+                        placeholder="Enter promo code"
+                        className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                      <button
+                        type="button"
+                        className="text-xs text-gray-400 hover:text-gray-600"
+                        onClick={() => { setShowPromoField(false); setPromoCode(""); }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <Button
+                  className="mt-4 w-full"
+                  disabled={loading === "solo"}
+                  onClick={() => handleCheckout("solo")}
+                >
+                  {loading === "solo" ? "Redirecting…" : "Subscribe now"}
+                </Button>
+              </>
             ) : (
               <Link href="/register" className="mt-8 block">
                 <Button className="w-full">Start free trial</Button>
