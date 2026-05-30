@@ -5,8 +5,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 
-const PROMO_END = new Date("2026-07-06T00:00:00.000Z");
-
 const coreFeatures = [
   "Unlimited SOAP & session notes",
   "Unlimited active clients",
@@ -23,7 +21,6 @@ export default function PricingSection({ showCheckout = false }: { showCheckout?
   const [yearly, setYearly] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const isPromo = new Date() < PROMO_END;
 
   async function handleCheckout(planKey: string) {
     setLoading(planKey);
@@ -50,14 +47,6 @@ export default function PricingSection({ showCheckout = false }: { showCheckout?
   return (
     <section id="pricing" className="py-24 px-4">
       <div className="mx-auto max-w-5xl">
-        {/* Promo banner */}
-        {isPromo && (
-          <div className="mb-8 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-center text-sm text-amber-800">
-            <span className="font-semibold">Introductory offer:</span> Save 20% on all plans — monthly prices locked in at annual rates through{" "}
-            <span className="font-semibold">July 6, 2026</span>. New signups only.
-          </div>
-        )}
-
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-gray-900">Simple, transparent pricing</h2>
           <p className="mt-2 text-gray-500">No per-note fees. No surprise charges.</p>
@@ -103,17 +92,12 @@ export default function PricingSection({ showCheckout = false }: { showCheckout?
             <h3 className="text-lg font-bold text-gray-900">Solo</h3>
             <p className="mt-1 text-sm text-gray-500">Everything you need to run your business</p>
             <p className="mt-4 text-4xl font-extrabold text-gray-900">
-              {yearly ? "$19.99" : isPromo ? "$19.99" : "$24.99"}
+              {yearly ? "$19.99" : "$24.99"}
               <span className="text-base font-normal text-gray-400">/mo</span>
-              {!yearly && isPromo && (
-                <span className="ml-2 text-base font-normal line-through text-gray-400">$24.99</span>
-              )}
             </p>
-            {yearly ? (
+            {yearly && (
               <p className="text-xs mt-0.5 text-gray-400">$239.88/yr · billed annually</p>
-            ) : isPromo ? (
-              <p className="text-xs mt-0.5 text-amber-600">Intro price · ends July 6, 2026</p>
-            ) : null}
+            )}
             <ul className="mt-6 space-y-2">
               {coreFeatures.map((f) => (
                 <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
