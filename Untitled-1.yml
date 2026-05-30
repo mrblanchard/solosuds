@@ -3,9 +3,9 @@ Decline: 4000 0000 0000 0002
 Requires auth: 4000 0025 0000 3155
 
 \Tier	Email	Password
-Solo	solo@test.soapsuds.dev	Test1234!
-Practice	practice@test.soapsuds.dev	Test1234!
-Clinic	clinic@test.soapsuds.dev	Test1234!
+Solo	solo@test.solosuds.dev	Test1234!
+Practice	practice@test.solosuds.dev	Test1234!
+Clinic	clinic@test.solosuds.dev	Test1234!
 
 
 

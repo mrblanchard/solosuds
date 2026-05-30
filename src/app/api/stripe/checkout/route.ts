@@ -3,8 +3,6 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 
-const PROMO_END = new Date("2026-07-06T00:00:00.000Z");
-
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.id || !session?.user?.organizationId) {
@@ -43,7 +41,6 @@ export async function POST(req: Request) {
   });
 
   const baseUrl = process.env.AUTH_URL ?? "http://localhost:3000";
-  const isPromo = new Date() < PROMO_END;
   const promoCoupon = process.env.STRIPE_COUPON_LAUNCH_PROMO;
 
   try {
@@ -53,7 +50,7 @@ export async function POST(req: Request) {
       ...(org?.stripeCustomerId
         ? { customer: org.stripeCustomerId }
         : { customer_email: session.user.email ?? undefined }),
-      ...(isPromo && promoCoupon && interval === "monthly"
+      ...(promoCoupon
         ? { discounts: [{ coupon: promoCoupon }] }
         : {}),
       subscription_data: {
