@@ -51,7 +51,7 @@ export async function POST(req: Request) {
         ? { customer: org.stripeCustomerId }
         : { customer_email: session.user.email ?? undefined }),
       ...(promoCoupon
-        ? { discounts: [{ coupon: promoCoupon }] }
+        ? { discounts: [{ promotion_code: promoCoupon }] }
         : {}),
       subscription_data: {
         metadata: { organizationId: session.user.organizationId, plan: planKey },
