@@ -31,6 +31,14 @@ export async function sendSms({
   const from = process.env.TWILIO_PHONE_NUMBER;
   if (!from) throw new Error("TWILIO_PHONE_NUMBER not configured");
 
-  const message = await client.messages.create({ to, from, body });
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.AUTH_URL ?? "";
+  const statusCallback = appUrl ? `${appUrl}/api/twilio/status` : undefined;
+
+  const message = await client.messages.create({
+    to,
+    from,
+    body,
+    ...(statusCallback ? { statusCallback } : {}),
+  });
   return { sid: message.sid };
 }
