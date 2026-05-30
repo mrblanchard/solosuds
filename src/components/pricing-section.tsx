@@ -73,7 +73,7 @@ export default function PricingSection({ showCheckout = false }: { showCheckout?
             >
               Yearly
               <span className="ml-1.5 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
-                20% off
+                10% off
               </span>
             </button>
           </div>
