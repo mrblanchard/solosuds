@@ -67,7 +67,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
 
       {/* Client & Linked Records */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-gray-100 p-4">
+        <div className="rounded-xl border border-gray-100 bg-white p-4">
           <p className="text-xs font-medium uppercase text-gray-400 mb-1">Bill To</p>
           <Link
             href={`/dashboard/clients/${invoice.clientId}`}
@@ -82,7 +82,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
             <p className="text-sm text-gray-500">{invoice.client.phone}</p>
           )}
         </div>
-        <div className="rounded-xl border border-gray-100 p-4 space-y-2">
+        <div className="rounded-xl border border-gray-100 bg-white p-4 space-y-2">
           <p className="text-xs font-medium uppercase text-gray-400">Linked To</p>
           {invoice.appointment && (
             <Link
@@ -99,7 +99,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
       </div>
 
       {/* Line Items */}
-      <div className="rounded-xl border border-gray-100 overflow-hidden">
+      <div className="rounded-xl border border-gray-100 bg-white overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50">
             <tr>
@@ -143,7 +143,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
 
       {/* Notes */}
       {invoice.notes && (
-        <div className="rounded-xl border border-gray-100 p-4">
+        <div className="rounded-xl border border-gray-100 bg-white p-4">
           <p className="text-xs font-medium uppercase text-gray-400 mb-1">Notes</p>
           <p className="text-sm text-gray-700 whitespace-pre-line">{invoice.notes}</p>
         </div>
