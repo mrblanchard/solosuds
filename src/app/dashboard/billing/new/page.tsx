@@ -29,7 +29,7 @@ export default async function NewInvoicePage({ searchParams }: Props) {
         </Link>
       </div>
 
-      <div className="rounded-xl border border-gray-100 p-6">
+      <div className="rounded-xl border border-gray-100 bg-white p-6">
         <NewInvoiceForm
           clients={clients}
           defaultClientId={clientId}

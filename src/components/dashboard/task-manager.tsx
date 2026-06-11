@@ -184,7 +184,7 @@ export default function TaskManager() {
           <Input
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="Add a taskâ€¦"
+            placeholder="Add a task…"
             className="flex-1"
           />
           <select
@@ -240,7 +240,7 @@ export default function TaskManager() {
 
       {/* Task list */}
       {loading ? (
-        <p className="text-center text-sm text-gray-400 py-8">Loadingâ€¦</p>
+        <p className="text-center text-sm text-gray-400 py-8">Loading…</p>
       ) : filtered.length === 0 ? (
         <p className="text-center text-sm text-gray-400 py-8">
           {filter === "ALL" ? "No tasks yet" : "No tasks in this category"}
@@ -343,7 +343,7 @@ export default function TaskManager() {
                           });
                         }
                       }}
-                      placeholder="Add a descriptionâ€¦"
+                      placeholder="Add a description…"
                       rows={2}
                       className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-300 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 outline-none resize-none"
                     />
