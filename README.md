@@ -92,7 +92,7 @@ STORAGE_PUBLIC_URL=""   # leave blank — never expose the bucket publicly
 
 > **Do not enable public bucket access.** Files are served through 15-minute expiring signed URLs generated server-side after authorization. A public bucket URL would bypass all access controls and violate HIPAA.
 
-**On the production server**, update `/app/SoloSuds/.env` with the same values and restart: `pm2 restart SoloSuds`
+**On the production server**, update `/app/solosuds/.env` with the same values and restart: `pm2 restart solosuds`
 
 ### Database
 
@@ -110,7 +110,7 @@ Code is hosted on [Forgejo](https://v14.next.forgejo.org/SoloSuds/SoloSuds). The
 
 **Server IP:** `45.33.68.189`  
 **Tunnel:** `SoloSuds-prod` (ID: `96854119-0d6e-4303-a1b7-914706b14f52`) → `solosuds.com`  
-**Process manager:** PM2 (`pm2 list`, `pm2 logs SoloSuds`)  
+**Process manager:** PM2 (`pm2 list`, `pm2 logs solosuds`)  
 **Swap:** 2GB swapfile at `/swapfile` (needed for builds on 1GB RAM)
 
 ### Deploy workflow
@@ -125,12 +125,12 @@ Code is hosted on [Forgejo](https://v14.next.forgejo.org/SoloSuds/SoloSuds). The
 3. SSH into the server and deploy:
    ```bash
    ssh root@45.33.68.189
-   cd /app/SoloSuds
+   cd /app/solosuds
    git pull
    npm install        # only if package.json changed
    npx prisma generate  # only if schema.prisma changed
    npm run build
-   pm2 restart SoloSuds
+   pm2 restart solosuds
    ```
 
 ### First-time server setup (already done)
@@ -139,8 +139,8 @@ Code is hosted on [Forgejo](https://v14.next.forgejo.org/SoloSuds/SoloSuds). The
 - PM2 with systemd startup (`pm2 startup systemd`)
 - cloudflared as systemd service (`/etc/systemd/system/cloudflared.service`)
 - 2GB swap at `/swapfile`
-- App cloned to `/app/SoloSuds`
-- `.env` at `/app/SoloSuds/.env` (not in git — must be set manually on server)
+- App cloned to `/app/solosuds`
+- `.env` at `/app/solosuds/.env` (not in git — must be set manually on server)
 
 ### Google OAuth redirect URIs
 
