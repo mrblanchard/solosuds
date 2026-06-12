@@ -4,11 +4,11 @@ import PublicBookingForm from "@/components/booking/public-booking-form";
 import { AppFooter } from "@/components/layout/app-footer";
 
 interface Props {
-  searchParams: { org?: string };
+  searchParams: Promise<{ org?: string }>;
 }
 
 export default async function BookingPage({ searchParams }: Props) {
-  const orgId = searchParams.org;
+  const { org: orgId } = await searchParams;
   if (!orgId) notFound();
 
   const [org, services] = await Promise.all([
