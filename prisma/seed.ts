@@ -9,6 +9,12 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const db = new PrismaClient({ adapter } as any);
 
 async function main() {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "Refusing to run prisma/seed.ts in production — it creates/resets a demo admin account with a publicly-known default password."
+    );
+  }
+
   const email = "admin@SoloSuds.dev";
   const password = "Admin1234!";
   const orgName = "SoloSuds Demo Practice";
@@ -88,5 +94,8 @@ async function main() {
 }
 
 main()
-  .catch(console.error)
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  })
   .finally(() => db.$disconnect());

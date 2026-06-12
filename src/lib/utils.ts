@@ -73,6 +73,9 @@ export const phoneSchema = z
 export const nameSchema = z.string().min(1).max(200);
 export const longTextSchema = z.string().max(10000);
 
+/** How long an org team-invite code remains valid before it must be regenerated. */
+export const INVITE_CODE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
 // ─── Field Formatting / Normalization ─────────────────────────────────────────
 
 /** Format a US phone string as 802-258-0000 or +1-802-258-0000 while the user types. */

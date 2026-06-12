@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { signPortalSession, portalSessionCookieOptions } from "@/lib/portal-session";
 import bcrypt from "bcryptjs";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -16,6 +17,14 @@ export async function POST(request: NextRequest) {
   }
 
   const normalized = contact.trim().toLowerCase();
+
+  // Throttle brute-force guessing of the 6-digit code: per-account and per-IP.
+  const ip = getClientIp(request);
+  const accountKey = `portal-verify:${orgSlug}:${normalized}`;
+  const ipKey = `portal-verify-ip:${ip}`;
+  if (!checkRateLimit(accountKey, 5, 15 * 60 * 1000) || !checkRateLimit(ipKey, 20, 15 * 60 * 1000)) {
+    return NextResponse.json({ error: "Too many attempts. Please request a new code and try again later." }, { status: 429 });
+  }
 
   const org = await db.organization.findUnique({
     where: { slug: orgSlug },

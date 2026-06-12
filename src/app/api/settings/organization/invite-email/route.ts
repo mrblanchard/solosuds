@@ -1,7 +1,17 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
+
+/** Sign the invited role to this org with an expiry, so it can't be edited via the URL. */
+function generateRoleToken(orgId: string, role: string): string {
+  const expiry = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+  const secret = (process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET)!;
+  const payload = `${orgId}:${role}:${expiry}`;
+  const sig = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+  return Buffer.from(`${payload}:${sig}`).toString("base64url");
+}
 
 export async function POST(request: NextRequest) {
   const session = await auth();
@@ -37,7 +47,8 @@ export async function POST(request: NextRequest) {
   }
 
   const origin = request.headers.get("origin") || request.nextUrl.origin;
-  const inviteUrl = `${origin}/register?invite=${org.inviteCode}&role=${inviteRole}`;
+  const roleToken = generateRoleToken(session.user.organizationId, inviteRole);
+  const inviteUrl = `${origin}/register?invite=${org.inviteCode}&rt=${roleToken}`;
 
   try {
     const result = await sendEmail({

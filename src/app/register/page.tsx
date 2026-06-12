@@ -37,7 +37,7 @@ function RegisterContent() {
   const [error, setError] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [inviteOrgName, setInviteOrgName] = useState<string | null>(null);
-  const [inviteRole, setInviteRole] = useState<string | null>(null);
+  const [inviteRoleToken, setInviteRoleToken] = useState<string | null>(null);
   const [cfToken, setCfToken] = useState<string | null>(null);
 
   const schema = fromGoogle
@@ -64,13 +64,13 @@ function RegisterContent() {
     const email = params.get("email") ?? "";
     const name = params.get("name") ?? "";
     const invite = params.get("invite");
-    const role = params.get("role");
+    const roleToken = params.get("rt");
     setFromGoogle(fg);
     if (email) { setPrefillEmail(email); setValue("email", email); }
     if (name) { setPrefillName(name); setValue("name", name); }
     if (invite) {
       setInviteCode(invite);
-      if (role) setInviteRole(role);
+      if (roleToken) setInviteRoleToken(roleToken);
       // Look up the org name for the invite code
       fetch(`/api/auth/invite-info?code=${encodeURIComponent(invite)}`)
         .then((r) => r.ok ? r.json() : null)
@@ -95,7 +95,7 @@ function RegisterContent() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, fromGoogle, inviteCode, role: inviteRole, cfToken }),
+        body: JSON.stringify({ ...data, fromGoogle, inviteCode, roleToken: inviteRoleToken, cfToken }),
       });
       const json = await res.json();
       if (!res.ok) {

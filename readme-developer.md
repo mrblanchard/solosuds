@@ -430,3 +430,65 @@ Added PRACTITIONER/FRONT_DESK role blocking to all DELETE routes:
 - CSS: react-grid-layout resize handle enlarged to 24×24px with 3px border in indigo-400.
 - Storage key bumped from `v2` to `v3` to force layout reset for all users.
 
+---
+
+### 2026-06-12 — Security audit fixes
+
+Full pass across auth/RBAC, file storage, webhooks, and stored-XSS surfaces. 12 findings fixed, highest severity first.
+
+#### Cross-tenant data isolation
+- `src/app/api/intake-forms/[id]/submit/route.ts` — the consent `client.updateMany` was scoped only by `clientId`, so a malicious submission could flip `emailConsentStatus` on a client in a *different* org if the attacker knew/guessed its ID. Now also selects `organizationId` from the form and scopes the update by it.
+  - **Check:** submit an intake form; confirm only the client belonging to that form's org gets `emailConsentStatus: CONSENTED`.
+- `src/app/api/invoices/[id]/route.ts` — `GET` included a non-existent `soapNote` relation on `Invoice` (Prisma has no such field), so this endpoint threw on every call. Removed from the `include`.
+  - **Check:** `GET /api/invoices/:id` now returns 200 with `client` and `appointment`.
+
+#### Portal OTP hardening
+- `src/lib/rate-limit.ts` (new) — in-memory sliding-window limiter: `checkRateLimit(key, max, windowMs)`, `getClientIp(request)`.
+- `src/app/api/portal/verify/route.ts` — 5 attempts/15min per account + 20/15min per IP → `429` before the OTP is checked.
+- `src/app/api/portal/request-access/route.ts` — 3 requests/15min per account + 20/15min per IP → `429`; OTP now generated with `crypto.randomInt(100000, 1000000)` instead of `Math.random()` (was guessable/biased).
+  - **Check:** request portal access 4x quickly for one client → 4th call returns 429 with "Too many requests...". Same pattern for `/verify` after 5 wrong codes.
+  - **Caveat:** rate-limit state is in-memory per process — resets on every deploy/restart, and won't be shared if the app ever runs as a PM2 cluster (currently single instance, so fine).
+
+#### Webhook signature verification
+- `src/app/api/webhooks/resend/route.ts` — verifies the Svix signature (`svix-id`/`svix-timestamp`/`svix-signature`) via `new Webhook(RESEND_WEBHOOK_SECRET).verify()`. **Fails closed**: `500` if `RESEND_WEBHOOK_SECRET` is unset, `401` on bad signature, `400` on unparseable payload.
+- `src/lib/twilio.ts` — new `isValidTwilioRequest(request, params)` wrapping `Twilio.validateRequest`.
+- `src/app/api/webhooks/twilio/route.ts` and `src/app/api/twilio/status/route.ts` — both verify `x-twilio-signature` and return `403` before processing.
+  - **Check:** `curl -X POST https://solosuds.com/api/webhooks/resend` with no Svix headers → `401`/`500`. Same idea for the Twilio routes with no `x-twilio-signature` → `403`.
+  - **Note:** Twilio creds are still commented out in `.env` ("coming soon"), so both Twilio routes will `403` everything until `TWILIO_ACCOUNT_SID`/`TWILIO_AUTH_TOKEN` are set — expected, not a regression.
+
+#### Stored XSS prevention
+- `src/lib/sanitize.ts` (new) — `sanitizeEmailHtml()` via `sanitize-html`, allow-listing formatting tags/attributes only; strips `<script>`, `<style>`, `<iframe>`, event handlers, `javascript:` URLs.
+- `src/app/api/webhooks/resend/route.ts` — inbound email `htmlBody` is sanitized before it's persisted to `Email.htmlBody`.
+- `src/app/api/settings/organization/route.ts` — `emailSignature` sanitized on save.
+- `src/lib/email.ts` — new `escapeHtml()`; applied to `orgName` and `logoUrl` inside `buildBrandedEmail()` so an org's display name/logo URL can't break out of the HTML email template.
+  - **Check:** set the org name to `"><img src=x onerror=alert(1)>` in Settings, trigger any branded email (e.g. appointment reminder), confirm the name renders as literal escaped text in the email source.
+  - **Outstanding — needs your call:** rows written to `Email.htmlBody` / `Organization.emailSignature` *before* this fix were not retroactively re-sanitized. A backfill script could clean existing data, but that's a separate prod-DB write — only do it if asked.
+
+#### File upload validation
+- `src/lib/file-validation.ts` (new) — `validateUploadedFile(file)` checks MIME type against an allow-list (`pdf`, `jpg/jpeg`, `png`, `gif`, `webp`, `heic`, `doc`, `docx`, `xls`, `xlsx`, `txt`, `csv`) and cross-checks the file extension matches, returning a safe lowercase extension or `null`.
+- `src/app/api/clients/[id]/documents/route.ts` and `src/app/api/portal/documents/route.ts` — reject (`400 "Unsupported file type"`) anything outside the allow-list instead of trusting the client-supplied extension for the storage key.
+  - **Check:** try uploading a `.exe`/`.html`/etc. via both the dashboard client-documents uploader and the client portal uploader → `400`.
+
+#### Org invite code expiry
+- `prisma/schema.prisma` — added `Organization.inviteCodeExpiresAt DateTime?`.
+- `src/lib/utils.ts` — `INVITE_CODE_TTL_MS` (7 days).
+- `src/app/api/settings/organization/invite/route.ts` — (re)generating the team invite link sets a fresh 7-day expiry.
+- `src/app/api/auth/register/route.ts` (both the join-existing-org path and new-org creation) and `src/app/api/auth/invite-info/route.ts` — reject expired codes as "Invalid or expired invite link" / `404`.
+- **DB sync done 2026-06-12**: ran `npx prisma generate` + `npx prisma db push` against the prod Neon DB — schema is in sync (this also picked up other previously-drifted columns like `brandFont`, `emailSignature`, `faviconUrl`, `replyToEmail`).
+  - **Check:** generate a team invite link, then in the DB set that org's `inviteCodeExpiresAt` to a past date — `/register?invite=<code>` should now show "Invalid invite code" and registering with it returns "Invalid or expired invite link".
+
+#### Seed script guard
+- `prisma/seed.ts` — refuses to run when `NODE_ENV=production` (the seed `upsert`s a hardcoded `admin@SoloSuds.dev` / `Admin1234!` account — running it against prod would create/reset that login). Also exits non-zero on error instead of silently logging via `console.error` only.
+  - **Check:** `NODE_ENV=production npx tsx prisma/seed.ts` should throw and exit 1 immediately.
+
+#### New dependencies / config
+- `package.json` — added `sanitize-html`, `svix`, `@types/sanitize-html`.
+- `.env` — added `RESEND_WEBHOOK_SECRET` (from Resend dashboard → Webhooks → endpoint signing secret). **Set in both local `.env` and prod `/app/solosuds/.env`** as of 2026-06-12. Without it, `/api/webhooks/resend` returns `500` for every request.
+
+#### Deploy checklist for this batch
+1. `git push`, then on the server: `cd /app/solosuds && git pull`.
+2. `npm install` (new deps: sanitize-html, svix).
+3. `npx prisma generate` (schema changed; DB itself is already synced as of 2026-06-12 — this just regenerates types).
+4. `npm run build && pm2 restart solosuds`.
+5. `RESEND_WEBHOOK_SECRET` is already in prod `.env` — no action needed.
+

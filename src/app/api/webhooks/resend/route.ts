@@ -1,17 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { Webhook, WebhookVerificationError } from "svix";
 import { db } from "@/lib/db";
+import { sanitizeEmailHtml } from "@/lib/sanitize";
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 
 // Resend inbound email webhook
 // Docs: https://resend.com/docs/webhooks/emails/received
+// Resend signs webhook deliveries via Svix — verify before trusting the payload.
 export async function POST(request: NextRequest) {
+  const secret = process.env.RESEND_WEBHOOK_SECRET;
+  if (!secret) {
+    console.error("[Resend webhook] RESEND_WEBHOOK_SECRET is not configured — rejecting");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+  }
+
+  const rawBody = await request.text();
+  const svixHeaders = {
+    "svix-id": request.headers.get("svix-id") ?? "",
+    "svix-timestamp": request.headers.get("svix-timestamp") ?? "",
+    "svix-signature": request.headers.get("svix-signature") ?? "",
+  };
+
   let payload: Record<string, unknown>;
   try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    const wh = new Webhook(secret);
+    payload = wh.verify(rawBody, svixHeaders) as Record<string, unknown>;
+  } catch (err) {
+    if (err instanceof WebhookVerificationError) {
+      console.error("[Resend webhook] Signature verification failed:", err.message);
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
   const eventType = payload.type as string;
@@ -47,7 +68,8 @@ export async function POST(request: NextRequest) {
     const fromEmail = (fromMatch[1] || fromRaw).trim().toLowerCase();
 
     const subject = (fullEmail as Record<string, unknown>).subject as string || data.subject || "(No subject)";
-    const htmlBody = (fullEmail as Record<string, unknown>).html as string || "";
+    const rawHtmlBody = (fullEmail as Record<string, unknown>).html as string || "";
+    const htmlBody = rawHtmlBody ? sanitizeEmailHtml(rawHtmlBody) : "";
     const textBody = (fullEmail as Record<string, unknown>).text as string || "";
 
     // Try to match sender to a client by email

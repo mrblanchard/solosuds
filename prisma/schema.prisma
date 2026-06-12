@@ -72,6 +72,7 @@ model Organization {
   noteType             String    @default("SOAP")   // SOAP | SESSION
   defaultIntakeFormId  String?
   inviteCode           String?   @unique
+  inviteCodeExpiresAt  DateTime?
   hipaaAcceptedAt      DateTime?
   stripeCustomerId     String?   @unique
   stripeSubscriptionId String?   @unique

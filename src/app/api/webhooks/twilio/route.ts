@@ -1,12 +1,16 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { sendSms } from "@/lib/twilio";
+import { sendSms, isValidTwilioRequest } from "@/lib/twilio";
 import { sendEmail } from "@/lib/email";
 
 // Twilio sends form-encoded POST when an SMS is received
 export async function POST(req: NextRequest) {
   const text = await req.text();
   const params = new URLSearchParams(text);
+
+  if (!isValidTwilioRequest(req, Object.fromEntries(params.entries()))) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
 
   const from = params.get("From");       // E.164 e.g. "+16032838443"
   const messageBody = params.get("Body");

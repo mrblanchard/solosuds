@@ -1,4 +1,5 @@
 import Twilio from "twilio";
+import type { NextRequest } from "next/server";
 
 let _client: ReturnType<typeof Twilio> | null = null;
 
@@ -41,4 +42,17 @@ export async function sendSms({
     ...(statusCallback ? { statusCallback } : {}),
   });
   return { sid: message.sid };
+}
+
+/** Verify that an incoming webhook request was actually sent by Twilio. */
+export function isValidTwilioRequest(request: NextRequest, params: Record<string, string>): boolean {
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const signature = request.headers.get("x-twilio-signature");
+  if (!authToken || !signature) return false;
+
+  const proto = request.headers.get("x-forwarded-proto") ?? "https";
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
+  const url = `${proto}://${host}${request.nextUrl.pathname}`;
+
+  return Twilio.validateRequest(authToken, signature, url, params);
 }

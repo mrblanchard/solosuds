@@ -207,7 +207,7 @@ function TemplateForm({ initial, onSave, onCancel }: FormProps) {
   }
 
   return (
-    <div className="rounded-xl border-2 border-indigo-200 bg-indigo-50/30 p-5 sm:col-span-2">
+    <div className="rounded-xl border-2 border-indigo-200 bg-white p-5 sm:col-span-2">
       <h3 className="font-semibold text-gray-900 mb-4">
         {initial ? "Edit Template" : "New Template"}
       </h3>

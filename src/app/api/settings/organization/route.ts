@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { sanitizeEmailHtml } from "@/lib/sanitize";
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -62,7 +63,7 @@ export async function PATCH(request: NextRequest) {
         ...(logoUrl !== undefined && { logoUrl: logoUrl || null }),
         ...(faviconUrl !== undefined && { faviconUrl: faviconUrl || null }),
         ...(brandFont !== undefined && { brandFont: brandFont || null }),
-        ...(emailSignature !== undefined && { emailSignature: emailSignature || null }),
+        ...(emailSignature !== undefined && { emailSignature: emailSignature ? sanitizeEmailHtml(emailSignature) : null }),
         ...(replyToEmail !== undefined && { replyToEmail: replyToEmail || null }),
       },
     });

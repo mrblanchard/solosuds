@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 }
 
 export async function POST(request: NextRequest) {
@@ -22,6 +24,14 @@ export async function POST(request: NextRequest) {
   }
 
   const normalized = contact.trim().toLowerCase();
+
+  // Throttle how often a code can be requested for a given account / IP.
+  const ip = getClientIp(request);
+  const accountKey = `portal-request:${orgSlug}:${normalized}`;
+  const ipKey = `portal-request-ip:${ip}`;
+  if (!checkRateLimit(accountKey, 3, 15 * 60 * 1000) || !checkRateLimit(ipKey, 20, 15 * 60 * 1000)) {
+    return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+  }
 
   const org = await db.organization.findUnique({
     where: { slug: orgSlug },

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPortalSession } from "@/lib/portal-session";
 import { db } from "@/lib/db";
 import { uploadFile, getSignedDownloadUrl } from "@/lib/storage";
+import { validateUploadedFile } from "@/lib/file-validation";
 import { randomUUID } from "crypto";
 
 const MAX_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
@@ -40,8 +41,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "File exceeds 25 MB limit" }, { status: 413 });
   }
 
-  const ext = file.name.split(".").pop() ?? "";
-  const storageKey = `orgs/${session.orgId}/clients/${session.clientId}/${randomUUID()}${ext ? `.${ext}` : ""}`;
+  const ext = validateUploadedFile(file);
+  if (!ext) {
+    return NextResponse.json({ error: "Unsupported file type" }, { status: 400 });
+  }
+  const storageKey = `orgs/${session.orgId}/clients/${session.clientId}/${randomUUID()}.${ext}`;
 
   const buffer = Buffer.from(await file.arrayBuffer());
 

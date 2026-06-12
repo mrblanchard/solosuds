@@ -13,7 +13,7 @@ export async function POST(
 
     const form = await db.intakeForm.findUnique({
       where: { id },
-      select: { id: true, isActive: true, isEmailConsent: true },
+      select: { id: true, isActive: true, isEmailConsent: true, organizationId: true },
     });
 
     if (!form || !form.isActive) {
@@ -31,10 +31,11 @@ export async function POST(
       },
     });
 
-    // If this is the email consent form and a clientId was provided, mark the client as consented
+    // If this is the email consent form and a clientId was provided, mark the client as consented.
+    // Scope to the form's organization so a clientId from another org can't be targeted.
     if (isConsent && clientId) {
       await db.client.updateMany({
-        where: { id: clientId },
+        where: { id: clientId, organizationId: form.organizationId },
         data: { emailConsentStatus: EmailConsentStatus.CONSENTED },
       });
     }

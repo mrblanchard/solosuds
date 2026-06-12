@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { INVITE_CODE_TTL_MS } from "@/lib/utils";
 
 export async function POST() {
   const session = await auth();
@@ -19,11 +20,12 @@ export async function POST() {
   }
 
   const inviteCode = crypto.randomBytes(16).toString("hex");
+  const inviteCodeExpiresAt = new Date(Date.now() + INVITE_CODE_TTL_MS);
 
   await db.organization.update({
     where: { id: session.user.organizationId },
-    data: { inviteCode },
+    data: { inviteCode, inviteCodeExpiresAt },
   });
 
-  return NextResponse.json({ inviteCode });
+  return NextResponse.json({ inviteCode, inviteCodeExpiresAt });
 }

@@ -4,6 +4,16 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 }
 
+/** Escapes a string for safe interpolation into HTML text or attribute values. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export interface OrgBranding {
   name: string;
   logoUrl?: string | null;
@@ -15,12 +25,12 @@ export interface OrgBranding {
 
 /** Wraps email body HTML in a branded template with logo, font, and signature. */
 export function buildBrandedEmail(content: string, branding?: OrgBranding | null): string {
-  const orgName = branding?.name || "SoloSuds";
+  const orgName = escapeHtml(branding?.name || "SoloSuds");
   const color = branding?.primaryColor && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(branding.primaryColor)
     ? branding.primaryColor
     : "#4f46e5";
   const font = branding?.brandFont || "Inter";
-  const logoUrl = branding?.logoUrl;
+  const logoUrl = branding?.logoUrl ? escapeHtml(branding.logoUrl) : null;
   const signature = branding?.emailSignature;
 
   const safeFontName = font.replace(/[^a-zA-Z0-9 ]/g, "");

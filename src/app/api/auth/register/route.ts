@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { db } from "@/lib/db";
-import { validatePassword } from "@/lib/utils";
+import { validatePassword, INVITE_CODE_TTL_MS } from "@/lib/utils";
 import { verifyTurnstile } from "@/lib/turnstile";
+
+type InviteRole = "ADMIN" | "PRACTITIONER" | "FRONT_DESK";
 
 /** Generate a short-lived signed token so the register page can auto sign-in without a CAPTCHA. */
 function generateAutoSignInToken(email: string): string {
@@ -13,10 +15,32 @@ function generateAutoSignInToken(email: string): string {
   return `internal:${expiry}:${sig}`;
 }
 
+/** Verify a signed invite role token (see invite-email route). Returns the role if valid, else null. */
+function verifyRoleToken(token: string, orgId: string): InviteRole | null {
+  try {
+    const decoded = Buffer.from(token, "base64url").toString("utf8");
+    const parts = decoded.split(":");
+    if (parts.length !== 4) return null;
+    const [tokenOrgId, role, expiryStr, sig] = parts;
+    if (tokenOrgId !== orgId || Date.now() > Number(expiryStr)) return null;
+
+    const secret = (process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET)!;
+    const expected = crypto.createHmac("sha256", secret).update(`${tokenOrgId}:${role}:${expiryStr}`).digest("hex");
+    const sigBuf = Buffer.from(sig, "hex");
+    const expectedBuf = Buffer.from(expected, "hex");
+    if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) return null;
+
+    const allowedRoles: InviteRole[] = ["ADMIN", "PRACTITIONER", "FRONT_DESK"];
+    return (allowedRoles as string[]).includes(role) ? (role as InviteRole) : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { organizationName, name, email, password, fromGoogle, inviteCode, role: requestedRole, cfToken } = body;
+    const { organizationName, name, email, password, fromGoogle, inviteCode, roleToken, cfToken } = body;
 
     // Verify CAPTCHA for non-Google credential registrations
     if (!fromGoogle) {
@@ -71,12 +95,11 @@ export async function POST(request: NextRequest) {
       // If registering with an invite code, join existing org
       if (inviteCode) {
         const org = await tx.organization.findUnique({ where: { inviteCode } });
-        if (!org) {
+        if (!org || (org.inviteCodeExpiresAt && org.inviteCodeExpiresAt < new Date())) {
           throw new Error("INVALID_INVITE");
         }
 
-        const allowedRoles = ["ADMIN", "PRACTITIONER", "FRONT_DESK"] as const;
-        const inviteRole = allowedRoles.includes(requestedRole) ? requestedRole : "PRACTITIONER";
+        const inviteRole = (typeof roleToken === "string" ? verifyRoleToken(roleToken, org.id) : null) ?? "PRACTITIONER";
 
         if (existingUser) {
           return tx.user.update({
@@ -104,7 +127,7 @@ export async function POST(request: NextRequest) {
 
       const code = crypto.randomBytes(16).toString("hex");
       const org = await tx.organization.create({
-        data: { name: organizationName, slug, inviteCode: code },
+        data: { name: organizationName, slug, inviteCode: code, inviteCodeExpiresAt: new Date(Date.now() + INVITE_CODE_TTL_MS) },
       });
 
       if (existingUser) {
