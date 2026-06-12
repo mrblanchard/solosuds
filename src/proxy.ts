@@ -8,10 +8,14 @@ const PUBLIC_PATHS = [
   "/forgot-password",
   "/intake",
   "/book",
+  "/portal",
+  "/terms",
+  "/hipaa",
   "/api/auth",
   "/api/webhooks",
   "/api/book",
   "/api/intake-forms",
+  "/api/portal",
 ];
 
 export function proxy(request: NextRequest) {
