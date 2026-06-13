@@ -194,8 +194,9 @@ export default function NewIntakeFormPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label>Title</Label>
+            <Label htmlFor="title">Title</Label>
             <Input
+              id="title"
               value={formData.title}
               onChange={(e) => setFormData((f) => ({ ...f, title: e.target.value }))}
               placeholder="e.g. New Patient Intake"
@@ -203,8 +204,9 @@ export default function NewIntakeFormPage() {
             />
           </div>
           <div>
-            <Label>Description (optional)</Label>
+            <Label htmlFor="description">Description (optional)</Label>
             <Textarea
+              id="description"
               value={formData.description}
               onChange={(e) => setFormData((f) => ({ ...f, description: e.target.value }))}
               placeholder="Brief description shown to clients"
@@ -240,6 +242,7 @@ export default function NewIntakeFormPage() {
                 </select>
                 <button
                   onClick={() => removeField(field.id)}
+                  aria-label="Remove field"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -249,8 +252,9 @@ export default function NewIntakeFormPage() {
               {field.type !== "heading" ? (
                 <>
                   <div>
-                    <Label>Label</Label>
+                    <Label htmlFor={`field-${field.id}-label`}>Label</Label>
                     <Input
+                      id={`field-${field.id}-label`}
                       value={field.label}
                       onChange={(e) => updateField(field.id, { label: e.target.value })}
                       placeholder="Field label"
@@ -259,8 +263,9 @@ export default function NewIntakeFormPage() {
                   </div>
                   {(field.type === "text" || field.type === "textarea") && (
                     <div>
-                      <Label>Placeholder text</Label>
+                      <Label htmlFor={`field-${field.id}-placeholder`}>Placeholder text</Label>
                       <Input
+                        id={`field-${field.id}-placeholder`}
                         value={field.placeholder ?? ""}
                         onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
                         placeholder="Optional placeholder"
@@ -270,8 +275,9 @@ export default function NewIntakeFormPage() {
                   )}
                   {field.type === "select" && (
                     <div>
-                      <Label>Options (one per line)</Label>
+                      <Label htmlFor={`field-${field.id}-options`}>Options (one per line)</Label>
                       <Textarea
+                        id={`field-${field.id}-options`}
                         value={field.options ?? ""}
                         onChange={(e) => updateField(field.id, { options: e.target.value })}
                         placeholder={"Option 1\nOption 2\nOption 3"}
@@ -292,8 +298,9 @@ export default function NewIntakeFormPage() {
                 </>
               ) : (
                 <div>
-                  <Label>Heading text</Label>
+                  <Label htmlFor={`field-${field.id}-heading`}>Heading text</Label>
                   <Input
+                    id={`field-${field.id}-heading`}
                     value={field.label}
                     onChange={(e) => updateField(field.id, { label: e.target.value })}
                     placeholder="Section heading"

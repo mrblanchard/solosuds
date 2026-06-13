@@ -230,6 +230,7 @@ export default function CsvImport() {
       <div className="flex items-center gap-3">
         <Link
           href="/dashboard/clients"
+          aria-label="Back to clients"
           className="flex h-8 w-8 items-center justify-center rounded-md border hover:bg-gray-50"
         >
           <ArrowLeft className="h-4 w-4" />

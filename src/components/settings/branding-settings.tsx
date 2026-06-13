@@ -181,12 +181,13 @@ export default function BrandingSettings({ org }: Props) {
 
         {/* Practice Name */}
         <div className="space-y-2">
-          <Label className="flex items-center gap-1">
+          <Label htmlFor="practiceName" className="flex items-center gap-1">
             <Building2 className="h-4 w-4" /> Practice Name
           </Label>
           <p className="text-xs text-gray-500">Shown in the sidebar, topbar, emails, and everywhere your brand appears.</p>
           <div className="flex items-center gap-2">
             <Input
+              id="practiceName"
               value={practiceName}
               onChange={e => setPracticeName(e.target.value)}
               placeholder="Your Practice Name"
@@ -231,7 +232,7 @@ export default function BrandingSettings({ org }: Props) {
           <Label className="flex items-center gap-1">
             <ImageIcon className="h-4 w-4" /> Favicon
           </Label>
-          <p className="text-xs text-gray-500">Browser tab icon. ICO, PNG, or SVG. Recommended 32Ã—32. Max 2 MB.</p>
+          <p className="text-xs text-gray-500">Browser tab icon. ICO, PNG, or SVG. Recommended 32×32. Max 2 MB.</p>
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 overflow-hidden">
               {faviconPreview
@@ -336,16 +337,17 @@ export default function BrandingSettings({ org }: Props) {
 
         {/* Email signature */}
         <div className="space-y-2">
-          <Label className="flex items-center gap-1">
+          <Label htmlFor="emailSignature" className="flex items-center gap-1">
             <Mail className="h-4 w-4" /> Email Signature
           </Label>
           <p className="text-xs text-gray-500">
             Appended to all outgoing emails. HTML is supported (bold, links, etc.).
           </p>
           <Textarea
+            id="emailSignature"
             value={emailSignature}
             onChange={e => setEmailSignature(e.target.value)}
-            placeholder={`e.g.\n<strong>Jane Smith, LMT</strong><br>\nRelax & Restore Massage<br>\nðŸ“ž (555) 123-4567 Â· <a href="https://example.com">book online</a>`}
+            placeholder={`e.g.\n<strong>Jane Smith, LMT</strong><br>\nRelax & Restore Massage<br>\n📞 (555) 123-4567 · <a href="https://example.com">book online</a>`}
             rows={5}
             className="font-mono text-sm"
           />

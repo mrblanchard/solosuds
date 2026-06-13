@@ -101,6 +101,7 @@ export default function SendFormButtons({ formId, clients }: Props) {
               </div>
               <button
                 onClick={close}
+                aria-label="Close"
                 className="text-gray-400 hover:text-gray-600 ml-4 shrink-0"
               >
                 <X className="h-5 w-5" />

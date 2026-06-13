@@ -126,13 +126,14 @@ export default function OrgSettings({ org, intakeForms = [], plan = "solo" }: Pr
       <CardContent className="space-y-4">
         {/* Team Invite Link */}
         <div className="mb-4 pb-4 border-b">
-          <Label>Team Registration Link</Label>
+          <Label htmlFor="inviteLink">Team Registration Link</Label>
           <p className="text-xs text-gray-500 mt-0.5 mb-2">
             Share this link with team members so they can register and join your organization
           </p>
           {inviteCode ? (
             <div className="flex items-center gap-2">
               <Input
+                id="inviteLink"
                 readOnly
                 value={`${typeof window !== "undefined" ? window.location.origin : ""}/register?invite=${inviteCode}`}
                 className="flex-1 text-sm font-mono bg-gray-50"

@@ -289,7 +289,7 @@ export default function TaskManager() {
                         {dueMeta.label}
                         {task.recurrence !== "NONE" && (
                           <span className="ml-1 opacity-70">
-                            Â· {RECURRENCE_LABELS[task.recurrence]}
+                            · {RECURRENCE_LABELS[task.recurrence]}
                           </span>
                         )}
                       </span>
@@ -314,6 +314,7 @@ export default function TaskManager() {
                         setEditDesc(task.description ?? "");
                       }
                     }}
+                    aria-label={isExpanded ? "Collapse task details" : "Expand task details"}
                     className="shrink-0 text-gray-300 hover:text-gray-500"
                   >
                     {isExpanded ? (
@@ -325,6 +326,7 @@ export default function TaskManager() {
 
                   <button
                     onClick={() => deleteTask(task.id)}
+                    aria-label="Delete task"
                     className="shrink-0 text-gray-300 hover:text-red-500"
                   >
                     <Trash2 className="h-3.5 w-3.5" />

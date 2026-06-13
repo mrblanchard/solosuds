@@ -76,6 +76,7 @@ export default function ClientTable({ clients }: { clients: ClientRow[] }) {
                     type="checkbox"
                     checked={allSelected}
                     onChange={toggleAll}
+                    aria-label="Select all clients"
                     className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                   />
                 </th>
@@ -111,6 +112,7 @@ export default function ClientTable({ clients }: { clients: ClientRow[] }) {
                       type="checkbox"
                       checked={selected.has(client.id)}
                       onChange={() => toggle(client.id)}
+                      aria-label={`Select ${client.firstName} ${client.lastName}`}
                       className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                     />
                   </td>

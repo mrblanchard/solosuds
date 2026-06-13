@@ -45,7 +45,7 @@ export default function MessageComposer({ clientId }: Props) {
         placeholder="Type a message… (Ctrl+Enter to send)"
         className="resize-none min-h-[80px]"
       />
-      <Button onClick={send} disabled={loading || !content.trim()} size="icon" className="h-10 w-10 shrink-0">
+      <Button onClick={send} disabled={loading || !content.trim()} size="icon" className="h-10 w-10 shrink-0" aria-label="Send message">
         <Send className="h-4 w-4" />
       </Button>
     </div>

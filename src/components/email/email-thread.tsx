@@ -193,6 +193,7 @@ export default function EmailThread({ client, emails, consentFormId }: Props) {
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={() => router.push("/dashboard/email")}
+          aria-label="Back to inbox"
           className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -437,7 +438,7 @@ export default function EmailThread({ client, emails, consentFormId }: Props) {
                     <Paperclip className="h-3 w-3" />
                     {file.name}
                     <span className="text-gray-400">({formatSize(file.size)})</span>
-                    <button onClick={() => removeAttachment(idx)} className="text-gray-400 hover:text-red-500">
+                    <button onClick={() => removeAttachment(idx)} aria-label="Remove attachment" className="text-gray-400 hover:text-red-500">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
