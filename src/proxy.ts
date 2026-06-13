@@ -9,6 +9,7 @@ const PUBLIC_PATHS = [
   "/intake",
   "/book",
   "/portal",
+  "/pay",
   "/terms",
   "/hipaa",
   "/api/auth",
@@ -16,6 +17,7 @@ const PUBLIC_PATHS = [
   "/api/book",
   "/api/intake-forms",
   "/api/portal",
+  "/api/pay",
 ];
 
 export function proxy(request: NextRequest) {

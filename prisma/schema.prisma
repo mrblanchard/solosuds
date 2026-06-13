@@ -79,6 +79,20 @@ model Organization {
   subscriptionStatus   String?   @default("trialing")
   subscriptionPeriodEnd DateTime?
   plan                 String?   @default("solo")  // solo | practice | clinic
+
+  // Stripe Connect (practitioner's own account, receives invoice payments directly)
+  stripeConnectAccountId        String?  @unique
+  stripeConnectChargesEnabled   Boolean  @default(false)
+  stripeConnectDetailsSubmitted Boolean  @default(false)
+  stripeConnectPayoutsEnabled   Boolean  @default(false)
+
+  // Alt payment method links (manual / link-only — client pays externally, owner marks paid)
+  venmoHandle    String?  // without leading @
+  cashAppHandle  String?  // without leading $
+  paypalHandle   String?  // paypal.me/<handle> username, or email
+  squareHandle   String?  // full "Square Pay" link URL
+  zelleHandle    String?  // email or phone shown as text instructions (no deep link)
+
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
@@ -383,6 +397,7 @@ model Invoice {
   dueDate               DateTime?
   paidAt                DateTime?
   stripePaymentIntentId String?
+  publicToken           String?       @unique
   notes                 String?       @db.Text
   lineItems             Json
   createdAt             DateTime      @default(now())

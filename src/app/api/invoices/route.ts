@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import crypto from "crypto";
 import { stripe } from "@/lib/stripe";
 
 const lineItemSchema = z.object({
@@ -63,6 +64,7 @@ export async function POST(req: Request) {
       dueDate: dueDate ? new Date(dueDate) : undefined,
       lineItems: enrichedItems as never,
       status: "DRAFT",
+      publicToken: crypto.randomBytes(16).toString("hex"),
     },
   });
 

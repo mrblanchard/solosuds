@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import { notifyConversion } from "@/lib/email";
+import { markInvoicePaidFromPaymentIntent } from "@/lib/invoices";
 import Stripe from "stripe";
 
 export async function POST(req: Request) {
@@ -61,18 +62,7 @@ export async function POST(req: Request) {
     }
 
     case "payment_intent.succeeded": {
-      const pi = event.data.object as Stripe.PaymentIntent;
-      const invoiceId = pi.metadata?.invoiceId;
-      if (invoiceId) {
-        await db.invoice.updateMany({
-          where: { id: invoiceId },
-          data: {
-            status: "PAID",
-            paidAt: new Date(),
-            stripePaymentIntentId: pi.id,
-          },
-        });
-      }
+      await markInvoicePaidFromPaymentIntent(event.data.object as Stripe.PaymentIntent);
       break;
     }
 

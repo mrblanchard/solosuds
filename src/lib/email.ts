@@ -1,4 +1,5 @@
 ﻿import { Resend } from "resend";
+import type { AltPaymentOption } from "@/lib/alt-payments";
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY || "re_placeholder");
@@ -240,6 +241,63 @@ export async function sendThankYouEmail({
     html: buildBrandedEmail(content, branding),
     ...replyToHeader(branding),
   });
+}
+
+export async function sendInvoiceEmail({
+  to,
+  clientName,
+  invoiceNumber,
+  total,
+  dueDate,
+  payUrl,
+  altPayments,
+  branding,
+}: {
+  to: string;
+  clientName: string;
+  invoiceNumber: string;
+  total: number; // cents
+  dueDate?: string | null;
+  payUrl: string;
+  altPayments: AltPaymentOption[];
+  branding?: OrgBranding | null;
+}) {
+  const color = branding?.primaryColor && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(branding.primaryColor)
+    ? branding.primaryColor
+    : "#4f46e5";
+  const amount = (total / 100).toFixed(2);
+
+  const altSection = altPayments.length
+    ? `
+    <p style="margin-top:24px;font-size:14px;color:#6b7280;">Other ways to pay:</p>
+    <ul style="font-size:14px;color:#374151;">
+      ${altPayments.map((o) => o.url
+        ? `<li><a href="${o.url}">${o.label}</a></li>`
+        : `<li>${o.instructions}</li>`
+      ).join("")}
+    </ul>`
+    : "";
+
+  const content = `
+    <h2 style="margin-top:0;">Invoice #${invoiceNumber}</h2>
+    <p>Hi ${clientName},</p>
+    <p>You have a new invoice for <strong>$${amount}</strong>${dueDate ? ` due ${dueDate}` : ""}.</p>
+    <p><a href="${payUrl}" style="display:inline-block;background:${color};color:white;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;">View &amp; Pay Invoice</a></p>
+    ${altSection}
+  `;
+
+  const subject = `Invoice #${invoiceNumber} from ${branding?.name || process.env.FROM_NAME}`;
+  const html = buildBrandedEmail(content, branding);
+
+  const result = await getResend().emails.send({
+    from: `${branding?.name || process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+    to,
+    subject,
+    html,
+    ...replyToHeader(branding),
+  });
+
+  return { subject, html, result };
 }
 
 export async function sendEmail({

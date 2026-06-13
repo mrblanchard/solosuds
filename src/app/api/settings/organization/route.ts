@@ -17,7 +17,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, phone, email, address, website, timezone, practiceType, noteType, defaultIntakeFormId, primaryColor, logoUrl, faviconUrl, brandFont, emailSignature, replyToEmail } = body;
+    const { name, phone, email, address, website, timezone, practiceType, noteType, defaultIntakeFormId, primaryColor, logoUrl, faviconUrl, brandFont, emailSignature, replyToEmail, venmoHandle, cashAppHandle, paypalHandle, squareHandle, zelleHandle } = body;
 
     if (name !== undefined && name.trim() === "") {
       return NextResponse.json({ error: "Organization name cannot be empty" }, { status: 400 });
@@ -65,6 +65,11 @@ export async function PATCH(request: NextRequest) {
         ...(brandFont !== undefined && { brandFont: brandFont || null }),
         ...(emailSignature !== undefined && { emailSignature: emailSignature ? sanitizeEmailHtml(emailSignature) : null }),
         ...(replyToEmail !== undefined && { replyToEmail: replyToEmail || null }),
+        ...(venmoHandle !== undefined && { venmoHandle: venmoHandle ? venmoHandle.trim().replace(/^@/, "") : null }),
+        ...(cashAppHandle !== undefined && { cashAppHandle: cashAppHandle ? cashAppHandle.trim().replace(/^\$/, "") : null }),
+        ...(paypalHandle !== undefined && { paypalHandle: paypalHandle ? paypalHandle.trim() : null }),
+        ...(squareHandle !== undefined && { squareHandle: squareHandle ? squareHandle.trim() : null }),
+        ...(zelleHandle !== undefined && { zelleHandle: zelleHandle ? zelleHandle.trim() : null }),
       },
     });
 

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import crypto from "crypto";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -33,6 +34,13 @@ export default async function InvoiceDetailPage({ params }: Props) {
   });
 
   if (!invoice) notFound();
+
+  if (!invoice.publicToken) {
+    invoice.publicToken = (await db.invoice.update({
+      where: { id: invoice.id },
+      data: { publicToken: crypto.randomBytes(16).toString("hex") },
+    })).publicToken;
+  }
 
   const lineItems = invoice.lineItems as Array<{
     description: string;
@@ -150,7 +158,7 @@ export default async function InvoiceDetailPage({ params }: Props) {
       )}
 
       {/* Actions */}
-      <InvoiceActions invoice={{ id: invoice.id, status: invoice.status }} />
+      <InvoiceActions invoice={{ id: invoice.id, status: invoice.status, publicToken: invoice.publicToken }} />
     </div>
   );
 }

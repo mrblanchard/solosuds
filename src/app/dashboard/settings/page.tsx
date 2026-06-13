@@ -6,6 +6,7 @@ import OrgSettings from "@/components/settings/org-settings";
 import ServicesSettings from "@/components/settings/services-settings";
 import ThemePicker from "@/components/settings/theme-picker";
 import BookingSettings from "@/components/settings/booking-settings";
+import PaymentsSettings from "@/components/settings/payments-settings";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -18,7 +19,11 @@ export default async function SettingsPage() {
     }),
     db.organization.findUnique({
       where: { id: session.user.organizationId },
-      select: { id: true, name: true, phone: true, email: true, address: true, website: true, timezone: true, practiceType: true, noteType: true, defaultIntakeFormId: true, inviteCode: true, plan: true },
+      select: {
+        id: true, name: true, phone: true, email: true, address: true, website: true, timezone: true, practiceType: true, noteType: true, defaultIntakeFormId: true, inviteCode: true, plan: true,
+        stripeConnectAccountId: true, stripeConnectChargesEnabled: true, stripeConnectDetailsSubmitted: true, stripeConnectPayoutsEnabled: true,
+        venmoHandle: true, cashAppHandle: true, paypalHandle: true, squareHandle: true, zelleHandle: true,
+      },
     }),
     db.service.findMany({
       where: { organizationId: session.user.organizationId, isActive: true },
@@ -47,6 +52,7 @@ export default async function SettingsPage() {
       {(user.role === "OWNER" || user.role === "ADMIN") && (
         <>
           <OrgSettings org={org} intakeForms={intakeForms} plan={org.plan ?? "solo"} />
+          <PaymentsSettings org={org} />
           <BookingSettings orgId={org.id} />
           <ServicesSettings initialServices={services} />
         </>
