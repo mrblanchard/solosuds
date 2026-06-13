@@ -147,7 +147,7 @@ export default function LandingPage() {
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="rounded-2xl border border-gray-100 p-6 hover:border-indigo-200 hover:shadow-md transition-all"
+                className="rounded-2xl border border-gray-100 bg-white p-6 hover:border-indigo-200 hover:shadow-md transition-all"
               >
                 <div className="mb-4 inline-flex rounded-xl bg-indigo-50 p-3">
                   <feature.icon className="h-6 w-6 text-indigo-600" />
