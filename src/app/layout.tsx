@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   description:
     "SOAP notes, scheduling, client management, and billing for healthcare SMBs.",
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
 
