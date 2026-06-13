@@ -133,7 +133,9 @@ function RegisterContent() {
         <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <img src="/logo.png" alt="SoloSuds" className="h-12 w-auto" />
+            <Link href="/">
+              <img src="/logo.png" alt="SoloSuds" className="h-12 w-auto" />
+            </Link>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">
             {inviteCode ? "Join your team" : "Create your account"}

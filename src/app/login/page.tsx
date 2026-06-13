@@ -107,7 +107,9 @@ function LoginForm() {
         <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center text-center">
-          <img src="/logo.png" alt="SoloSuds" className="h-15 w-auto mb-2" />
+          <Link href="/">
+            <img src="/logo.png" alt="SoloSuds" className="h-15 w-auto mb-2" />
+          </Link>
           <p className="mt-1 text-sm text-gray-500">
             Care without the chaos
           </p>

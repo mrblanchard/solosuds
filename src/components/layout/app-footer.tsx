@@ -8,10 +8,10 @@ export function AppFooter() {
         <div className="flex flex-col gap-8 sm:flex-row sm:justify-between">
           {/* Brand */}
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <img src="/logo.png" alt="SoloSuds" className="h-7 w-auto" />
               <span className="text-base font-semibold text-gray-800">SoloSuds</span>
-            </div>
+            </Link>
             <p className="max-w-xs text-xs text-gray-500 leading-relaxed">
               Practice management software for independent practitioners.
             </p>
