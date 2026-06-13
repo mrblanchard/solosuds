@@ -220,8 +220,8 @@ export default function LandingPage() {
               </div>
               <p className="text-xs text-indigo-200">Your clients see your brand — not ours.</p>
               <div className="rounded-xl bg-white/10 border border-white/20 p-4 text-sm">
-                <p className="text-white font-medium">From: Missy&apos;s Massage Studio</p>
-                <p className="text-indigo-200 text-xs mt-0.5">reply-to: hello@missysmassage.com</p>
+                <p className="text-white font-medium">From: Your Practice Name</p>
+                <p className="text-indigo-200 text-xs mt-0.5">reply-to: hello@yourpractice.com</p>
                 <p className="mt-2 text-indigo-100 text-xs">Hi Sarah, your intake form is ready…</p>
               </div>
             </div>
