@@ -266,3 +266,38 @@ export async function sendEmail({
     ...(replyTo ? { replyTo } : {}),
   });
 }
+
+/** Sends an internal alert to ADMIN_NOTIFICATION_EMAIL. No-op if unset; never throws. */
+async function sendAdminNotification(subject: string, html: string) {
+  const to = process.env.ADMIN_NOTIFICATION_EMAIL;
+  if (!to) return;
+  try {
+    await getResend().emails.send({
+      from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+      to,
+      subject,
+      html,
+    });
+  } catch (err) {
+    console.error("[sendAdminNotification]", err);
+  }
+}
+
+/** Notifies the admin when a new organization signs up for a trial. */
+export async function notifyTrialSignup(params: { orgName: string; ownerName: string; ownerEmail: string }) {
+  const { orgName, ownerName, ownerEmail } = params;
+  await sendAdminNotification(
+    `New trial signup: ${orgName}`,
+    `<p><strong>${escapeHtml(orgName)}</strong> just started a free trial.</p>
+<p>Owner: ${escapeHtml(ownerName)} (${escapeHtml(ownerEmail)})</p>`
+  );
+}
+
+/** Notifies the admin when an organization converts from trial to a paid subscription. */
+export async function notifyConversion(params: { orgName: string; plan: string }) {
+  const { orgName, plan } = params;
+  await sendAdminNotification(
+    `New paid subscription: ${orgName}`,
+    `<p><strong>${escapeHtml(orgName)}</strong> just converted to a paid <strong>${escapeHtml(plan)}</strong> plan.</p>`
+  );
+}

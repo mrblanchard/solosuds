@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
+import { notifyConversion } from "@/lib/email";
 import Stripe from "stripe";
 
 export async function POST(req: Request) {
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
         const metaOrgId = sub.metadata?.organizationId ?? orgId;
 
         if (metaOrgId) {
-          await db.organization.update({
+          const updatedOrg = await db.organization.update({
             where: { id: metaOrgId },
             data: {
               stripeSubscriptionId: subId,
@@ -52,6 +53,8 @@ export async function POST(req: Request) {
               plan: (sub.metadata?.plan as string) ?? "solo",
             },
           });
+
+          await notifyConversion({ orgName: updatedOrg.name, plan: updatedOrg.plan ?? "solo" });
         }
       }
       break;

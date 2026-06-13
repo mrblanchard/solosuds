@@ -4,6 +4,7 @@ import crypto from "crypto";
 import { db } from "@/lib/db";
 import { validatePassword, INVITE_CODE_TTL_MS } from "@/lib/utils";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { notifyTrialSignup } from "@/lib/email";
 
 type InviteRole = "ADMIN" | "PRACTITIONER" | "FRONT_DESK";
 
@@ -148,6 +149,11 @@ export async function POST(request: NextRequest) {
         },
       });
     });
+
+    // New organization (not joining an existing one via invite) = new trial signup
+    if (!inviteCode) {
+      await notifyTrialSignup({ orgName: organizationName, ownerName: name, ownerEmail: email });
+    }
 
     const autoSignInToken = fromGoogle ? undefined : generateAutoSignInToken(email);
     return NextResponse.json({ id: user.id, autoSignInToken }, { status: 201 });
