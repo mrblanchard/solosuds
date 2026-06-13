@@ -128,12 +128,15 @@ export function Sidebar({
           "flex h-16 items-center border-b-primary",
           isCollapsed ? "justify-center px-2" : "justify-between px-4"
         )}>
-          <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
+          <Link href="/dashboard" className="flex min-w-0 flex-1 items-center gap-2">
             <img
               src={logoSrc}
               alt={logoAlt}
-              className={isCollapsed ? "h-8 w-auto" : "h-12 w-auto"}
+              className={isCollapsed ? "h-8 w-auto shrink-0" : "h-10 w-auto shrink-0"}
             />
+            {!isCollapsed && (
+              <span className="truncate text-lg font-bold text-gray-800">{logoAlt}</span>
+            )}
           </Link>
           {!isCollapsed && (
             mobile ? (

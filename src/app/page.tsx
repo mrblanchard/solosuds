@@ -20,8 +20,9 @@ export default function LandingPage() {
       <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b-primary">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center shrink-0">
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center gap-2">
               <img src="/logo.png" alt="SoloSuds" className="h-10 w-auto" />
+              <span className="text-xl font-bold text-gray-800">SoloSuds</span>
             </Link>
           </div>
           <LandingNav />
