@@ -143,7 +143,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900">Everything your practice needs</h2>
             <p className="mt-3 text-gray-500 max-w-xl mx-auto">
-              From first appointment to final invoice, Soap Suds handles the workflow.
+              From first appointment to final invoice, SoloSUDS handles the workflow.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
