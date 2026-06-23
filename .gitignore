@@ -16,6 +16,9 @@
 # local verification tests (not committed)
 /tests/
 
+# stray nested clone of this repo, kept locally but not version-controlled
+/solosuds/
+
 # next.js
 /.next/
 /out/
