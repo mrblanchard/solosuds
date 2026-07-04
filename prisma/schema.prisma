@@ -269,11 +269,15 @@ model Appointment {
   reminderSentAt DateTime?
   googleEventId  String?
   outlookEventId String?
+  recurrence        TaskRecurrence @default(NONE)
+  recurrenceGroupId String?
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
   soapNotes SoapNote[]
   invoices  Invoice[]
+
+  @@index([recurrenceGroupId])
 }
 
 // ─── SOAP Notes ───────────────────────────────────────────────────────────────

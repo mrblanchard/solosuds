@@ -18,6 +18,7 @@ const schema = z.object({
   endTime: z.string().min(1, "End time is required"),
   notes: z.string().max(5000, "Notes are too long").optional(),
   sendReminder: z.boolean().optional(),
+  recurrence: z.enum(["NONE", "WEEKLY", "BIWEEKLY", "MONTHLY"]).optional(),
 }).refine((d) => !d.startTime || !d.endTime || new Date(d.endTime) > new Date(d.startTime), {
   message: "End time must be after start time",
   path: ["endTime"],
@@ -65,6 +66,7 @@ export default function AppointmentForm({
       startTime: defaultStartTime ?? defaultValues?.startTime ?? "",
       endTime: defaultValues?.endTime ?? "",
       sendReminder: true,
+      recurrence: "NONE",
     },
   });
 
@@ -113,6 +115,11 @@ export default function AppointmentForm({
         return;
       }
       const appt = await res.json();
+      if (appt.skippedOccurrences > 0) {
+        alert(
+          `Booked. ${appt.skippedOccurrences} future occurrence(s) were skipped because that time slot was already taken, you can add those manually.`
+        );
+      }
       router.push(`/dashboard/schedule/${appt.id}`);
       router.refresh();
     } catch (err) {
@@ -236,6 +243,22 @@ export default function AppointmentForm({
             className="mt-1.5"
           />
         </div>
+
+        {!appointmentId && (
+          <div>
+            <Label htmlFor="recurrence">Repeat</Label>
+            <select
+              id="recurrence"
+              {...register("recurrence")}
+              className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="NONE">Does not repeat</option>
+              <option value="WEEKLY">Weekly</option>
+              <option value="BIWEEKLY">Every 2 weeks</option>
+              <option value="MONTHLY">Monthly</option>
+            </select>
+          </div>
+        )}
 
         <div className="sm:col-span-2 flex items-center gap-2">
           <input

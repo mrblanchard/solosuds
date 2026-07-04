@@ -1,9 +1,11 @@
 ﻿import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { sendAppointmentReminder } from "@/lib/email";
 import { formatDate } from "@/lib/utils";
+import { hasConflict } from "@/lib/scheduling";
 
 const schema = z.object({
   // Client: either select an existing client by id, OR pass a name to create one on the fly
@@ -16,7 +18,25 @@ const schema = z.object({
   endTime: z.string().min(1, "End time is required"),
   notes: z.string().optional(),
   sendReminder: z.boolean().default(true),
+  recurrence: z.enum(["NONE", "DAILY", "WEEKLY", "BIWEEKLY", "MONTHLY"]).default("NONE"),
 });
+
+// How many future occurrences to generate for each recurrence cadence (roughly 6 months out)
+const OCCURRENCE_COUNT: Record<string, number> = {
+  DAILY: 60,
+  WEEKLY: 26,
+  BIWEEKLY: 13,
+  MONTHLY: 6,
+};
+
+function nextOccurrence(date: Date, recurrence: string): Date {
+  const next = new Date(date);
+  if (recurrence === "DAILY") next.setDate(next.getDate() + 1);
+  else if (recurrence === "WEEKLY") next.setDate(next.getDate() + 7);
+  else if (recurrence === "BIWEEKLY") next.setDate(next.getDate() + 14);
+  else if (recurrence === "MONTHLY") next.setMonth(next.getMonth() + 1);
+  return next;
+}
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -31,10 +51,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
   }
 
-  const { sendReminder, startTime, endTime, serviceId, clientId, clientName, practitionerId, notes } = parsed.data;
+  const { sendReminder, startTime, endTime, serviceId, clientId, clientName, practitionerId, notes, recurrence } = parsed.data;
 
   // Resolve practitioner — default to the current user
   const resolvedPractitionerId = practitionerId || session.user.id;
+
+  const conflict = await hasConflict({
+    organizationId: orgId,
+    practitionerId: resolvedPractitionerId,
+    startTime: new Date(startTime),
+    endTime: new Date(endTime),
+  });
+  if (conflict) {
+    return NextResponse.json(
+      { error: "This practitioner already has an appointment during that time." },
+      { status: 409 }
+    );
+  }
 
   // Resolve client — use existing if clientId provided, create minimal record if name given
   let resolvedClientId: string | undefined;
@@ -60,7 +93,10 @@ export async function POST(req: Request) {
     client = created;
   }
 
+  const recurrenceGroupId = recurrence !== "NONE" ? randomUUID() : undefined;
+
   let appointment;
+  let skippedOccurrences = 0;
   try {
     appointment = await db.appointment.create({
       data: {
@@ -72,9 +108,50 @@ export async function POST(req: Request) {
         serviceId: serviceId || undefined,
         notes: notes || undefined,
         status: "SCHEDULED",
+        recurrence,
+        recurrenceGroupId,
       },
       include: { service: true },
     });
+
+    // Generate future occurrences for recurring appointments, skipping any that conflict
+    if (recurrence !== "NONE") {
+      const durationMs = new Date(endTime).getTime() - new Date(startTime).getTime();
+      let cursorStart = new Date(startTime);
+      const count = OCCURRENCE_COUNT[recurrence] ?? 0;
+
+      for (let i = 1; i < count; i++) {
+        cursorStart = nextOccurrence(cursorStart, recurrence);
+        const cursorEnd = new Date(cursorStart.getTime() + durationMs);
+
+        const occurrenceConflict = await hasConflict({
+          organizationId: orgId,
+          practitionerId: resolvedPractitionerId,
+          startTime: cursorStart,
+          endTime: cursorEnd,
+        });
+
+        if (occurrenceConflict) {
+          skippedOccurrences++;
+          continue;
+        }
+
+        await db.appointment.create({
+          data: {
+            organizationId: orgId,
+            ...(resolvedClientId && { clientId: resolvedClientId }),
+            practitionerId: resolvedPractitionerId,
+            startTime: cursorStart,
+            endTime: cursorEnd,
+            serviceId: serviceId || undefined,
+            notes: notes || undefined,
+            status: "SCHEDULED",
+            recurrence,
+            recurrenceGroupId,
+          },
+        });
+      }
+    }
   } catch (err) {
     console.error("[appointments POST] DB error:", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
@@ -155,7 +232,7 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json(appointment, { status: 201 });
+  return NextResponse.json({ ...appointment, skippedOccurrences }, { status: 201 });
 }
 
 export async function GET(req: Request) {

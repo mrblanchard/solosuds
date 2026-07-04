@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
+import { hasConflict } from "@/lib/scheduling";
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,6 +45,18 @@ export async function POST(request: NextRequest) {
       where: { id: serviceId, organizationId: orgId, isActive: true },
     });
     if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });
+
+    const conflict = await hasConflict({
+      organizationId: orgId,
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+    });
+    if (conflict) {
+      return NextResponse.json(
+        { error: "That time is no longer available. Please pick a different time." },
+        { status: 409 }
+      );
+    }
 
     // Find or create client
     let client = await db.client.findFirst({

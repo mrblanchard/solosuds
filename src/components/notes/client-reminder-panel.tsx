@@ -191,12 +191,13 @@ export default function ClientReminderPanel({
                     )}
                   </div>
                 </div>
-                {alreadySent && !isSending ? (
-                  <div className="flex items-center gap-1.5 text-sm text-green-600">
-                    <CheckCircle2 className="h-4 w-4" />
-                    Sent
-                  </div>
-                ) : (
+                <div className="flex items-center gap-3">
+                  {alreadySent && (
+                    <div className="flex items-center gap-1.5 text-sm text-green-600">
+                      <CheckCircle2 className="h-4 w-4" />
+                      Sent
+                    </div>
+                  )}
                   <Button
                     size="sm"
                     variant="outline"
@@ -208,9 +209,9 @@ export default function ClientReminderPanel({
                     ) : (
                       <Send className="h-3.5 w-3.5 mr-1" />
                     )}
-                    Send
+                    {alreadySent ? "Resend" : "Send"}
                   </Button>
-                )}
+                </div>
               </div>
             );
           })
