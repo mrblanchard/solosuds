@@ -14,6 +14,7 @@ const PUBLIC_PATHS = [
   "/hipaa",
   "/api/auth",
   "/api/webhooks",
+  "/api/twilio",
   "/api/book",
   "/api/intake-forms",
   "/api/portal",
