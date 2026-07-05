@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { appendLead } from "@/lib/leads-store";
+import { isAdminSession } from "@/lib/admin";
 
 const leadSchema = z.object({
   business: z.string().min(1, "Business name is required").max(200),
@@ -13,7 +14,7 @@ const leadSchema = z.object({
 });
 
 export async function POST(req: Request) {
-  if (process.env.NODE_ENV === "production") {
+  if (!(await isAdminSession())) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

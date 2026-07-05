@@ -1,9 +1,10 @@
 import { db } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 import { notFound } from "next/navigation";
+import { isAdminSession } from "@/lib/admin";
 
 export default async function DevSubscribersPage() {
-  if (process.env.NODE_ENV === "production") notFound();
+  if (!(await isAdminSession())) notFound();
 
   const [total, byStatus, byPlan, orgs] = await Promise.all([
     db.organization.count(),

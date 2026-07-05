@@ -26,6 +26,7 @@ export function DashboardShell({
   const { data: session } = useSession();
   const practiceType = session?.user?.practiceType;
   const userRole = session?.user?.role;
+  const isAdmin = session?.user?.email === "mrjeremyblanchard@gmail.com";
 
   // Hydrate collapsed preference from localStorage
   useEffect(() => {
@@ -53,6 +54,7 @@ export function DashboardShell({
         practiceType={practiceType}
         userRole={userRole}
         branding={branding}
+        isAdmin={isAdmin}
       />
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <Topbar onMenuClick={() => setMobileOpen(true)} branding={branding} />

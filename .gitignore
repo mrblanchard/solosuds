@@ -16,6 +16,9 @@
 # local verification tests (not committed)
 /tests/
 
+# personal local-only admin tool (not committed, not deployed)
+/local-admin/
+
 # stray nested clone of this repo, kept locally but not version-controlled
 /solosuds/
 

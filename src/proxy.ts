@@ -25,12 +25,8 @@ const PUBLIC_PATHS = [
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Dev-only debug routes bypass auth entirely; the routes themselves 404 in production.
-  const isDevRoute = pathname.startsWith("/dev/") || pathname.startsWith("/api/dev/");
-  if (isDevRoute && process.env.NODE_ENV !== "production") {
-    return NextResponse.next();
-  }
-
+  // /dev and /api/dev require login (checked here) and are further
+  // restricted to a single admin account at the page/route level.
   const isPublic = PUBLIC_PATHS.some(
     (path) =>
       pathname === path || pathname.startsWith(path + "/")

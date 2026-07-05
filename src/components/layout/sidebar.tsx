@@ -20,6 +20,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Paintbrush,
+  Wrench,
 } from "lucide-react";
 
 type PracticeType = "THERAPY" | "SALON" | "MEDICAL" | "FITNESS" | "OTHER" | undefined;
@@ -102,7 +103,13 @@ interface SidebarProps {
   practiceType?: PracticeType;
   userRole?: UserRole;
   branding?: { name: string; logoUrl: string | null; primaryColor: string | null } | null;
+  isAdmin?: boolean;
 }
+
+const ADMIN_NAV: NavItem[] = [
+  { href: "/dev/subscribers", label: "Subscribers", icon: Wrench },
+  { href: "/dev/leads", label: "Leads", icon: Wrench },
+];
 
 export function Sidebar({
   mobileOpen = false,
@@ -112,6 +119,7 @@ export function Sidebar({
   practiceType,
   userRole,
   branding,
+  isAdmin = false,
 }: SidebarProps) {
   const pathname = usePathname();
   const navItems = buildNav(practiceType, userRole);
@@ -210,6 +218,37 @@ export function Sidebar({
               </Link>
             );
           })}
+
+          {isAdmin && (
+            <>
+              {!isCollapsed && (
+                <p className="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                  Admin
+                </p>
+              )}
+              {ADMIN_NAV.map(({ href, label, icon: Icon }) => {
+                const active = pathname === href || pathname.startsWith(href + "/");
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={mobile ? onMobileClose : undefined}
+                    title={isCollapsed ? label : undefined}
+                    className={cn(
+                      "flex items-center rounded-lg text-sm font-medium transition-colors",
+                      isCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2",
+                      active
+                        ? "bg-indigo-50 text-indigo-700"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    )}
+                  >
+                    <Icon className={cn("h-5 w-5 shrink-0", active ? "text-indigo-600" : "text-gray-400")} />
+                    {!isCollapsed && <span>{label}</span>}
+                  </Link>
+                );
+              })}
+            </>
+          )}
         </nav>
 
         {/* Sign out */}
