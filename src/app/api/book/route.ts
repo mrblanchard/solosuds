@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
 import { hasConflict } from "@/lib/scheduling";
@@ -85,12 +86,14 @@ export async function POST(request: NextRequest) {
         endTime: new Date(endTime),
         status: "SCHEDULED",
         notes: notes ?? null,
+        publicToken: randomUUID(),
       },
     });
 
     // Send confirmation email
     if (clientEmail) {
       try {
+        const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
         await sendAppointmentReminder({
           to: clientEmail,
           clientName: `${clientFirstName} ${clientLastName}`,
@@ -100,6 +103,7 @@ export async function POST(request: NextRequest) {
           serviceName: service.name,
           startDateTime: startTime,
           endDateTime: endTime,
+          manageUrl: `${baseUrl}/manage/${appointment.publicToken}`,
         });
       } catch {
         // Non-fatal — log but don't reject

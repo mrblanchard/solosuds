@@ -19,6 +19,7 @@ const invoiceSchema = z.object({
   dueDate: z.string().optional(),
   notes: z.string().optional(),
   tax: z.number().int().default(0),
+  discountCode: z.string().max(50).optional(),
 });
 
 export async function POST(req: Request) {
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
   }
 
-  const { lineItems, dueDate, tax, ...data } = parsed.data;
+  const { lineItems, dueDate, tax, discountCode, ...data } = parsed.data;
 
   const client = await db.client.findFirst({
     where: { id: data.clientId, organizationId: orgId },
@@ -47,7 +48,32 @@ export async function POST(req: Request) {
   }));
 
   const subtotal = enrichedItems.reduce((sum, item) => sum + item.total, 0);
-  const total = subtotal + tax;
+
+  let discountCodeId: string | undefined;
+  let discountAmount = 0;
+
+  if (discountCode?.trim()) {
+    const code = await db.discountCode.findUnique({
+      where: { organizationId_code: { organizationId: orgId, code: discountCode.trim().toUpperCase() } },
+    });
+    if (!code || !code.active) {
+      return NextResponse.json({ error: "Invalid or inactive discount code" }, { status: 400 });
+    }
+    if (code.expiresAt && code.expiresAt < new Date()) {
+      return NextResponse.json({ error: "This discount code has expired" }, { status: 400 });
+    }
+    if (code.usageLimit != null && code.usageCount >= code.usageLimit) {
+      return NextResponse.json({ error: "This discount code has reached its usage limit" }, { status: 400 });
+    }
+
+    discountCodeId = code.id;
+    discountAmount = code.type === "PERCENT"
+      ? Math.round(subtotal * (code.amount / 100))
+      : code.amount;
+    discountAmount = Math.min(discountAmount, subtotal); // never discount below $0 subtotal
+  }
+
+  const total = subtotal + tax - discountAmount;
 
   // Generate invoice number
   const count = await db.invoice.count({ where: { organizationId: orgId } });
@@ -60,6 +86,8 @@ export async function POST(req: Request) {
       number,
       subtotal,
       tax,
+      discountCodeId,
+      discountAmount,
       total,
       dueDate: dueDate ? new Date(dueDate) : undefined,
       lineItems: enrichedItems as never,
@@ -67,6 +95,13 @@ export async function POST(req: Request) {
       publicToken: crypto.randomBytes(16).toString("hex"),
     },
   });
+
+  if (discountCodeId) {
+    await db.discountCode.update({
+      where: { id: discountCodeId },
+      data: { usageCount: { increment: 1 } },
+    });
+  }
 
   return NextResponse.json(invoice, { status: 201 });
 }

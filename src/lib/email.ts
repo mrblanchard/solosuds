@@ -118,6 +118,7 @@ export async function sendAppointmentReminder({
   startDateTime,
   endDateTime,
   branding,
+  manageUrl,
 }: {
   to: string;
   clientName: string;
@@ -128,6 +129,7 @@ export async function sendAppointmentReminder({
   startDateTime?: string;
   endDateTime?: string;
   branding?: OrgBranding | null;
+  manageUrl?: string;
 }) {
   const eventTitle = `${serviceName} with ${practitionerName}`;
   const eventDescription = `Service: ${serviceName}\nPractitioner: ${practitionerName}\nDate: ${appointmentDate}\nTime: ${appointmentTime}`;
@@ -169,7 +171,9 @@ export async function sendAppointmentReminder({
       <li><strong>Date:</strong> ${appointmentDate}</li>
       <li><strong>Time:</strong> ${appointmentTime}</li>
     </ul>
-    <p>If you need to reschedule or cancel, please contact us as soon as possible.</p>
+    ${manageUrl
+      ? `<p><a href="${manageUrl}" style="color:#4f46e5;">Reschedule or cancel this appointment</a></p>`
+      : `<p>If you need to reschedule or cancel, please contact us as soon as possible.</p>`}
     ${calendarSection}
   `;
 
@@ -179,6 +183,33 @@ export async function sendAppointmentReminder({
     subject: `Reminder: Your appointment on ${appointmentDate}`,
     html: buildBrandedEmail(content, branding),
     ...(attachments ? { attachments } : {}),
+    ...replyToHeader(branding),
+  });
+}
+
+export async function sendWaitlistOpening({
+  to,
+  clientName,
+  bookingUrl,
+  branding,
+}: {
+  to: string;
+  clientName: string;
+  bookingUrl: string;
+  branding?: OrgBranding | null;
+}) {
+  const content = `
+    <h2 style="margin-top:0;">A spot opened up!</h2>
+    <p>Hi ${clientName},</p>
+    <p>A time slot just became available. Since you're on the waitlist, we wanted to give you first chance to grab it.</p>
+    <p><a href="${bookingUrl}" style="display:inline-block;background:#4f46e5;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;">Book This Spot</a></p>
+    <p style="font-size:14px;color:#6b7280;">Spots like this tend to go fast, first come, first served.</p>
+  `;
+  return getResend().emails.send({
+    from: `${branding?.name || process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
+    to,
+    subject: "A spot just opened up",
+    html: buildBrandedEmail(content, branding),
     ...replyToHeader(branding),
   });
 }

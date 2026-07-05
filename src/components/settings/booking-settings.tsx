@@ -3,16 +3,41 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { CalendarDays, Copy, Check, ExternalLink, Settings2 } from "lucide-react";
 import Link from "next/link";
 
 interface BookingSettingsProps {
   orgId: string;
+  bookingStartHour: number;
+  bookingEndHour: number;
+  bookingDays: number[];
+  bookingSlotMinutes: number;
+  maxDailyAppointments: number | null;
 }
 
-export default function BookingSettings({ orgId }: BookingSettingsProps) {
+const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+export default function BookingSettings({
+  orgId,
+  bookingStartHour,
+  bookingEndHour,
+  bookingDays,
+  bookingSlotMinutes,
+  maxDailyAppointments,
+}: BookingSettingsProps) {
   const [origin, setOrigin] = useState("");
   const [copied, setCopied] = useState(false);
+
+  const [startHour, setStartHour] = useState(bookingStartHour);
+  const [endHour, setEndHour] = useState(bookingEndHour);
+  const [days, setDays] = useState<number[]>(bookingDays);
+  const [slotMinutes, setSlotMinutes] = useState(bookingSlotMinutes);
+  const [maxDaily, setMaxDaily] = useState<string>(maxDailyAppointments != null ? String(maxDailyAppointments) : "");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -27,7 +52,6 @@ export default function BookingSettings({ orgId }: BookingSettingsProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // fallback
       const el = document.createElement("textarea");
       el.value = bookingUrl;
       document.body.appendChild(el);
@@ -36,6 +60,39 @@ export default function BookingSettings({ orgId }: BookingSettingsProps) {
       document.body.removeChild(el);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  }
+
+  function toggleDay(day: number) {
+    setDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort()));
+  }
+
+  async function saveAvailability() {
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+    try {
+      const res = await fetch("/api/settings/organization", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookingStartHour: startHour,
+          bookingEndHour: endHour,
+          bookingDays: days,
+          bookingSlotMinutes: slotMinutes,
+          maxDailyAppointments: maxDaily.trim() === "" ? null : parseInt(maxDaily, 10),
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Failed to save");
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -95,6 +152,96 @@ export default function BookingSettings({ orgId }: BookingSettingsProps) {
                 </Button>
               </a>
             )}
+          </div>
+        </div>
+
+        {/* Availability config */}
+        <div className="rounded-lg border border-gray-100 p-4 space-y-4">
+          <p className="text-sm font-medium text-gray-700">Availability</p>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="startHour">Opens at</Label>
+              <select
+                id="startHour"
+                value={startHour}
+                onChange={(e) => setStartHour(Number(e.target.value))}
+                className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                {Array.from({ length: 24 }, (_, h) => (
+                  <option key={h} value={h}>{h === 0 ? "12am" : h < 12 ? `${h}am` : h === 12 ? "12pm" : `${h - 12}pm`}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="endHour">Closes at</Label>
+              <select
+                id="endHour"
+                value={endHour}
+                onChange={(e) => setEndHour(Number(e.target.value))}
+                className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                {Array.from({ length: 24 }, (_, h) => h + 1).map((h) => (
+                  <option key={h} value={h}>{h === 24 ? "12am" : h < 12 ? `${h}am` : h === 12 ? "12pm" : `${h - 12}pm`}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <Label>Days open</Label>
+            <div className="mt-1.5 flex flex-wrap gap-2">
+              {DAY_LABELS.map((label, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => toggleDay(i)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                    days.includes(i)
+                      ? "bg-indigo-600 text-white"
+                      : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="slotMinutes">Slot interval (minutes)</Label>
+              <select
+                id="slotMinutes"
+                value={slotMinutes}
+                onChange={(e) => setSlotMinutes(Number(e.target.value))}
+                className="mt-1.5 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                {[15, 30, 45, 60].map((m) => (
+                  <option key={m} value={m}>{m} min</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="maxDaily">Max appointments/day</Label>
+              <Input
+                id="maxDaily"
+                type="number"
+                min={1}
+                placeholder="No limit"
+                value={maxDaily}
+                onChange={(e) => setMaxDaily(e.target.value)}
+                className="mt-1.5"
+              />
+            </div>
+          </div>
+
+          {error && <p className="text-sm text-red-600">{error}</p>}
+
+          <div className="flex justify-end">
+            <Button type="button" size="sm" onClick={saveAvailability} disabled={saving}>
+              {saving ? "Saving…" : saved ? "Saved!" : "Save Availability"}
+            </Button>
           </div>
         </div>
 

@@ -8,6 +8,7 @@ const PUBLIC_PATHS = [
   "/forgot-password",
   "/intake",
   "/book",
+  "/manage",
   "/portal",
   "/pay",
   "/terms",
@@ -17,6 +18,7 @@ const PUBLIC_PATHS = [
   "/api/twilio",
   "/api/Twilio", // Twilio's console has this saved with a capital T and can't be edited there
   "/api/book",
+  "/api/manage",
   "/api/intake-forms",
   "/api/portal",
   "/api/pay",

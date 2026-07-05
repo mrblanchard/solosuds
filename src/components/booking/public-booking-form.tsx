@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { formatCurrency } from "@/lib/utils";
 import { formatPhone, stripPhone, titleCase, normalizeEmail } from "@/lib/utils";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Clock } from "lucide-react";
 
 interface Service {
   id: string;
@@ -22,9 +22,10 @@ interface Props {
   orgId: string;
   services: Service[];
   timezone: string;
+  primaryColor?: string | null;
 }
 
-export default function PublicBookingForm({ orgId, services, timezone }: Props) {
+export default function PublicBookingForm({ orgId, services, primaryColor }: Props) {
   const [step, setStep] = useState<"service" | "details" | "confirm">("service");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [date, setDate] = useState("");
@@ -37,6 +38,36 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+
+  const [slots, setSlots] = useState<string[]>([]);
+  const [fullyBooked, setFullyBooked] = useState(false);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [wantsWaitlist, setWantsWaitlist] = useState(false);
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+
+  const accent = primaryColor && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(primaryColor) ? primaryColor : "#4f46e5";
+
+  const loadSlots = useCallback(async () => {
+    if (!selectedService || !date) return;
+    setLoadingSlots(true);
+    setTime("");
+    setWantsWaitlist(false);
+    try {
+      const res = await fetch(`/api/book/availability?orgId=${orgId}&serviceId=${selectedService.id}&date=${date}`);
+      const data = await res.json();
+      setSlots(data.slots ?? []);
+      setFullyBooked(!!data.fullyBooked);
+    } catch {
+      setSlots([]);
+      setFullyBooked(true);
+    } finally {
+      setLoadingSlots(false);
+    }
+  }, [orgId, selectedService, date]);
+
+  useEffect(() => {
+    loadSlots();
+  }, [loadSlots]);
 
   async function submit() {
     if (!selectedService || !date || !time || !firstName || !lastName || !email) {
@@ -89,6 +120,41 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
     } else {
       const json = await res.json();
       setError(json.error ?? "Booking failed. Please try again.");
+      if (res.status === 409) loadSlots();
+    }
+  }
+
+  async function submitWaitlist() {
+    if (!firstName || !lastName || !email) {
+      setError("Please fill in your name and email.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    setError(null);
+    setSubmitting(true);
+    const res = await fetch("/api/book/waitlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orgId,
+        serviceId: selectedService?.id,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: normalizeEmail(email),
+        phone: stripPhone(phone),
+        preferredDate: date || undefined,
+        notes,
+      }),
+    });
+    setSubmitting(false);
+    if (res.ok) {
+      setWaitlistSubmitted(true);
+    } else {
+      const json = await res.json().catch(() => ({}));
+      setError(json.error ?? "Something went wrong. Please try again.");
     }
   }
 
@@ -100,6 +166,20 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
           <h2 className="text-xl font-semibold text-gray-900">Booking Confirmed!</h2>
           <p className="mt-2 text-sm text-gray-500">
             We&apos;ll send a confirmation to {email}. See you soon!
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (waitlistSubmitted) {
+    return (
+      <Card>
+        <CardContent className="py-16 text-center">
+          <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900">You&apos;re on the waitlist!</h2>
+          <p className="mt-2 text-sm text-gray-500">
+            We&apos;ll email {email} the moment a spot opens up.
           </p>
         </CardContent>
       </Card>
@@ -141,7 +221,7 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
                       <p className="mt-1 text-xs text-gray-400">{service.durationMinutes} minutes</p>
                     </div>
                     {service.price != null && (
-                      <span className="font-semibold text-indigo-600">
+                      <span className="font-semibold" style={{ color: accent }}>
                         {formatCurrency(service.price)}
                       </span>
                     )}
@@ -161,7 +241,8 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
               <CardTitle>Your Details</CardTitle>
               <button
                 onClick={() => setStep("service")}
-                className="text-xs text-indigo-600 hover:underline"
+                className="text-xs hover:underline"
+                style={{ color: accent }}
               >
                 ← Change service
               </button>
@@ -173,21 +254,52 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
               <span className="text-indigo-600 ml-2">· {selectedService.durationMinutes} min</span>
             </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); submit(); }} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="bookingDate">Date <span className="text-red-500">*</span></Label>
-                <DateWheelPicker
-                  id="bookingDate"
-                  value={date}
-                  onChange={setDate}
-                />
-              </div>
-              <div>
-                <Label htmlFor="bookingTime">Time <span className="text-red-500">*</span></Label>
-                <Input id="bookingTime" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="mt-1" />
-              </div>
+            <div>
+              <Label htmlFor="bookingDate">Date <span className="text-red-500">*</span></Label>
+              <DateWheelPicker id="bookingDate" value={date} onChange={setDate} />
             </div>
+
+            {date && (
+              <div>
+                <Label>Time <span className="text-red-500">*</span></Label>
+                {loadingSlots ? (
+                  <p className="mt-2 text-sm text-gray-400">Loading available times…</p>
+                ) : fullyBooked ? (
+                  <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                    <p className="text-sm font-medium text-amber-900">Fully booked that day</p>
+                    <p className="mt-1 text-xs text-amber-700">Want to be notified if a spot opens up?</p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="mt-2"
+                      onClick={() => setWantsWaitlist(true)}
+                    >
+                      Join Waitlist
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="mt-2 grid grid-cols-3 sm:grid-cols-4 gap-2">
+                    {slots.map((slot) => (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => setTime(slot)}
+                        className="flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-sm transition-colors"
+                        style={
+                          time === slot
+                            ? { borderColor: accent, backgroundColor: `${accent}1a`, color: accent }
+                            : undefined
+                        }
+                      >
+                        <Clock className="h-3 w-3" />
+                        {slot}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -241,10 +353,27 @@ export default function PublicBookingForm({ orgId, services, timezone }: Props) 
               <Input id="bookingNotes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" className="mt-1" />
             </div>
 
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Booking…" : "Confirm Booking"}
-            </Button>
-            </form>
+            {wantsWaitlist ? (
+              <Button
+                type="button"
+                className="w-full"
+                style={{ backgroundColor: accent }}
+                disabled={submitting}
+                onClick={submitWaitlist}
+              >
+                {submitting ? "Joining…" : "Join Waitlist"}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                className="w-full"
+                style={{ backgroundColor: accent }}
+                disabled={submitting || !time}
+                onClick={submit}
+              >
+                {submitting ? "Booking…" : time ? "Confirm Booking" : "Pick a time above"}
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}

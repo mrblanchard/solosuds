@@ -7,12 +7,13 @@ import ServicesSettings from "@/components/settings/services-settings";
 import ThemePicker from "@/components/settings/theme-picker";
 import BookingSettings from "@/components/settings/booking-settings";
 import PaymentsSettings from "@/components/settings/payments-settings";
+import DiscountCodesSettings from "@/components/settings/discount-codes-settings";
 
 export default async function SettingsPage() {
   const session = await auth();
   if (!session?.user?.id || !session?.user?.organizationId) redirect("/dashboard");
 
-  const [user, org, services, intakeForms] = await Promise.all([
+  const [user, org, services, intakeForms, discountCodes] = await Promise.all([
     db.user.findUnique({
       where: { id: session.user.id },
       select: { id: true, name: true, email: true, role: true, smsForwardNumber: true, theme: true },
@@ -23,6 +24,7 @@ export default async function SettingsPage() {
         id: true, name: true, phone: true, email: true, address: true, website: true, timezone: true, practiceType: true, noteType: true, defaultIntakeFormId: true, inviteCode: true, plan: true,
         stripeConnectAccountId: true, stripeConnectChargesEnabled: true, stripeConnectDetailsSubmitted: true, stripeConnectPayoutsEnabled: true,
         venmoHandle: true, cashAppHandle: true, paypalHandle: true, squareHandle: true, zelleHandle: true,
+        bookingStartHour: true, bookingEndHour: true, bookingDays: true, bookingSlotMinutes: true, maxDailyAppointments: true,
       },
     }),
     db.service.findMany({
@@ -34,6 +36,10 @@ export default async function SettingsPage() {
       where: { organizationId: session.user.organizationId, isActive: true },
       select: { id: true, title: true },
       orderBy: { title: "asc" },
+    }),
+    db.discountCode.findMany({
+      where: { organizationId: session.user.organizationId },
+      orderBy: { createdAt: "desc" },
     }),
   ]);
 
@@ -53,8 +59,21 @@ export default async function SettingsPage() {
         <>
           <OrgSettings org={org} intakeForms={intakeForms} plan={org.plan ?? "solo"} />
           <PaymentsSettings org={org} />
-          <BookingSettings orgId={org.id} />
+          <BookingSettings
+            orgId={org.id}
+            bookingStartHour={org.bookingStartHour}
+            bookingEndHour={org.bookingEndHour}
+            bookingDays={org.bookingDays}
+            bookingSlotMinutes={org.bookingSlotMinutes}
+            maxDailyAppointments={org.maxDailyAppointments}
+          />
           <ServicesSettings initialServices={services} />
+          <DiscountCodesSettings
+            initialCodes={discountCodes.map((c) => ({
+              ...c,
+              expiresAt: c.expiresAt ? c.expiresAt.toISOString() : null,
+            }))}
+          />
         </>
       )}
     </div>

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
 import { formatDate } from "@/lib/utils";
@@ -15,6 +16,8 @@ const REMINDER_WINDOW_MS = 24 * 60 * 60 * 1000; // remind once an appointment is
 export async function runReminderSweep(): Promise<{ sent: number; failed: number }> {
   const now = new Date();
   const windowEnd = new Date(now.getTime() + REMINDER_WINDOW_MS);
+
+  const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
 
   const dueAppointments = await db.appointment.findMany({
     where: {
@@ -39,6 +42,7 @@ export async function runReminderSweep(): Promise<{ sent: number; failed: number
   for (const appt of dueAppointments) {
     if (!appt.client?.email) continue;
     try {
+      const publicToken = appt.publicToken ?? randomUUID();
       await sendAppointmentReminder({
         to: appt.client.email,
         clientName: `${appt.client.firstName} ${appt.client.lastName}`,
@@ -49,10 +53,11 @@ export async function runReminderSweep(): Promise<{ sent: number; failed: number
         startDateTime: appt.startTime.toISOString(),
         endDateTime: appt.endTime.toISOString(),
         branding: appt.organization,
+        manageUrl: `${baseUrl}/manage/${publicToken}`,
       });
       await db.appointment.update({
         where: { id: appt.id },
-        data: { reminderSentAt: new Date() },
+        data: { reminderSentAt: new Date(), publicToken },
       });
       sent++;
     } catch (err) {

@@ -110,6 +110,7 @@ export async function POST(req: Request) {
         status: "SCHEDULED",
         recurrence,
         recurrenceGroupId,
+        publicToken: randomUUID(),
       },
       include: { service: true },
     });
@@ -148,6 +149,7 @@ export async function POST(req: Request) {
             status: "SCHEDULED",
             recurrence,
             recurrenceGroupId,
+            publicToken: randomUUID(),
           },
         });
       }
@@ -164,6 +166,7 @@ export async function POST(req: Request) {
         where: { id: resolvedPractitionerId },
         select: { name: true },
       });
+      const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
       await sendAppointmentReminder({
         to: client.email,
         clientName: `${client.firstName} ${client.lastName}`,
@@ -173,6 +176,7 @@ export async function POST(req: Request) {
         serviceName: appointment.service?.name ?? "Session",
         startDateTime: appointment.startTime.toISOString(),
         endDateTime: appointment.endTime.toISOString(),
+        manageUrl: `${baseUrl}/manage/${appointment.publicToken}`,
       });
     } catch (err) {
       console.error("Failed to send reminder:", err);

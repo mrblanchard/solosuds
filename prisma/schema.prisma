@@ -93,6 +93,13 @@ model Organization {
   squareHandle   String?  // full "Square Pay" link URL
   zelleHandle    String?  // email or phone shown as text instructions (no deep link)
 
+  // Public booking availability
+  bookingStartHour     Int    @default(9)          // 24h, e.g. 9 = 9:00am
+  bookingEndHour       Int    @default(17)         // 24h, e.g. 17 = 5:00pm
+  bookingDays          Int[]  @default([1, 2, 3, 4, 5]) // 0=Sun..6=Sat
+  bookingSlotMinutes   Int    @default(30)          // slot granularity
+  maxDailyAppointments Int?                          // null = no cap
+
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
@@ -109,6 +116,8 @@ model Organization {
   tasks         Task[]
   emails        Email[]
   documents     Document[]
+  discountCodes DiscountCode[]
+  waitlistEntries WaitlistEntry[]
 }
 
 // ─── Users / Practitioners ────────────────────────────────────────────────────
@@ -226,7 +235,8 @@ model Service {
   isActive        Boolean      @default(true)
   createdAt       DateTime     @default(now())
 
-  appointments Appointment[]
+  appointments    Appointment[]
+  waitlistEntries WaitlistEntry[]
 }
 
 // ─── Scheduling ───────────────────────────────────────────────────────────────
@@ -271,6 +281,7 @@ model Appointment {
   outlookEventId String?
   recurrence        TaskRecurrence @default(NONE)
   recurrenceGroupId String?
+  publicToken    String?           @unique // lets a client manage (reschedule/cancel) their own booking
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
@@ -397,6 +408,9 @@ model Invoice {
   status                InvoiceStatus @default(DRAFT)
   subtotal              Int
   tax                   Int           @default(0)
+  discountCodeId        String?
+  discountCode          DiscountCode? @relation(fields: [discountCodeId], references: [id])
+  discountAmount        Int           @default(0) // cents actually discounted, snapshot at creation
   total                 Int
   dueDate               DateTime?
   paidAt                DateTime?
@@ -406,6 +420,53 @@ model Invoice {
   lineItems             Json
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
+model DiscountCode {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  code           String       // e.g. "SUMMER10", stored uppercase
+  type           DiscountType @default(PERCENT)
+  amount         Int          // percent (0-100) if PERCENT, cents if FIXED
+  active         Boolean      @default(true)
+  usageLimit     Int?         // null = unlimited
+  usageCount     Int          @default(0)
+  expiresAt      DateTime?
+  createdAt      DateTime     @default(now())
+
+  invoices Invoice[]
+
+  @@unique([organizationId, code])
+}
+
+enum WaitlistStatus {
+  WAITING
+  NOTIFIED
+  BOOKED
+  EXPIRED
+}
+
+model WaitlistEntry {
+  id             String         @id @default(cuid())
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  serviceId      String?
+  service        Service?       @relation(fields: [serviceId], references: [id])
+  clientFirstName String
+  clientLastName  String
+  clientEmail     String
+  clientPhone     String?
+  preferredDate   DateTime?     // null = any opening
+  notes           String?
+  status          WaitlistStatus @default(WAITING)
+  notifiedAt      DateTime?
+  createdAt       DateTime      @default(now())
 }
 
 // ─── Messaging ────────────────────────────────────────────────────────────────

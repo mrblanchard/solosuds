@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
@@ -42,6 +43,9 @@ export async function POST(
     hour12: true,
   });
 
+  const publicToken = appointment.publicToken ?? randomUUID();
+  const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+
   await sendAppointmentReminder({
     to: appointment.client.email,
     clientName: `${appointment.client.firstName} ${appointment.client.lastName}`,
@@ -52,12 +56,13 @@ export async function POST(
     startDateTime: appointment.startTime.toISOString(),
     endDateTime: appointment.endTime.toISOString(),
     branding,
+    manageUrl: `${baseUrl}/manage/${publicToken}`,
   });
 
   // Track last reminder sent
   await db.appointment.update({
     where: { id },
-    data: { reminderSentAt: new Date() },
+    data: { reminderSentAt: new Date(), publicToken },
   });
 
   return NextResponse.json({ success: true });

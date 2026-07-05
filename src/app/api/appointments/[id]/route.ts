@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { notifyWaitlistForOpening } from "@/lib/scheduling";
 
 export async function PATCH(
   request: NextRequest,
@@ -31,6 +32,14 @@ export async function PATCH(
         ...(notes !== undefined && { notes }),
       },
     });
+
+    if (status === "CANCELLED" && appointment.status !== "CANCELLED") {
+      notifyWaitlistForOpening({
+        organizationId: session.user.organizationId,
+        serviceId: appointment.serviceId,
+        openingDate: appointment.startTime,
+      }).catch((err) => console.error("[waitlist notify]", err));
+    }
 
     return NextResponse.json(updated);
   } catch (error) {

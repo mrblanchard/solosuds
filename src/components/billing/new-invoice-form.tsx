@@ -42,6 +42,11 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [discountCode, setDiscountCode] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; type: "PERCENT" | "FIXED"; amount: number } | null>(null);
+  const [checkingDiscount, setCheckingDiscount] = useState(false);
+  const [discountError, setDiscountError] = useState("");
+
   function updateItem(index: number, field: keyof LineItem, value: string | number) {
     setLineItems((prev) =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
@@ -105,6 +110,7 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
           ...(dueDate ? { dueDate } : {}),
           ...(notes ? { notes } : {}),
           tax: Math.round(parseFloat(tax || "0") * 100),
+          ...(appliedDiscount ? { discountCode: appliedDiscount.code } : {}),
         }),
       });
 
@@ -128,7 +134,33 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
     return sum + item.quantity * (isNaN(price) ? 0 : price);
   }, 0);
   const taxAmount = parseFloat(tax || "0");
-  const total = subtotal + (isNaN(taxAmount) ? 0 : taxAmount);
+  const discountDollars = appliedDiscount
+    ? Math.min(
+        appliedDiscount.type === "PERCENT" ? subtotal * (appliedDiscount.amount / 100) : appliedDiscount.amount / 100,
+        subtotal
+      )
+    : 0;
+  const total = subtotal + (isNaN(taxAmount) ? 0 : taxAmount) - discountDollars;
+
+  async function applyDiscountCode() {
+    setDiscountError("");
+    if (!discountCode.trim()) return;
+    setCheckingDiscount(true);
+    try {
+      const res = await fetch(`/api/settings/discount-codes/preview?code=${encodeURIComponent(discountCode.trim())}`);
+      const data = await res.json();
+      if (!data.valid) {
+        setDiscountError(data.error ?? "Invalid code");
+        setAppliedDiscount(null);
+        return;
+      }
+      setAppliedDiscount({ code: discountCode.trim().toUpperCase(), type: data.type, amount: data.amount });
+    } catch {
+      setDiscountError("Failed to check code");
+    } finally {
+      setCheckingDiscount(false);
+    }
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -293,6 +325,37 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
                 />
               </div>
             </div>
+
+            {appliedDiscount ? (
+              <div className="flex justify-between items-center text-green-700">
+                <span>Discount ({appliedDiscount.code})</span>
+                <div className="flex items-center gap-2">
+                  <span>-${discountDollars.toFixed(2)}</span>
+                  <button
+                    type="button"
+                    onClick={() => { setAppliedDiscount(null); setDiscountCode(""); }}
+                    className="text-xs text-gray-400 hover:text-gray-600"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Input
+                  aria-label="Discount code"
+                  placeholder="Discount code"
+                  value={discountCode}
+                  onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                  className="h-8 text-sm"
+                />
+                <Button type="button" size="sm" variant="outline" onClick={applyDiscountCode} disabled={checkingDiscount}>
+                  {checkingDiscount ? "…" : "Apply"}
+                </Button>
+              </div>
+            )}
+            {discountError && <p className="text-xs text-red-600">{discountError}</p>}
+
             <div className="flex justify-between font-semibold text-base pt-2 border-t border-gray-100">
               <span>Total</span>
               <span>${total.toFixed(2)}</span>

@@ -17,7 +17,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, phone, email, address, website, timezone, practiceType, noteType, defaultIntakeFormId, primaryColor, logoUrl, faviconUrl, brandFont, emailSignature, replyToEmail, venmoHandle, cashAppHandle, paypalHandle, squareHandle, zelleHandle } = body;
+    const { name, phone, email, address, website, timezone, practiceType, noteType, defaultIntakeFormId, primaryColor, logoUrl, faviconUrl, brandFont, emailSignature, replyToEmail, venmoHandle, cashAppHandle, paypalHandle, squareHandle, zelleHandle, bookingStartHour, bookingEndHour, bookingDays, bookingSlotMinutes, maxDailyAppointments } = body;
 
     if (name !== undefined && name.trim() === "") {
       return NextResponse.json({ error: "Organization name cannot be empty" }, { status: 400 });
@@ -47,6 +47,25 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Invalid note type" }, { status: 400 });
     }
 
+    if (bookingStartHour !== undefined && (!Number.isInteger(bookingStartHour) || bookingStartHour < 0 || bookingStartHour > 23)) {
+      return NextResponse.json({ error: "Invalid booking start hour" }, { status: 400 });
+    }
+    if (bookingEndHour !== undefined && (!Number.isInteger(bookingEndHour) || bookingEndHour < 1 || bookingEndHour > 24)) {
+      return NextResponse.json({ error: "Invalid booking end hour" }, { status: 400 });
+    }
+    if (bookingStartHour !== undefined && bookingEndHour !== undefined && bookingStartHour >= bookingEndHour) {
+      return NextResponse.json({ error: "Booking start hour must be before end hour" }, { status: 400 });
+    }
+    if (bookingDays !== undefined && (!Array.isArray(bookingDays) || bookingDays.some((d: unknown) => !Number.isInteger(d) || (d as number) < 0 || (d as number) > 6))) {
+      return NextResponse.json({ error: "Invalid booking days" }, { status: 400 });
+    }
+    if (bookingSlotMinutes !== undefined && (!Number.isInteger(bookingSlotMinutes) || bookingSlotMinutes < 5 || bookingSlotMinutes > 240)) {
+      return NextResponse.json({ error: "Invalid slot interval" }, { status: 400 });
+    }
+    if (maxDailyAppointments !== undefined && maxDailyAppointments !== null && (!Number.isInteger(maxDailyAppointments) || maxDailyAppointments < 1)) {
+      return NextResponse.json({ error: "Invalid max daily appointments" }, { status: 400 });
+    }
+
     const updated = await db.organization.update({
       where: { id: session.user.organizationId },
       data: {
@@ -70,6 +89,11 @@ export async function PATCH(request: NextRequest) {
         ...(paypalHandle !== undefined && { paypalHandle: paypalHandle ? paypalHandle.trim() : null }),
         ...(squareHandle !== undefined && { squareHandle: squareHandle ? squareHandle.trim() : null }),
         ...(zelleHandle !== undefined && { zelleHandle: zelleHandle ? zelleHandle.trim() : null }),
+        ...(bookingStartHour !== undefined && { bookingStartHour }),
+        ...(bookingEndHour !== undefined && { bookingEndHour }),
+        ...(bookingDays !== undefined && { bookingDays }),
+        ...(bookingSlotMinutes !== undefined && { bookingSlotMinutes }),
+        ...(maxDailyAppointments !== undefined && { maxDailyAppointments }),
       },
     });
 
