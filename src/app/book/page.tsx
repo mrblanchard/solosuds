@@ -14,7 +14,7 @@ export default async function BookingPage({ searchParams }: Props) {
   const [org, services] = await Promise.all([
     db.organization.findUnique({
       where: { id: orgId },
-      select: { id: true, name: true, timezone: true, logoUrl: true, primaryColor: true },
+      select: { id: true, name: true, logoUrl: true, primaryColor: true },
     }),
     db.service.findMany({
       where: { organizationId: orgId, isActive: true },
@@ -47,7 +47,6 @@ export default async function BookingPage({ searchParams }: Props) {
         <PublicBookingForm
           orgId={org.id}
           services={services}
-          timezone={org.timezone ?? "America/New_York"}
           primaryColor={org.primaryColor}
         />
       </div>

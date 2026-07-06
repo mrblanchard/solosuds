@@ -55,7 +55,10 @@ export async function POST(req: Request) {
       type,
       amount,
       usageLimit: usageLimit ?? null,
-      expiresAt: expiresAt ? new Date(expiresAt) : null,
+      // Bare "YYYY-MM-DD" parses as UTC midnight per the JS spec, which would
+      // expire the code hours early for anyone west of UTC. Treat the chosen
+      // date as valid through its end in local time instead.
+      expiresAt: expiresAt ? new Date(`${expiresAt}T23:59:59`) : null,
     },
   });
 

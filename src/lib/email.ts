@@ -119,6 +119,7 @@ export async function sendAppointmentReminder({
   endDateTime,
   branding,
   manageUrl,
+  kind = "reminder",
 }: {
   to: string;
   clientName: string;
@@ -130,6 +131,7 @@ export async function sendAppointmentReminder({
   endDateTime?: string;
   branding?: OrgBranding | null;
   manageUrl?: string;
+  kind?: "reminder" | "confirmation" | "rescheduled";
 }) {
   const eventTitle = `${serviceName} with ${practitionerName}`;
   const eventDescription = `Service: ${serviceName}\nPractitioner: ${practitionerName}\nDate: ${appointmentDate}\nTime: ${appointmentTime}`;
@@ -161,10 +163,18 @@ export async function sendAppointmentReminder({
     ];
   }
 
+  const heading = kind === "confirmation" ? "Appointment Confirmed" : kind === "rescheduled" ? "Appointment Rescheduled" : "Appointment Reminder";
+  const intro = kind === "confirmation"
+    ? "Your appointment is confirmed:"
+    : kind === "rescheduled"
+    ? "Your appointment has been rescheduled to a new time:"
+    : "This is a reminder for your upcoming appointment:";
+  const subjectPrefix = kind === "confirmation" ? "Confirmed" : kind === "rescheduled" ? "Rescheduled" : "Reminder";
+
   const content = `
-    <h2 style="margin-top:0;">Appointment Reminder</h2>
+    <h2 style="margin-top:0;">${heading}</h2>
     <p>Hi ${clientName},</p>
-    <p>This is a reminder for your upcoming appointment:</p>
+    <p>${intro}</p>
     <ul>
       <li><strong>Service:</strong> ${serviceName}</li>
       <li><strong>Practitioner:</strong> ${practitionerName}</li>
@@ -180,7 +190,7 @@ export async function sendAppointmentReminder({
   return getResend().emails.send({
     from: `${branding?.name || process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
     to,
-    subject: `Reminder: Your appointment on ${appointmentDate}`,
+    subject: `${subjectPrefix}: Your appointment on ${appointmentDate}`,
     html: buildBrandedEmail(content, branding),
     ...(attachments ? { attachments } : {}),
     ...replyToHeader(branding),

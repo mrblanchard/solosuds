@@ -49,7 +49,6 @@ export default async function ManageBookingPage({ params }: Props) {
           serviceId={appointment.service?.id ?? null}
           serviceName={appointment.service?.name ?? "Appointment"}
           durationMinutes={appointment.service?.durationMinutes ?? 60}
-          startTime={appointment.startTime.toISOString()}
           clientName={appointment.client ? `${appointment.client.firstName} ${appointment.client.lastName}` : null}
           formattedDate={formatDate(appointment.startTime, "MMMM d, yyyy")}
           formattedTime={formatDate(appointment.startTime, "h:mm a")}

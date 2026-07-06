@@ -1,7 +1,27 @@
+import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendWaitlistOpening } from "@/lib/email";
 
 const ACTIVE_STATUSES = ["SCHEDULED", "CONFIRMED", "IN_PROGRESS", "COMPLETED"] as const;
+
+/**
+ * Returns the appointment's publicToken, generating and persisting one first
+ * if it doesn't have one yet. The reminder sweep and a manual "send reminder"
+ * click can both race to backfill a token for the same appointment; this
+ * claims it with a conditional update (only writes if still null) and always
+ * reads back whatever actually ended up persisted, so both callers embed the
+ * same token in their emails instead of each minting and emailing a different
+ * UUID (which would leave one recipient's link 404ing permanently).
+ */
+export async function ensurePublicToken(appointmentId: string, currentToken: string | null): Promise<string> {
+  if (currentToken) return currentToken;
+  await db.appointment.updateMany({
+    where: { id: appointmentId, publicToken: null },
+    data: { publicToken: randomUUID() },
+  });
+  const fresh = await db.appointment.findUnique({ where: { id: appointmentId }, select: { publicToken: true } });
+  return fresh!.publicToken!;
+}
 
 /**
  * Returns true if the given time range overlaps an existing active appointment
@@ -36,6 +56,63 @@ export async function hasConflict({
   return !!conflict;
 }
 
+/**
+ * Authoritative server-side check that a requested start time is actually
+ * bookable: on a day the org is open, within business hours, and under the
+ * daily appointment cap. getAvailableSlots (below) computes the same rules
+ * for *display*, but a client can always call the write endpoints directly,
+ * so every public write path (new booking, client self-reschedule) must also
+ * call this before creating/moving an appointment. Internal dashboard bookings
+ * intentionally skip this — a practitioner can book outside their own public
+ * hours or over the cap for their own schedule.
+ */
+export async function validateBookingWindow({
+  organizationId,
+  startTime,
+  excludeAppointmentId,
+}: {
+  organizationId: string;
+  startTime: Date;
+  excludeAppointmentId?: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const org = await db.organization.findUnique({
+    where: { id: organizationId },
+    select: { bookingStartHour: true, bookingEndHour: true, bookingDays: true, maxDailyAppointments: true },
+  });
+  if (!org) return { ok: false, error: "Organization not found" };
+
+  const dayOfWeek = startTime.getDay();
+  if (!org.bookingDays.includes(dayOfWeek)) {
+    return { ok: false, error: "That day isn't available for booking." };
+  }
+
+  const hour = startTime.getHours() + startTime.getMinutes() / 60;
+  if (hour < org.bookingStartHour || hour >= org.bookingEndHour) {
+    return { ok: false, error: "That time is outside business hours." };
+  }
+
+  if (org.maxDailyAppointments != null) {
+    const dayStart = new Date(startTime);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(startTime);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    const count = await db.appointment.count({
+      where: {
+        organizationId,
+        status: { in: [...ACTIVE_STATUSES] },
+        startTime: { gte: dayStart, lte: dayEnd },
+        ...(excludeAppointmentId ? { id: { not: excludeAppointmentId } } : {}),
+      },
+    });
+    if (count >= org.maxDailyAppointments) {
+      return { ok: false, error: "That day is fully booked." };
+    }
+  }
+
+  return { ok: true };
+}
+
 interface AvailabilityParams {
   organizationId: string;
   serviceId: string;
@@ -44,7 +121,8 @@ interface AvailabilityParams {
 
 interface AvailabilityResult {
   slots: string[]; // "HH:mm" start times, in the server's local time (matches how dates are combined elsewhere in booking)
-  fullyBooked: boolean; // true if the day hit the org's max-daily-appointments cap
+  fullyBooked: boolean; // true if there are no bookable slots left, for any reason
+  reason?: "closed" | "capped" | "unavailable"; // why fullyBooked is true, so the UI can decide whether a waitlist even makes sense
 }
 
 /** Computes open start-time slots for a given day, respecting org hours/days, service duration, existing bookings, and the daily cap. */
@@ -60,16 +138,19 @@ export async function getAvailableSlots({ organizationId, serviceId, date }: Ava
         maxDailyAppointments: true,
       },
     }),
-    db.service.findUnique({ where: { id: serviceId }, select: { durationMinutes: true } }),
+    db.service.findFirst({
+      where: { id: serviceId, organizationId, isActive: true },
+      select: { durationMinutes: true },
+    }),
   ]);
 
-  if (!org || !service) return { slots: [], fullyBooked: false };
+  if (!org || !service) return { slots: [], fullyBooked: true, reason: "unavailable" };
 
   const dayStart = new Date(`${date}T00:00:00`);
   const dayEnd = new Date(`${date}T23:59:59.999`);
   const dayOfWeek = dayStart.getDay();
 
-  if (!org.bookingDays.includes(dayOfWeek)) return { slots: [], fullyBooked: false };
+  if (!org.bookingDays.includes(dayOfWeek)) return { slots: [], fullyBooked: true, reason: "closed" };
 
   const dayAppointments = await db.appointment.findMany({
     where: {
@@ -81,7 +162,7 @@ export async function getAvailableSlots({ organizationId, serviceId, date }: Ava
   });
 
   if (org.maxDailyAppointments != null && dayAppointments.length >= org.maxDailyAppointments) {
-    return { slots: [], fullyBooked: true };
+    return { slots: [], fullyBooked: true, reason: "capped" };
   }
 
   const durationMs = service.durationMinutes * 60000;
@@ -99,6 +180,9 @@ export async function getAvailableSlots({ organizationId, serviceId, date }: Ava
     const slotEnd = new Date(slotStart.getTime() + durationMs);
 
     const isPast = slotStart.getTime() < now.getTime();
+    // Keep this predicate in sync with hasConflict's overlap check above — it's
+    // re-expressed in-memory here (rather than calling hasConflict per candidate
+    // slot) so a day's worth of slots costs one appointment query, not one per slot.
     const overlaps = dayAppointments.some(
       (a) => a.startTime.getTime() < slotEnd.getTime() && a.endTime.getTime() > slotStart.getTime()
     );
@@ -112,7 +196,7 @@ export async function getAvailableSlots({ organizationId, serviceId, date }: Ava
     cursor = new Date(cursor.getTime() + slotMs);
   }
 
-  return { slots, fullyBooked: slots.length === 0 };
+  return { slots, fullyBooked: slots.length === 0, reason: slots.length === 0 ? "unavailable" : undefined };
 }
 
 /**
@@ -135,6 +219,11 @@ export async function notifyWaitlistForOpening({
   const dayEnd = new Date(openingDate);
   dayEnd.setHours(23, 59, 59, 999);
 
+  // Prisma drops `undefined`-valued keys from a where clause entirely, so
+  // `{ serviceId: serviceId ?? undefined }` would silently match ALL services
+  // when serviceId is null — build the OR arm explicitly instead.
+  const serviceMatch = serviceId ? [{ serviceId: null }, { serviceId }] : [{ serviceId: null }];
+
   const [org, entries] = await Promise.all([
     db.organization.findUnique({
       where: { id: organizationId },
@@ -144,14 +233,9 @@ export async function notifyWaitlistForOpening({
       where: {
         organizationId,
         status: "WAITING",
-        OR: [{ serviceId: null }, { serviceId: serviceId ?? undefined }],
         AND: [
-          {
-            OR: [
-              { preferredDate: null },
-              { preferredDate: { gte: dayStart, lte: dayEnd } },
-            ],
-          },
+          { OR: serviceMatch },
+          { OR: [{ preferredDate: null }, { preferredDate: { gte: dayStart, lte: dayEnd } }] },
         ],
       },
     }),
@@ -162,18 +246,18 @@ export async function notifyWaitlistForOpening({
   const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
   const bookingUrl = `${baseUrl}/book?org=${org.id}`;
 
-  for (const entry of entries) {
-    try {
-      await sendWaitlistOpening({
+  await Promise.allSettled(
+    entries.map((entry) =>
+      sendWaitlistOpening({
         to: entry.clientEmail,
         clientName: `${entry.clientFirstName} ${entry.clientLastName}`,
         bookingUrl,
         branding: org,
-      });
-    } catch (err) {
-      console.error(`[waitlist] Failed to notify ${entry.clientEmail}:`, err);
-    }
-  }
+      }).catch((err) => {
+        console.error(`[waitlist] Failed to notify ${entry.clientEmail}:`, err);
+      })
+    )
+  );
 
   await db.waitlistEntry.updateMany({
     where: { id: { in: entries.map((e) => e.id) } },

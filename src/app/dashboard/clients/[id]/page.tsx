@@ -83,6 +83,8 @@ export default async function ClientProfilePage({
         <ClientActions
           clientId={client.id}
           clientName={`${client.firstName} ${client.lastName}`}
+          hasEmail={!!client.email}
+          hasPhone={!!client.phone}
         />
       </div>
 

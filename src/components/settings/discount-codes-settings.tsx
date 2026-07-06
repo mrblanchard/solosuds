@@ -73,18 +73,33 @@ export default function DiscountCodesSettings({ initialCodes }: { initialCodes: 
   }
 
   async function toggleActive(id: string, active: boolean) {
+    setError(null);
     setCodes((prev) => prev.map((c) => (c.id === id ? { ...c, active } : c)));
-    await fetch(`/api/settings/discount-codes/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ active }),
-    });
+    try {
+      const res = await fetch(`/api/settings/discount-codes/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active }),
+      });
+      if (!res.ok) throw new Error("Failed to update code");
+    } catch {
+      setCodes((prev) => prev.map((c) => (c.id === id ? { ...c, active: !active } : c)));
+      setError("Failed to update the code — please try again.");
+    }
   }
 
   async function deleteCode(id: string) {
     if (!confirm("Delete this discount code?")) return;
+    setError(null);
+    const previous = codes;
     setCodes((prev) => prev.filter((c) => c.id !== id));
-    await fetch(`/api/settings/discount-codes/${id}`, { method: "DELETE" });
+    try {
+      const res = await fetch(`/api/settings/discount-codes/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete code");
+    } catch {
+      setCodes(previous);
+      setError("Failed to delete the code — please try again.");
+    }
   }
 
   return (
@@ -107,9 +122,10 @@ export default function DiscountCodesSettings({ initialCodes }: { initialCodes: 
           Apply a discount code when creating an invoice, e.g. a promo for a first-time client or a referral thank-you.
         </p>
 
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
         {showForm && (
           <div className="rounded-lg border border-gray-100 p-4 space-y-3">
-            {error && <p className="text-sm text-red-600">{error}</p>}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label htmlFor="dc-code">Code</Label>

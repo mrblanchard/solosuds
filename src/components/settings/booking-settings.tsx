@@ -156,7 +156,7 @@ export default function BookingSettings({
         </div>
 
         {/* Availability config */}
-        <div className="rounded-lg border border-gray-100 p-4 space-y-4">
+        <div id="booking-availability" className="rounded-lg border border-gray-100 p-4 space-y-4 scroll-mt-6">
           <p className="text-sm font-medium text-gray-700">Availability</p>
 
           <div className="grid grid-cols-2 gap-4">

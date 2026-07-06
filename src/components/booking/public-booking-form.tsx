@@ -21,8 +21,11 @@ interface Service {
 interface Props {
   orgId: string;
   services: Service[];
-  timezone: string;
   primaryColor?: string | null;
+}
+
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 254;
 }
 
 export default function PublicBookingForm({ orgId, services, primaryColor }: Props) {
@@ -41,6 +44,8 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
 
   const [slots, setSlots] = useState<string[]>([]);
   const [fullyBooked, setFullyBooked] = useState(false);
+  const [dayClosed, setDayClosed] = useState(false);
+  const [slotsError, setSlotsError] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [wantsWaitlist, setWantsWaitlist] = useState(false);
   const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
@@ -52,14 +57,19 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
     setLoadingSlots(true);
     setTime("");
     setWantsWaitlist(false);
+    setSlotsError(false);
+    setDayClosed(false);
     try {
       const res = await fetch(`/api/book/availability?orgId=${orgId}&serviceId=${selectedService.id}&date=${date}`);
+      if (!res.ok) throw new Error("Request failed");
       const data = await res.json();
       setSlots(data.slots ?? []);
       setFullyBooked(!!data.fullyBooked);
+      setDayClosed(data.reason === "closed");
     } catch {
       setSlots([]);
-      setFullyBooked(true);
+      setFullyBooked(false);
+      setSlotsError(true);
     } finally {
       setLoadingSlots(false);
     }
@@ -78,7 +88,7 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
       setError("Name is too long.");
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
+    if (!isValidEmail(email)) {
       setError("Please enter a valid email address.");
       return;
     }
@@ -129,7 +139,7 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
       setError("Please fill in your name and email.");
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
+    if (!isValidEmail(email)) {
       setError("Please enter a valid email address.");
       return;
     }
@@ -155,6 +165,15 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
     } else {
       const json = await res.json().catch(() => ({}));
       setError(json.error ?? "Something went wrong. Please try again.");
+    }
+  }
+
+  function handleFormSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (wantsWaitlist) {
+      submitWaitlist();
+    } else {
+      submit();
     }
   }
 
@@ -248,7 +267,8 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
               </button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
+          <form onSubmit={handleFormSubmit} className="space-y-4">
             <div className="rounded-lg bg-indigo-50 px-3 py-2 text-sm">
               <span className="font-medium text-indigo-900">{selectedService.name}</span>
               <span className="text-indigo-600 ml-2">· {selectedService.durationMinutes} min</span>
@@ -264,6 +284,17 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
                 <Label>Time <span className="text-red-500">*</span></Label>
                 {loadingSlots ? (
                   <p className="mt-2 text-sm text-gray-400">Loading available times…</p>
+                ) : slotsError ? (
+                  <div className="mt-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                    <p className="text-sm text-gray-600">Couldn&apos;t load available times.</p>
+                    <Button type="button" size="sm" variant="outline" className="mt-2" onClick={loadSlots}>
+                      Try again
+                    </Button>
+                  </div>
+                ) : dayClosed ? (
+                  <div className="mt-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                    <p className="text-sm text-gray-600">Not available on this day. Please pick another date.</p>
+                  </div>
                 ) : fullyBooked ? (
                   <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
                     <p className="text-sm font-medium text-amber-900">Fully booked that day</p>
@@ -355,25 +386,24 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
 
             {wantsWaitlist ? (
               <Button
-                type="button"
+                type="submit"
                 className="w-full"
                 style={{ backgroundColor: accent }}
                 disabled={submitting}
-                onClick={submitWaitlist}
               >
                 {submitting ? "Joining…" : "Join Waitlist"}
               </Button>
             ) : (
               <Button
-                type="button"
+                type="submit"
                 className="w-full"
                 style={{ backgroundColor: accent }}
                 disabled={submitting || !time}
-                onClick={submit}
               >
                 {submitting ? "Booking…" : time ? "Confirm Booking" : "Pick a time above"}
               </Button>
             )}
+          </form>
           </CardContent>
         </Card>
       )}

@@ -62,15 +62,29 @@ export async function POST(req: Request) {
     if (code.expiresAt && code.expiresAt < new Date()) {
       return NextResponse.json({ error: "This discount code has expired" }, { status: 400 });
     }
-    if (code.usageLimit != null && code.usageCount >= code.usageLimit) {
-      return NextResponse.json({ error: "This discount code has reached its usage limit" }, { status: 400 });
-    }
 
     discountCodeId = code.id;
     discountAmount = code.type === "PERCENT"
       ? Math.round(subtotal * (code.amount / 100))
       : code.amount;
     discountAmount = Math.min(discountAmount, subtotal); // never discount below $0 subtotal
+
+    // Claim the usage slot atomically (conditioned on the DB's current count,
+    // not the stale read above) so two concurrent requests can't both redeem
+    // the last use of a limited code. If invoice creation fails after this,
+    // the slot is spent without an invoice to show for it — an acceptable
+    // failure direction (under-counts availability rather than over-redeeming).
+    if (code.usageLimit != null) {
+      const claim = await db.discountCode.updateMany({
+        where: { id: code.id, usageCount: { lt: code.usageLimit } },
+        data: { usageCount: { increment: 1 } },
+      });
+      if (claim.count === 0) {
+        return NextResponse.json({ error: "This discount code has reached its usage limit" }, { status: 400 });
+      }
+    } else {
+      await db.discountCode.update({ where: { id: code.id }, data: { usageCount: { increment: 1 } } });
+    }
   }
 
   const total = subtotal + tax - discountAmount;
@@ -95,13 +109,6 @@ export async function POST(req: Request) {
       publicToken: crypto.randomBytes(16).toString("hex"),
     },
   });
-
-  if (discountCodeId) {
-    await db.discountCode.update({
-      where: { id: discountCodeId },
-      data: { usageCount: { increment: 1 } },
-    });
-  }
 
   return NextResponse.json(invoice, { status: 201 });
 }

@@ -1,7 +1,7 @@
-import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
 import { formatDate } from "@/lib/utils";
+import { ensurePublicToken } from "@/lib/scheduling";
 
 const SWEEP_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const REMINDER_WINDOW_MS = 24 * 60 * 60 * 1000; // remind once an appointment is within 24h
@@ -42,7 +42,7 @@ export async function runReminderSweep(): Promise<{ sent: number; failed: number
   for (const appt of dueAppointments) {
     if (!appt.client?.email) continue;
     try {
-      const publicToken = appt.publicToken ?? randomUUID();
+      const publicToken = await ensurePublicToken(appt.id, appt.publicToken);
       await sendAppointmentReminder({
         to: appt.client.email,
         clientName: `${appt.client.firstName} ${appt.client.lastName}`,
@@ -57,7 +57,7 @@ export async function runReminderSweep(): Promise<{ sent: number; failed: number
       });
       await db.appointment.update({
         where: { id: appt.id },
-        data: { reminderSentAt: new Date(), publicToken },
+        data: { reminderSentAt: new Date() },
       });
       sent++;
     } catch (err) {

@@ -53,8 +53,18 @@ export async function PATCH(request: NextRequest) {
     if (bookingEndHour !== undefined && (!Number.isInteger(bookingEndHour) || bookingEndHour < 1 || bookingEndHour > 24)) {
       return NextResponse.json({ error: "Invalid booking end hour" }, { status: 400 });
     }
-    if (bookingStartHour !== undefined && bookingEndHour !== undefined && bookingStartHour >= bookingEndHour) {
-      return NextResponse.json({ error: "Booking start hour must be before end hour" }, { status: 400 });
+    if (bookingStartHour !== undefined || bookingEndHour !== undefined) {
+      // Cross-validate against whichever value isn't part of this request, so a
+      // partial update (only start or only end) can't silently invert the window.
+      const current = await db.organization.findUnique({
+        where: { id: session.user.organizationId },
+        select: { bookingStartHour: true, bookingEndHour: true },
+      });
+      const effectiveStart = bookingStartHour !== undefined ? bookingStartHour : current?.bookingStartHour ?? 0;
+      const effectiveEnd = bookingEndHour !== undefined ? bookingEndHour : current?.bookingEndHour ?? 24;
+      if (effectiveStart >= effectiveEnd) {
+        return NextResponse.json({ error: "Booking start hour must be before end hour" }, { status: 400 });
+      }
     }
     if (bookingDays !== undefined && (!Array.isArray(bookingDays) || bookingDays.some((d: unknown) => !Number.isInteger(d) || (d as number) < 0 || (d as number) > 6))) {
       return NextResponse.json({ error: "Invalid booking days" }, { status: 400 });

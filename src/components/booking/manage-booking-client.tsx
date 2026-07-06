@@ -13,7 +13,6 @@ interface Props {
   serviceId: string | null;
   serviceName: string;
   durationMinutes: number;
-  startTime: string;
   clientName: string | null;
   formattedDate: string;
   formattedTime: string;
@@ -42,20 +41,27 @@ export default function ManageBookingClient({
   const [time, setTime] = useState("");
   const [slots, setSlots] = useState<string[]>([]);
   const [fullyBooked, setFullyBooked] = useState(false);
+  const [dayClosed, setDayClosed] = useState(false);
+  const [slotsError, setSlotsError] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
   const loadSlots = useCallback(async () => {
     if (!serviceId || !date) return;
     setLoadingSlots(true);
     setTime("");
+    setSlotsError(false);
+    setDayClosed(false);
     try {
       const res = await fetch(`/api/book/availability?orgId=${orgId}&serviceId=${serviceId}&date=${date}`);
+      if (!res.ok) throw new Error("Request failed");
       const data = await res.json();
       setSlots(data.slots ?? []);
       setFullyBooked(!!data.fullyBooked);
+      setDayClosed(data.reason === "closed");
     } catch {
       setSlots([]);
-      setFullyBooked(true);
+      setFullyBooked(false);
+      setSlotsError(true);
     } finally {
       setLoadingSlots(false);
     }
@@ -185,6 +191,15 @@ export default function ManageBookingClient({
                 <label className="mb-1.5 block text-sm font-medium text-gray-700">New time</label>
                 {loadingSlots ? (
                   <p className="text-sm text-gray-400">Loading available times…</p>
+                ) : slotsError ? (
+                  <div>
+                    <p className="text-sm text-gray-600">Couldn&apos;t load available times.</p>
+                    <Button type="button" size="sm" variant="outline" className="mt-2" onClick={loadSlots}>
+                      Try again
+                    </Button>
+                  </div>
+                ) : dayClosed ? (
+                  <p className="text-sm text-gray-600">Not available on this day. Please pick another date.</p>
                 ) : fullyBooked ? (
                   <p className="text-sm text-amber-700">No openings that day, please try another date.</p>
                 ) : (

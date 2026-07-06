@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import ScheduleCalendar from "@/components/schedule/schedule-calendar";
+import BookingLinkBanner from "@/components/schedule/booking-link-banner";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -66,6 +67,8 @@ export default async function SchedulePage() {
           </Button>
         </Link>
       </div>
+
+      <BookingLinkBanner orgId={orgId} />
 
       <ScheduleCalendar events={events} />
     </div>

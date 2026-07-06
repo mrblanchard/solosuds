@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
-import { hasConflict } from "@/lib/scheduling";
+import { hasConflict, validateBookingWindow } from "@/lib/scheduling";
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,6 +46,14 @@ export async function POST(request: NextRequest) {
       where: { id: serviceId, organizationId: orgId, isActive: true },
     });
     if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });
+
+    const windowCheck = await validateBookingWindow({
+      organizationId: orgId,
+      startTime: new Date(startTime),
+    });
+    if (!windowCheck.ok) {
+      return NextResponse.json({ error: windowCheck.error }, { status: 409 });
+    }
 
     const conflict = await hasConflict({
       organizationId: orgId,
@@ -104,6 +112,7 @@ export async function POST(request: NextRequest) {
           startDateTime: startTime,
           endDateTime: endTime,
           manageUrl: `${baseUrl}/manage/${appointment.publicToken}`,
+          kind: "confirmation",
         });
       } catch {
         // Non-fatal — log but don't reject

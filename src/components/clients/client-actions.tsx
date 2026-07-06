@@ -4,19 +4,44 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Trash2, Archive, Loader2, MoreVertical, FileText, CalendarDays, Pencil } from "lucide-react";
+import { Trash2, Archive, Loader2, MoreVertical, FileText, CalendarDays, Pencil, Mail, MessageSquare } from "lucide-react";
 
 interface ClientActionsProps {
   clientId: string;
   clientName: string;
+  hasEmail?: boolean;
+  hasPhone?: boolean;
 }
 
-export default function ClientActions({ clientId, clientName }: ClientActionsProps) {
+export default function ClientActions({ clientId, clientName, hasEmail = false, hasPhone = false }: ClientActionsProps) {
   const router = useRouter();
   const [isArchiving, setIsArchiving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [sendingLink, setSendingLink] = useState<"email" | "sms" | null>(null);
+  const [linkSent, setLinkSent] = useState<"email" | "sms" | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  async function sendBookingLink(method: "email" | "sms") {
+    setSendingLink(method);
+    try {
+      const res = await fetch(`/api/clients/${clientId}/send-booking-link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ method }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Failed to send");
+      }
+      setLinkSent(method);
+      setTimeout(() => setLinkSent(null), 2500);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to send booking link. Please try again.");
+    } finally {
+      setSendingLink(null);
+    }
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -86,6 +111,26 @@ export default function ClientActions({ clientId, clientName }: ClientActionsPro
             Book Appt
           </Button>
         </Link>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => sendBookingLink("email")}
+          disabled={!hasEmail || sendingLink !== null}
+          title={hasEmail ? "Email this client their online booking link" : "No email on file"}
+        >
+          {sendingLink === "email" ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Mail className="h-4 w-4 mr-1" />}
+          {linkSent === "email" ? "Sent!" : "Email Link"}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => sendBookingLink("sms")}
+          disabled={!hasPhone || sendingLink !== null}
+          title={hasPhone ? "Text this client their online booking link" : "No phone on file"}
+        >
+          {sendingLink === "sms" ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <MessageSquare className="h-4 w-4 mr-1" />}
+          {linkSent === "sms" ? "Sent!" : "Text Link"}
+        </Button>
         <Link href={`/dashboard/clients/${clientId}/edit`}>
           <Button size="sm">Edit Profile</Button>
         </Link>
@@ -147,6 +192,22 @@ export default function ClientActions({ clientId, clientName }: ClientActionsPro
               <CalendarDays className="h-4 w-4" />
               Book Appt
             </Link>
+            <button
+              onClick={() => { setMenuOpen(false); sendBookingLink("email"); }}
+              disabled={!hasEmail || sendingLink !== null}
+              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+            >
+              <Mail className="h-4 w-4" />
+              Email Booking Link
+            </button>
+            <button
+              onClick={() => { setMenuOpen(false); sendBookingLink("sms"); }}
+              disabled={!hasPhone || sendingLink !== null}
+              className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Text Booking Link
+            </button>
             <Link
               href={`/dashboard/clients/${clientId}/edit`}
               className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"

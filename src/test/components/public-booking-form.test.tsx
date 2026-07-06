@@ -21,7 +21,7 @@ const services = [
 
 function renderForm(props = {}) {
   return render(
-    <PublicBookingForm orgId="org1" services={services} timezone="America/New_York" {...props} />
+    <PublicBookingForm orgId="org1" services={services} {...props} />
   );
 }
 
@@ -44,7 +44,7 @@ describe("PublicBookingForm", () => {
     });
 
     it("shows empty state when no services", () => {
-      render(<PublicBookingForm orgId="org1" services={[]} timezone="UTC" />);
+      render(<PublicBookingForm orgId="org1" services={[]} />);
       expect(screen.getByText("No services available for online booking.")).toBeInTheDocument();
     });
   });
