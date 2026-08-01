@@ -15,6 +15,7 @@ const PUBLIC_PATHS = [
   "/hipaa",
   "/api/auth",
   "/api/webhooks",
+  "/api/cron",
   "/api/twilio",
   "/api/Twilio", // Twilio's console has this saved with a capital T and can't be edited there
   "/api/book",
