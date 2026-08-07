@@ -153,6 +153,17 @@ export default function PricingSection({ showCheckout = false }: { showCheckout?
             )}
           </div>
         </div>
+
+        <p className="mt-8 text-center text-sm text-gray-500">
+          Interested in a plan for a team of 3 or more?{" "}
+          <a
+            href="mailto:support@solosuds.com?subject=Team%20pricing"
+            className="text-indigo-600 hover:underline"
+          >
+            Contact us
+          </a>{" "}
+          for more information.
+        </p>
       </div>
     </section>
   );
