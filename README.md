@@ -26,11 +26,11 @@ Practice management software for healthcare practitioners. SOAP notes, schedulin
 
 ## Pricing
 
-| Plan | Monthly | Yearly | Practitioners |
-|------|---------|--------|---------------|
-| Solo | $39 | $32/mo | 1 |
-| Practice | $139 | $116/mo | Up to 5 |
-| Clinic | $389 | $324/mo | Unlimited |
+Single tier for now — Solo, for individual practitioners. Multi-practitioner tiers (Practice, Clinic) may come later but aren't built or sold today.
+
+| Plan | Monthly | Yearly |
+|------|---------|--------|
+| Solo | $49 | $39/mo ($468/yr) |
 
 ## Stack
 
