@@ -35,6 +35,7 @@ export default async function ClientEditPage({ params }: Props) {
     emergencyPhone: client.emergencyPhone ?? "",
     referralSource: client.referralSource ?? "",
     internalNotes: client.internalNotes ?? "",
+    smsConsent: client.smsConsentStatus === "CONSENTED",
   };
 
   return (

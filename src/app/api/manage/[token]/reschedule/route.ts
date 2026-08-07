@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hasConflict, notifyWaitlistForOpening, validateBookingWindow } from "@/lib/scheduling";
 import { sendAppointmentReminder } from "@/lib/email";
+import { sendAppointmentSms } from "@/lib/twilio";
+import { rescheduleSms } from "@/lib/sms-templates";
 import { formatDate } from "@/lib/utils";
 
 export async function PATCH(
@@ -19,7 +21,7 @@ export async function PATCH(
   const appointment = await db.appointment.findFirst({
     where: { publicToken: token },
     include: {
-      client: { select: { firstName: true, lastName: true, email: true } },
+      client: { select: { firstName: true, lastName: true, email: true, phone: true, smsConsentStatus: true } },
       service: { select: { name: true } },
       practitioner: { select: { name: true } },
       organization: {
@@ -87,6 +89,23 @@ export async function PATCH(
       });
     } catch (err) {
       console.error("[reschedule] Failed to send confirmation email:", err);
+    }
+  }
+
+  if (appointment.client?.phone && appointment.client.smsConsentStatus === "CONSENTED") {
+    const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+    try {
+      await sendAppointmentSms({
+        to: appointment.client.phone,
+        body: rescheduleSms({
+          orgName: appointment.organization.name,
+          date: formatDate(newStart, "MMM d"),
+          time: formatDate(newStart, "h:mm a"),
+          link: `${baseUrl}/manage/${token}`,
+        }),
+      });
+    } catch (err) {
+      console.error("[reschedule] Failed to send confirmation SMS:", err);
     }
   }
 

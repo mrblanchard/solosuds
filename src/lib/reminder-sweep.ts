@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
+import { sendAppointmentSms } from "@/lib/twilio";
+import { reminderSms } from "@/lib/sms-templates";
 import { formatDate } from "@/lib/utils";
 import { ensurePublicToken } from "@/lib/scheduling";
 
@@ -27,7 +29,7 @@ export async function runReminderSweep(): Promise<{ sent: number; failed: number
       client: { email: { not: null } },
     },
     include: {
-      client: { select: { firstName: true, lastName: true, email: true } },
+      client: { select: { firstName: true, lastName: true, email: true, phone: true, smsConsentStatus: true } },
       service: { select: { name: true } },
       practitioner: { select: { name: true } },
       organization: {
@@ -55,6 +57,23 @@ export async function runReminderSweep(): Promise<{ sent: number; failed: number
         branding: appt.organization,
         manageUrl: `${baseUrl}/manage/${publicToken}`,
       });
+
+      if (appt.client.phone && appt.client.smsConsentStatus === "CONSENTED") {
+        try {
+          await sendAppointmentSms({
+            to: appt.client.phone,
+            body: reminderSms({
+              orgName: appt.organization.name,
+              serviceName: appt.service?.name ?? "Session",
+              date: formatDate(appt.startTime, "MMM d"),
+              time: formatDate(appt.startTime, "h:mm a"),
+            }),
+          });
+        } catch (err) {
+          console.error(`[reminder-sweep] Failed to send SMS for appointment ${appt.id}:`, err);
+        }
+      }
+
       await db.appointment.update({
         where: { id: appt.id },
         data: { reminderSentAt: new Date() },

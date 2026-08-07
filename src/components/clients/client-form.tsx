@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,6 +35,7 @@ const schema = z.object({
   emergencyPhone: optionalPhone,
   referralSource: z.string().max(200).optional(),
   internalNotes: z.string().max(5000).optional(),
+  smsConsent: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -157,6 +159,28 @@ export default function ClientForm({ defaultValues, clientId }: ClientFormProps)
               placeholder="802-258-0000"
             />
           </FormField>
+          {watch("phone") && (
+            <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 sm:col-span-2">
+              <input
+                id="smsConsent"
+                type="checkbox"
+                checked={watch("smsConsent") ?? false}
+                onChange={(e) => setValue("smsConsent", e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <label htmlFor="smsConsent" className="text-xs text-gray-600 leading-relaxed">
+                <span className="font-medium text-gray-800">Client verbally consented to receive SMS reminders.</span>{" "}
+                Only check this after reading the client the required script: what texts they&rsquo;ll get
+                (appointment reminders), that frequency varies, &ldquo;message and data rates may apply,&rdquo;
+                that they can reply STOP to opt out or HELP for help, our{" "}
+                <Link href="/terms" target="_blank" className="text-indigo-600 hover:underline">Terms</Link>{" "}
+                and{" "}
+                <Link href="/privacy" target="_blank" className="text-indigo-600 hover:underline">Privacy Policy</Link>,
+                and getting an explicit &ldquo;yes.&rdquo; Unchecking this for a previously consented client
+                records that they revoked consent.
+              </label>
+            </div>
+          )}
           <FormField label="Address" fieldId="address" className="sm:col-span-2">
             <AddressAutocomplete
               id="address"

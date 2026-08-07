@@ -176,6 +176,18 @@ enum EmailConsentStatus {
   REVOKED   // Practitioner has revoked email access
 }
 
+enum SmsConsentStatus {
+  NONE      // No SMS consent on file
+  CONSENTED // Client has opted in to receive SMS
+  REVOKED   // Client replied STOP, or practitioner revoked
+}
+
+enum SmsConsentMethod {
+  WEB_FORM // Checkbox on public booking form or dashboard client form
+  VERBAL   // Practitioner read the required script and got a yes
+  TEXT     // Client texted the opt-in keyword to the Twilio number
+}
+
 model Client {
   id               String       @id @default(cuid())
   organizationId   String
@@ -198,6 +210,9 @@ model Client {
   internalNotes    String?      @db.Text
   status              ClientStatus       @default(ACTIVE)
   emailConsentStatus  EmailConsentStatus @default(NONE)
+  smsConsentStatus    SmsConsentStatus   @default(NONE)
+  smsConsentMethod    SmsConsentMethod?
+  smsConsentAt        DateTime?
   stripeCustomerId    String?            @unique
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt

@@ -44,6 +44,21 @@ export async function sendSms({
   return { sid: message.sid };
 }
 
+/**
+ * Automated appointment SMS (booking confirmation, reminder, reschedule notice) is built and
+ * consent-gated, but held back as "coming soon" until the Twilio A2P campaign clears carrier
+ * review — set SMS_APPOINTMENT_NOTIFICATIONS_ENABLED=true once it's approved to turn it on.
+ * Unaffected: intake-form SMS and inbound-message staff forwarding, which already ship via
+ * sendSms() directly and don't go through this gate.
+ */
+export async function sendAppointmentSms({ to, body }: { to: string; body: string }): Promise<void> {
+  if (process.env.SMS_APPOINTMENT_NOTIFICATIONS_ENABLED !== "true") {
+    console.log(`[SMS coming soon] Would send to ${to}: ${body}`);
+    return;
+  }
+  await sendSms({ to, body });
+}
+
 /** Verify that an incoming webhook request was actually sent by Twilio. */
 export function isValidTwilioRequest(request: NextRequest, params: Record<string, string>): boolean {
   const authToken = process.env.TWILIO_AUTH_TOKEN;

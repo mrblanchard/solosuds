@@ -23,6 +23,7 @@ const clientSchema = z.object({
   referralSource: z.string().max(200).optional(),
   internalNotes: z.string().max(5000).optional(),
   tags: z.array(z.string().max(50)).max(20).optional(),
+  smsConsent: z.boolean().optional(),
 });
 
 export async function POST(req: Request) {
@@ -38,7 +39,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
   }
 
-  const { tags, dateOfBirth, email, ...data } = parsed.data;
+  const { tags, dateOfBirth, email, smsConsent, ...data } = parsed.data;
+
+  // Practitioner must actively check the verbal-consent box — never inferred from a phone number alone.
+  const smsOptIn = Boolean(data.phone) && smsConsent === true;
 
   const client = await db.client.create({
     data: {
@@ -49,6 +53,9 @@ export async function POST(req: Request) {
       tags: tags?.length
         ? { create: tags.map((name) => ({ name })) }
         : undefined,
+      ...(smsOptIn
+        ? { smsConsentStatus: "CONSENTED", smsConsentMethod: "VERBAL", smsConsentAt: new Date() }
+        : {}),
     },
   });
 

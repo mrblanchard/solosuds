@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
+import { sendAppointmentSms } from "@/lib/twilio";
+import { confirmationSms } from "@/lib/sms-templates";
 import { hasConflict, validateBookingWindow } from "@/lib/scheduling";
+import { formatDate } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +19,7 @@ export async function POST(request: NextRequest) {
       clientLastName,
       clientEmail,
       clientPhone,
+      smsConsent,
       notes,
     } = body;
 
@@ -67,6 +71,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Recipient must actively check the SMS consent box on the web form — never inferred from
+    // providing a phone number alone. See the SmsConsentMethod enum in schema.prisma.
+    const smsOptIn = Boolean(clientPhone) && smsConsent === true;
+
     // Find or create client
     let client = await db.client.findFirst({
       where: { organizationId: orgId, email: clientEmail },
@@ -81,6 +89,21 @@ export async function POST(request: NextRequest) {
           email: clientEmail,
           phone: clientPhone ?? null,
           status: "ACTIVE",
+          ...(smsOptIn
+            ? { smsConsentStatus: "CONSENTED", smsConsentMethod: "WEB_FORM", smsConsentAt: new Date() }
+            : {}),
+        },
+      });
+    } else if (smsOptIn && client.smsConsentStatus !== "CONSENTED") {
+      // Re-consenting on a later booking upgrades an existing client's status, but a missing
+      // checkbox never downgrades or overwrites consent the client already gave elsewhere.
+      client = await db.client.update({
+        where: { id: client.id },
+        data: {
+          phone: clientPhone ?? client.phone,
+          smsConsentStatus: "CONSENTED",
+          smsConsentMethod: "WEB_FORM",
+          smsConsentAt: new Date(),
         },
       });
     }
@@ -117,6 +140,26 @@ export async function POST(request: NextRequest) {
       } catch {
         // Non-fatal — log but don't reject
         console.warn("Failed to send booking confirmation email");
+      }
+    }
+
+    // Send confirmation text — only ever to clients with recorded SMS consent
+    if (client.phone && client.smsConsentStatus === "CONSENTED") {
+      try {
+        const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+        await sendAppointmentSms({
+          to: client.phone,
+          body: confirmationSms({
+            orgName: org.name,
+            serviceName: service.name,
+            date: formatDate(startTime, "MMM d"),
+            time: formatDate(startTime, "h:mm a"),
+            link: `${baseUrl}/manage/${appointment.publicToken}`,
+          }),
+        });
+      } catch (err) {
+        // Non-fatal — log but don't reject
+        console.warn("Failed to send booking confirmation SMS:", err);
       }
     }
 

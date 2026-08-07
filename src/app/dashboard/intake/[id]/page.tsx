@@ -24,7 +24,7 @@ export default async function IntakeFormDetailPage({
     }),
     db.client.findMany({
       where: { organizationId: session.user.organizationId, status: "ACTIVE" },
-      select: { id: true, firstName: true, lastName: true, email: true, phone: true },
+      select: { id: true, firstName: true, lastName: true, email: true, phone: true, smsConsentStatus: true },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     }),
   ]);

@@ -41,7 +41,19 @@ export async function PATCH(
       referralSource,
       internalNotes,
       status,
+      smsConsent,
     } = body;
+
+    // Practitioner must actively toggle the verbal-consent checkbox — checking it records a fresh
+    // verbal opt-in, unchecking it (only meaningful if the client was previously consented) records
+    // a revocation. Leaving it untouched (smsConsent undefined) never changes consent on file.
+    const nextPhone = phone !== undefined ? phone || null : client.phone;
+    let consentUpdate: Record<string, unknown> = {};
+    if (smsConsent === true && Boolean(nextPhone) && client.smsConsentStatus !== "CONSENTED") {
+      consentUpdate = { smsConsentStatus: "CONSENTED", smsConsentMethod: "VERBAL", smsConsentAt: new Date() };
+    } else if (smsConsent === false && client.smsConsentStatus === "CONSENTED") {
+      consentUpdate = { smsConsentStatus: "REVOKED" };
+    }
 
     const updated = await db.client.update({
       where: { id },
@@ -63,6 +75,7 @@ export async function PATCH(
         ...(referralSource !== undefined && { referralSource: referralSource || null }),
         ...(internalNotes !== undefined && { internalNotes: internalNotes || null }),
         ...(status !== undefined && { status }),
+        ...consentUpdate,
       },
     });
 

@@ -10,6 +10,7 @@ type Client = {
   lastName: string;
   email: string | null;
   phone: string | null;
+  smsConsentStatus: "NONE" | "CONSENTED" | "REVOKED";
 };
 
 interface Props {
@@ -24,9 +25,12 @@ export default function SendFormButtons({ formId, clients }: Props) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
+  // SMS is further restricted to clients with recorded consent — a phone number alone isn't enough.
   const eligibleClients = clients.filter((c) =>
-    modal === "email" ? !!c.email : !!c.phone
+    modal === "email" ? !!c.email : !!c.phone && c.smsConsentStatus === "CONSENTED"
   );
+  const phoneOnNoConsentCount =
+    modal === "sms" ? clients.filter((c) => !!c.phone && c.smsConsentStatus !== "CONSENTED").length : 0;
 
   function openModal(type: "email" | "sms") {
     setModal(type);
@@ -125,11 +129,21 @@ export default function SendFormButtons({ formId, clients }: Props) {
 
                 {eligibleClients.length === 0 ? (
                   <p className="text-sm text-gray-500 py-6 text-center">
-                    No clients have {modal === "email" ? "an email address" : "a phone number"} on file.
+                    {modal === "email"
+                      ? "No clients have an email address on file."
+                      : phoneOnNoConsentCount > 0
+                      ? "No clients have consented to SMS yet. Record consent on a client's profile first."
+                      : "No clients have a phone number on file."}
                   </p>
                 ) : (
                   <div className="space-y-2">
                     <p className="text-sm text-gray-600 mb-3">Select a client:</p>
+                    {modal === "sms" && phoneOnNoConsentCount > 0 && (
+                      <p className="text-xs text-gray-400 mb-2">
+                        {phoneOnNoConsentCount} client{phoneOnNoConsentCount === 1 ? "" : "s"} with a phone number
+                        {phoneOnNoConsentCount === 1 ? " isn't" : " aren't"} shown: no SMS consent on file.
+                      </p>
+                    )}
                     <div className="max-h-64 overflow-y-auto rounded-xl border border-gray-200 divide-y divide-gray-100">
                       {eligibleClients.map((c) => (
                         <button

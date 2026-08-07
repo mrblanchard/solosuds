@@ -153,7 +153,23 @@ export default async function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-base font-semibold text-gray-900 mb-2">13. Changes to These Terms</h2>
+              <h2 className="text-base font-semibold text-gray-900 mb-2">13. SMS / Text Messaging Terms</h2>
+              <p>
+                If you provide a mobile phone number and opt in, SoloSuds or the Practitioner you have an
+                appointment with may send you SMS text messages, including appointment confirmations, reminders,
+                and reschedule notices. Message frequency varies based on your appointment activity (typically one
+                to a few messages per booking). <strong>Message and data rates may apply.</strong>
+              </p>
+              <p className="mt-2">
+                Reply <strong>STOP</strong> at any time to opt out of SMS messages, or <strong>HELP</strong> for
+                assistance. Consent to receive SMS messages is not a condition of purchasing any service. See our{" "}
+                <Link href="/privacy" className="text-indigo-600 hover:underline">Privacy Policy</Link> for how we
+                handle phone numbers collected for SMS.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-base font-semibold text-gray-900 mb-2">14. Changes to These Terms</h2>
               <p>
                 We may update these Terms from time to time. We will notify you of material changes by email or
                 in-app notice at least 14 days before they take effect. Continued use of the Service after the

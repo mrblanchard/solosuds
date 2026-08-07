@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { sendAppointmentReminder } from "@/lib/email";
+import { sendAppointmentSms } from "@/lib/twilio";
+import { confirmationSms } from "@/lib/sms-templates";
 import { formatDate } from "@/lib/utils";
 import { hasConflict } from "@/lib/scheduling";
 
@@ -71,12 +73,19 @@ export async function POST(req: Request) {
 
   // Resolve client — use existing if clientId provided, create minimal record if name given
   let resolvedClientId: string | undefined;
-  let client: { id: string; email: string | null; firstName: string; lastName: string } | null = null;
+  let client: {
+    id: string;
+    email: string | null;
+    firstName: string;
+    lastName: string;
+    phone: string | null;
+    smsConsentStatus: string;
+  } | null = null;
 
   if (clientId) {
     const found = await db.client.findFirst({
       where: { id: clientId, organizationId: orgId },
-      select: { id: true, email: true, firstName: true, lastName: true },
+      select: { id: true, email: true, firstName: true, lastName: true, phone: true, smsConsentStatus: true },
     });
     if (!found) return NextResponse.json({ error: "Client not found" }, { status: 404 });
     resolvedClientId = found.id;
@@ -87,7 +96,7 @@ export async function POST(req: Request) {
     const lastName = parts.slice(1).join(" ");
     const created = await db.client.create({
       data: { organizationId: orgId, firstName, lastName, status: "ACTIVE" },
-      select: { id: true, email: true, firstName: true, lastName: true },
+      select: { id: true, email: true, firstName: true, lastName: true, phone: true, smsConsentStatus: true },
     });
     resolvedClientId = created.id;
     client = created;
@@ -180,6 +189,28 @@ export async function POST(req: Request) {
       });
     } catch (err) {
       console.error("Failed to send reminder:", err);
+    }
+  }
+
+  // Send confirmation text — only if this client has recorded SMS consent (recorded via a prior
+  // web booking or a practitioner checking the verbal-consent box on their profile). Booking from
+  // the dashboard doesn't itself capture new consent.
+  if (sendReminder && client?.phone && client.smsConsentStatus === "CONSENTED") {
+    try {
+      const org = await db.organization.findUnique({ where: { id: orgId }, select: { name: true } });
+      const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+      await sendAppointmentSms({
+        to: client.phone,
+        body: confirmationSms({
+          orgName: org?.name ?? "SoloSuds",
+          serviceName: appointment.service?.name ?? "your appointment",
+          date: formatDate(appointment.startTime, "MMM d"),
+          time: formatDate(appointment.startTime, "h:mm a"),
+          link: `${baseUrl}/manage/${appointment.publicToken}`,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to send confirmation SMS:", err);
     }
   }
 

@@ -38,6 +38,12 @@ export function AppFooter() {
             >
               Terms of Service
             </Link>
+            <Link
+              href="/privacy"
+              className="text-sm text-gray-600 transition-colors hover:text-indigo-600"
+            >
+              Privacy Policy
+            </Link>
           </div>
         </div>
 

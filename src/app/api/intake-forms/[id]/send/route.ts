@@ -30,7 +30,7 @@ export async function POST(
     }),
     db.client.findFirst({
       where: { id: clientId, organizationId: orgId },
-      select: { id: true, firstName: true, lastName: true, email: true, phone: true },
+      select: { id: true, firstName: true, lastName: true, email: true, phone: true, smsConsentStatus: true },
     }),
   ]);
 
@@ -66,8 +66,14 @@ export async function POST(
     if (!client.phone) {
       return NextResponse.json({ error: "Client has no phone number on file" }, { status: 400 });
     }
+    if (client.smsConsentStatus !== "CONSENTED") {
+      return NextResponse.json(
+        { error: "Client has not consented to receive SMS. Record consent on their client profile first." },
+        { status: 400 }
+      );
+    }
 
-    const smsBody = `Hi ${client.firstName}, please complete your intake form: ${formUrl}`;
+    const smsBody = `Hi ${client.firstName}, please complete your intake form: ${formUrl} Reply STOP to opt out.`;
 
     let sid: string | undefined;
     try {

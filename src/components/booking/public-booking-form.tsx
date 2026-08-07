@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +38,7 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [smsConsent, setSmsConsent] = useState(false);
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -119,6 +121,7 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
         clientLastName: lastName.trim(),
         clientEmail: normalizeEmail(email),
         clientPhone: stripPhone(phone),
+        smsConsent: Boolean(phone) && smsConsent,
         notes,
       }),
     });
@@ -373,11 +376,40 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
                 id="phone"
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(formatPhone(e.target.value))}
+                onChange={(e) => {
+                  const next = formatPhone(e.target.value);
+                  setPhone(next);
+                  if (!next) setSmsConsent(false);
+                }}
                 placeholder="802-258-0000"
                 className="mt-1"
               />
             </div>
+
+            {phone && (
+              <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-3">
+                <input
+                  id="smsConsent"
+                  type="checkbox"
+                  checked={smsConsent}
+                  onChange={(e) => setSmsConsent(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <label htmlFor="smsConsent" className="text-xs text-gray-600 leading-relaxed">
+                  Yes, text me appointment confirmations and reminders at the number above. Message
+                  frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help.
+                  See our{" "}
+                  <Link href="/terms" target="_blank" className="text-indigo-600 hover:underline">
+                    Terms
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" target="_blank" className="text-indigo-600 hover:underline">
+                    Privacy Policy
+                  </Link>
+                  .
+                </label>
+              </div>
+            )}
 
             <div>
               <Label htmlFor="bookingNotes">Notes for the practitioner</Label>
