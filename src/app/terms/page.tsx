@@ -17,7 +17,7 @@ export default async function TermsPage() {
 
         <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
           <h1 className="mb-2 text-3xl font-bold text-gray-900">Terms of Service</h1>
-          <p className="mb-8 text-sm text-gray-500">Effective date: January 1, 2025. Last updated: August 10, 2026.</p>
+          <p className="mb-8 text-sm text-gray-500">Effective date: January 1, 2026. Last updated: August 10, 2026.</p>
 
           <div className="prose prose-gray max-w-none text-sm leading-relaxed text-gray-700 space-y-6">
 
