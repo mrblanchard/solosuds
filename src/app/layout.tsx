@@ -1,9 +1,10 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { Analytics } from "@vercel/analytics/next";
 
 const nunito = Nunito({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 
@@ -111,6 +112,7 @@ export default async function RootLayout({
         className={`${nunito.className} min-h-full bg-cover bg-center bg-no-repeat bg-fixed bg-banner`}
       >
         <SessionProvider>{children}</SessionProvider>
+        <Analytics />
       </body>
     </html>
   );
