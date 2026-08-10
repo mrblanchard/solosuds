@@ -30,7 +30,7 @@ export default async function TermsPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">1. The Service</h2>
               <p>
-                SoloSuds, Inc. (&ldquo;SoloSuds,&rdquo; &ldquo;we,&rdquo; &ldquo;us&rdquo;) provides a
+                Jeremy Blanchard, doing business as SoloSuds (&ldquo;SoloSuds,&rdquo; &ldquo;we,&rdquo; &ldquo;us&rdquo;) provides a
                 cloud-based practice management platform (&ldquo;Service&rdquo;) for healthcare professionals,
                 including tools for SOAP notes, scheduling, client management, intake forms, invoicing, and
                 secure messaging. The Service is intended for licensed healthcare providers and their authorized

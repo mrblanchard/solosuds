@@ -38,11 +38,17 @@ export function AppFooter() {
             >
               Terms of Service
             </Link>
+            <Link
+              href="/privacy"
+              className="text-sm text-gray-600 transition-colors hover:text-indigo-600"
+            >
+              Privacy Policy
+            </Link>
           </div>
         </div>
 
         <div className="mt-8 border-t border-gray-100 pt-5 text-center text-xs text-gray-400">
-          © {new Date().getFullYear()} Jeremy Blanchard, d/b/a SoloSuds. All rights reserved.
+          © {new Date().getFullYear()} SoloSuds. All rights reserved.
         </div>
       </div>
     </footer>

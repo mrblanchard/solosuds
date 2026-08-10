@@ -22,7 +22,7 @@ export default async function PrivacyPage() {
           <div className="prose prose-gray max-w-none text-sm leading-relaxed text-gray-700 space-y-6">
 
             <p>
-              This Privacy Policy describes how SoloSuds, Inc. (&ldquo;SoloSuds,&rdquo; &ldquo;we,&rdquo; &ldquo;us&rdquo;)
+              This Privacy Policy describes how Jeremy Blanchard, doing business as SoloSuds (&ldquo;SoloSuds,&rdquo; &ldquo;we,&rdquo; &ldquo;us&rdquo;)
               collects, uses, and shares information through our appointment-scheduling platform for independent
               healthcare and wellness practitioners (the &ldquo;Service&rdquo;). It applies both to practitioners who
               hold an account and to their clients who interact with a practitioner through the Service, including

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Leaf } from "lucide-react";
 
-export const metadata = { title: "Business Associate Agreement — SoloSuds" };
+export const metadata = { title: "Business Associate Agreement | SoloSuds" };
 
 export default function HipaaPage() {
   return (
@@ -16,13 +16,13 @@ export default function HipaaPage() {
 
         <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
           <h1 className="mb-2 text-3xl font-bold text-gray-900">Business Associate Agreement</h1>
-          <p className="mb-8 text-sm text-gray-500">Effective date: January 1, 2025 — Last updated: January 1, 2025</p>
+          <p className="mb-8 text-sm text-gray-500">Effective date: January 1, 2026. Last updated: August 10, 2026.</p>
 
           <div className="prose prose-gray max-w-none text-sm leading-relaxed text-gray-700 space-y-6">
 
             <p>
-              This Business Associate Agreement (&ldquo;BAA&rdquo;) is entered into between SoloSuds, Inc.
-              (&ldquo;Business Associate&rdquo;) and the healthcare provider or covered entity that creates an
+              This Business Associate Agreement (&ldquo;BAA&rdquo;) is entered into between Jeremy Blanchard, doing
+              business as SoloSuds (&ldquo;Business Associate&rdquo;) and the healthcare provider or covered entity that creates an
               account (&ldquo;Covered Entity&rdquo;). This BAA is incorporated into and forms part of the
               SoloSuds Terms of Service.
             </p>
@@ -36,9 +36,9 @@ export default function HipaaPage() {
                 implementing regulations (collectively, the &ldquo;HIPAA Rules&rdquo;).
               </p>
               <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li><strong>Protected Health Information (PHI)</strong> — individually identifiable health information transmitted or maintained in any form or medium.</li>
-                <li><strong>Electronic PHI (ePHI)</strong> — PHI that is created, received, maintained, or transmitted electronically.</li>
-                <li><strong>Breach</strong> — acquisition, access, use, or disclosure of PHI in a manner not permitted under the HIPAA Privacy Rule that compromises the security or privacy of the PHI.</li>
+                <li><strong>Protected Health Information (PHI):</strong> individually identifiable health information transmitted or maintained in any form or medium.</li>
+                <li><strong>Electronic PHI (ePHI):</strong> PHI that is created, received, maintained, or transmitted electronically.</li>
+                <li><strong>Breach:</strong> acquisition, access, use, or disclosure of PHI in a manner not permitted under the HIPAA Privacy Rule that compromises the security or privacy of the PHI.</li>
               </ul>
             </section>
 
