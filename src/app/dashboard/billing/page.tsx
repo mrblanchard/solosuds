@@ -8,6 +8,7 @@ import SortHeader from "@/components/ui/sort-header";
 import { CreditCard, Plus } from "lucide-react";
 import { formatDate, formatCurrency } from "@/lib/utils";
 import { Prisma } from "@prisma/client";
+import InvoiceRowActions from "@/components/billing/invoice-row-actions";
 
 const SORT_MAP: Record<string, Prisma.InvoiceOrderByWithRelationInput> = {
   client_asc:  { client: { lastName: "asc" } },
@@ -167,12 +168,7 @@ export default async function BillingPage({
                     <InvoiceStatusBadge status={inv.status} />
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <Link
-                      href={`/dashboard/billing/${inv.id}`}
-                      className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-                    >
-                      View →
-                    </Link>
+                    <InvoiceRowActions invoice={{ id: inv.id, status: inv.status, publicToken: inv.publicToken }} />
                   </td>
                 </tr>
               ))}
