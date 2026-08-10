@@ -2,7 +2,7 @@
 import { AppFooter } from "@/components/layout/app-footer";
 import { auth } from "@/lib/auth";
 
-export const metadata = { title: "Terms of Service — SoloSuds" };
+export const metadata = { title: "Terms of Service | SoloSuds" };
 
 export default async function TermsPage() {
   const session = await auth();
@@ -17,7 +17,7 @@ export default async function TermsPage() {
 
         <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
           <h1 className="mb-2 text-3xl font-bold text-gray-900">Terms of Service</h1>
-          <p className="mb-8 text-sm text-gray-500">Effective date: January 1, 2025 — Last updated: January 1, 2025</p>
+          <p className="mb-8 text-sm text-gray-500">Effective date: January 1, 2025. Last updated: August 10, 2026.</p>
 
           <div className="prose prose-gray max-w-none text-sm leading-relaxed text-gray-700 space-y-6">
 
@@ -165,9 +165,8 @@ export default async function TermsPage() {
               <h2 className="text-base font-semibold text-gray-900 mb-2">14. Text Messaging (SMS) Terms</h2>
               <p>
                 A practitioner using SoloSuds may send appointment-related text messages to their own clients
-                through the Service (&ldquo;SoloSuds Appointment Text Notifications&rdquo;). This program is
-                separate from a practitioner&rsquo;s own account and applies only to a client who has actively
-                opted in to receive texts.
+                through the Service (&ldquo;SoloSuds Appointment Text Notifications&rdquo;). This applies only to
+                a client who has actively opted in to receive texts.
               </p>
               <p className="mt-2"><strong>Message types.</strong> Booking confirmations, appointment reminders, reschedule notices, and waitlist availability alerts, plus a one-time confirmation sent when a client opts in.</p>
               <p className="mt-2"><strong>Message frequency.</strong> Frequency varies based on a client&rsquo;s appointment activity, typically 1 to 4 messages per month.</p>

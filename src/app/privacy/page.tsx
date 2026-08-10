@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AppFooter } from "@/components/layout/app-footer";
 import { auth } from "@/lib/auth";
 
-export const metadata = { title: "Privacy Policy — SoloSuds" };
+export const metadata = { title: "Privacy Policy | SoloSuds" };
 
 export default async function PrivacyPage() {
   const session = await auth();
