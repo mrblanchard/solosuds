@@ -12,6 +12,7 @@ const PUBLIC_PATHS = [
   "/portal",
   "/pay",
   "/terms",
+  "/privacy",
   "/hipaa",
   "/api/auth",
   "/api/webhooks",
