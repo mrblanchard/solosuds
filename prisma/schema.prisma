@@ -198,6 +198,7 @@ model Client {
   internalNotes    String?      @db.Text
   status              ClientStatus       @default(ACTIVE)
   emailConsentStatus  EmailConsentStatus @default(NONE)
+  smsConsentedAt      DateTime?          // set when the client opts in to appointment texts; null = not opted in
   stripeCustomerId    String?            @unique
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
@@ -462,6 +463,7 @@ model WaitlistEntry {
   clientLastName  String
   clientEmail     String
   clientPhone     String?
+  smsConsentedAt  DateTime?      // set when the client opts in to appointment texts; null = not opted in
   preferredDate   DateTime?     // null = any opening
   notes           String?
   status          WaitlistStatus @default(WAITING)

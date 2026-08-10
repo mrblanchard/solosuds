@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
+import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { formatPhone, stripPhone, titleCase, normalizeEmail } from "@/lib/utils";
 import { CheckCircle, Clock } from "lucide-react";
@@ -20,6 +21,7 @@ interface Service {
 
 interface Props {
   orgId: string;
+  orgName: string;
   services: Service[];
   primaryColor?: string | null;
 }
@@ -28,7 +30,7 @@ function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 254;
 }
 
-export default function PublicBookingForm({ orgId, services, primaryColor }: Props) {
+export default function PublicBookingForm({ orgId, orgName, services, primaryColor }: Props) {
   const [step, setStep] = useState<"service" | "details" | "confirm">("service");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [date, setDate] = useState("");
@@ -37,6 +39,7 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [smsConsent, setSmsConsent] = useState(false);
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -119,6 +122,7 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
         clientLastName: lastName.trim(),
         clientEmail: normalizeEmail(email),
         clientPhone: stripPhone(phone),
+        smsConsent: phone ? smsConsent : false,
         notes,
       }),
     });
@@ -155,6 +159,7 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
         lastName: lastName.trim(),
         email: normalizeEmail(email),
         phone: stripPhone(phone),
+        smsConsent: phone ? smsConsent : false,
         preferredDate: date || undefined,
         notes,
       }),
@@ -373,11 +378,35 @@ export default function PublicBookingForm({ orgId, services, primaryColor }: Pro
                 id="phone"
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(formatPhone(e.target.value))}
+                onChange={(e) => {
+                  const next = formatPhone(e.target.value);
+                  setPhone(next);
+                  if (!next) setSmsConsent(false);
+                }}
                 placeholder="802-258-0000"
                 className="mt-1"
               />
             </div>
+
+            {phone && (
+              <label className="flex items-start gap-2 text-xs text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={smsConsent}
+                  onChange={(e) => setSmsConsent(e.target.checked)}
+                  className="mt-0.5 rounded border-gray-300 text-indigo-600"
+                />
+                <span>
+                  I agree to receive appointment text messages (booking confirmations, reminders, reschedule
+                  notices, and waitlist alerts) from {orgName} via SoloSuds at the number above. Msg frequency
+                  varies. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help.{" "}
+                  <Link href="/terms" target="_blank" className="text-indigo-600 hover:underline">Terms of Service</Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" target="_blank" className="text-indigo-600 hover:underline">Privacy Policy</Link>{" "}
+                  apply.
+                </span>
+              </label>
+            )}
 
             <div>
               <Label htmlFor="bookingNotes">Notes for the practitioner</Label>

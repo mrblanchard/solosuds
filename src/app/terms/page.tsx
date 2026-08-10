@@ -161,6 +161,29 @@ export default async function TermsPage() {
               </p>
             </section>
 
+            <section>
+              <h2 className="text-base font-semibold text-gray-900 mb-2">14. Text Messaging (SMS) Terms</h2>
+              <p>
+                A practitioner using SoloSuds may send appointment-related text messages to their own clients
+                through the Service (&ldquo;SoloSuds Appointment Text Notifications&rdquo;). This program is
+                separate from a practitioner&rsquo;s own account and applies only to a client who has actively
+                opted in to receive texts.
+              </p>
+              <p className="mt-2"><strong>Message types.</strong> Booking confirmations, appointment reminders, reschedule notices, and waitlist availability alerts, plus a one-time confirmation sent when a client opts in.</p>
+              <p className="mt-2"><strong>Message frequency.</strong> Frequency varies based on a client&rsquo;s appointment activity, typically 1 to 4 messages per month.</p>
+              <p className="mt-2"><strong>Cost.</strong> Message and data rates may apply, as charged by the client&rsquo;s wireless carrier.</p>
+              <p className="mt-2"><strong>Opting out.</strong> A client can reply STOP at any time to stop receiving texts. Reply HELP for help, or contact the practitioner directly. Opting out of texts does not affect a client&rsquo;s appointments or care.</p>
+              <p className="mt-2"><strong>Consent is not a condition of service.</strong> A client is never required to opt in to text messages to book or keep an appointment.</p>
+              <p className="mt-2">
+                Carriers are not liable for delayed or undelivered messages. Supported carriers include the major
+                U.S. wireless carriers; coverage and reliability vary by carrier and are not guaranteed by SoloSuds.
+              </p>
+              <p className="mt-2">
+                See our <Link href="/privacy" className="text-indigo-600 hover:underline">Privacy Policy</Link> for
+                how phone numbers and message content are handled.
+              </p>
+            </section>
+
           </div>
         </div>
 

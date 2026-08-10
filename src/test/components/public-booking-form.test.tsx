@@ -21,7 +21,7 @@ const services = [
 
 function renderForm(props = {}) {
   return render(
-    <PublicBookingForm orgId="org1" services={services} {...props} />
+    <PublicBookingForm orgId="org1" orgName="Test Org" services={services} {...props} />
   );
 }
 
@@ -44,7 +44,7 @@ describe("PublicBookingForm", () => {
     });
 
     it("shows empty state when no services", () => {
-      render(<PublicBookingForm orgId="org1" services={[]} />);
+      render(<PublicBookingForm orgId="org1" orgName="Test Org" services={[]} />);
       expect(screen.getByText("No services available for online booking.")).toBeInTheDocument();
     });
   });

@@ -46,6 +46,7 @@ export default async function BookingPage({ searchParams }: Props) {
         </div>
         <PublicBookingForm
           orgId={org.id}
+          orgName={org.name}
           services={services}
           primaryColor={org.primaryColor}
         />
