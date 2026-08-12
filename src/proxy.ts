@@ -14,6 +14,7 @@ const PUBLIC_PATHS = [
   "/terms",
   "/privacy",
   "/hipaa",
+  "/a940fd266c3300f4ddc7b2f8b61938ad.html", // Twilio domain-ownership verification file
   "/api/auth",
   "/api/webhooks",
   "/api/cron",
