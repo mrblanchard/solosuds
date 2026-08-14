@@ -168,7 +168,7 @@ export default async function TermsPage() {
                 through the Service (&ldquo;SoloSuds Appointment Text Notifications&rdquo;). This applies only to
                 a client who has actively opted in to receive texts.
               </p>
-              <p className="mt-2"><strong>Message types.</strong> Booking confirmations, appointment reminders, reschedule notices, and waitlist availability alerts, plus a one-time confirmation sent when a client opts in.</p>
+              <p className="mt-2"><strong>Message types.</strong> Booking confirmations, appointment reminders, reschedule notices, waitlist availability alerts, booking links, and intake form links, plus a one-time confirmation sent when a client opts in.</p>
               <p className="mt-2"><strong>Message frequency.</strong> Frequency varies based on a client&rsquo;s appointment activity, typically 1 to 4 messages per month.</p>
               <p className="mt-2"><strong>Cost.</strong> Message and data rates may apply, as charged by the client&rsquo;s wireless carrier.</p>
               <p className="mt-2"><strong>Opting out.</strong> A client can reply STOP at any time to stop receiving texts. Reply HELP for help, or contact the practitioner directly. Opting out of texts does not affect a client&rsquo;s appointments or care.</p>

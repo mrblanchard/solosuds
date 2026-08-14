@@ -18,7 +18,7 @@ export async function POST(
 
   const client = await db.client.findFirst({
     where: { id, organizationId: orgId },
-    select: { firstName: true, lastName: true, email: true, phone: true },
+    select: { firstName: true, lastName: true, email: true, phone: true, smsConsentedAt: true },
   });
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
@@ -50,10 +50,16 @@ export async function POST(
     }
   } else {
     if (!client.phone) return NextResponse.json({ error: "This client has no phone number on file" }, { status: 400 });
+    if (!client.smsConsentedAt) {
+      return NextResponse.json(
+        { error: "This client hasn't opted in to text messages" },
+        { status: 400 }
+      );
+    }
     try {
       await sendSms({
         to: client.phone,
-        body: `Hi ${client.firstName}, book your next appointment with ${org.name} here: ${bookingUrl}`,
+        body: `SoloSuds: Hi ${client.firstName}, book your next appointment with ${org.name} here: ${bookingUrl}. Reply HELP for help, STOP to opt out.`,
       });
     } catch (err) {
       console.error("[send-booking-link] sms failed:", err);
