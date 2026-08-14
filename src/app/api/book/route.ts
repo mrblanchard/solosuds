@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
 import { hasConflict, validateBookingWindow } from "@/lib/scheduling";
-import { sendSms } from "@/lib/twilio";
+import { sendSms, buildAppointmentConfirmationSms } from "@/lib/twilio";
 
 const SMS_OPT_IN_CONFIRMATION =
   "SoloSuds: You are now opted in to receive appointment text notifications. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.";
@@ -118,10 +118,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+    const manageUrl = `${baseUrl}/manage/${appointment.publicToken}`;
+
     // Send confirmation email
     if (clientEmail) {
       try {
-        const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
         await sendAppointmentReminder({
           to: clientEmail,
           clientName: `${clientFirstName} ${clientLastName}`,
@@ -131,7 +133,7 @@ export async function POST(request: NextRequest) {
           serviceName: service.name,
           startDateTime: startTime,
           endDateTime: endTime,
-          manageUrl: `${baseUrl}/manage/${appointment.publicToken}`,
+          manageUrl,
           kind: "confirmation",
         });
       } catch {
@@ -146,6 +148,23 @@ export async function POST(request: NextRequest) {
         await sendSms({ to: client.phone, body: SMS_OPT_IN_CONFIRMATION });
       } catch (err) {
         console.warn("Failed to send SMS opt-in confirmation:", err);
+      }
+    } else if (client.phone && client.smsConsentedAt) {
+      // Client was already opted in from a previous booking — send the
+      // booking confirmation text (the opt-in confirmation above already
+      // covers this booking for a brand-new opt-in, so this branch only
+      // fires for a returning, already-consented client).
+      try {
+        await sendSms({
+          to: client.phone,
+          body: buildAppointmentConfirmationSms({
+            serviceName: service.name,
+            startTime,
+            manageUrl,
+          }),
+        });
+      } catch (err) {
+        console.warn("Failed to send booking confirmation SMS:", err);
       }
     }
 

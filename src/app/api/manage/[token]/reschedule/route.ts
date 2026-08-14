@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { hasConflict, notifyWaitlistForOpening, validateBookingWindow } from "@/lib/scheduling";
 import { sendAppointmentReminder } from "@/lib/email";
 import { formatDate } from "@/lib/utils";
+import { sendSms, buildAppointmentRescheduledSms } from "@/lib/twilio";
 
 export async function PATCH(
   req: Request,
@@ -19,7 +20,7 @@ export async function PATCH(
   const appointment = await db.appointment.findFirst({
     where: { publicToken: token },
     include: {
-      client: { select: { firstName: true, lastName: true, email: true } },
+      client: { select: { firstName: true, lastName: true, email: true, phone: true, smsConsentedAt: true } },
       service: { select: { name: true } },
       practitioner: { select: { name: true } },
       organization: {
@@ -69,8 +70,10 @@ export async function PATCH(
     },
   });
 
+  const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+  const manageUrl = `${baseUrl}/manage/${token}`;
+
   if (appointment.client?.email) {
-    const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
     try {
       await sendAppointmentReminder({
         to: appointment.client.email,
@@ -82,11 +85,22 @@ export async function PATCH(
         startDateTime: newStart.toISOString(),
         endDateTime: newEnd.toISOString(),
         branding: appointment.organization,
-        manageUrl: `${baseUrl}/manage/${token}`,
+        manageUrl,
         kind: "rescheduled",
       });
     } catch (err) {
       console.error("[reschedule] Failed to send confirmation email:", err);
+    }
+  }
+
+  if (appointment.client?.phone && appointment.client.smsConsentedAt) {
+    try {
+      await sendSms({
+        to: appointment.client.phone,
+        body: buildAppointmentRescheduledSms({ startTime: newStart, manageUrl }),
+      });
+    } catch (err) {
+      console.error("[reschedule] Failed to send confirmation SMS:", err);
     }
   }
 

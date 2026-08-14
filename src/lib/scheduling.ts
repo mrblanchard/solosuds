@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendWaitlistOpening } from "@/lib/email";
+import { sendSms, buildWaitlistOpeningSms } from "@/lib/twilio";
 
 const ACTIVE_STATUSES = ["SCHEDULED", "CONFIRMED", "IN_PROGRESS", "COMPLETED"] as const;
 
@@ -247,16 +248,25 @@ export async function notifyWaitlistForOpening({
   const bookingUrl = `${baseUrl}/book?org=${org.id}`;
 
   await Promise.allSettled(
-    entries.map((entry) =>
-      sendWaitlistOpening({
+    entries.map(async (entry) => {
+      await sendWaitlistOpening({
         to: entry.clientEmail,
         clientName: `${entry.clientFirstName} ${entry.clientLastName}`,
         bookingUrl,
         branding: org,
       }).catch((err) => {
         console.error(`[waitlist] Failed to notify ${entry.clientEmail}:`, err);
-      })
-    )
+      });
+
+      if (entry.clientPhone && entry.smsConsentedAt) {
+        await sendSms({
+          to: entry.clientPhone,
+          body: buildWaitlistOpeningSms({ openingDate, bookingUrl }),
+        }).catch((err) => {
+          console.error(`[waitlist] Failed to send SMS to ${entry.clientPhone}:`, err);
+        });
+      }
+    })
   );
 
   await db.waitlistEntry.updateMany({

@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
 import { formatDate } from "@/lib/utils";
 import { ensurePublicToken } from "@/lib/scheduling";
+import { sendSms, buildAppointmentReminderSms } from "@/lib/twilio";
 
 const SWEEP_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const REMINDER_WINDOW_MS = 24 * 60 * 60 * 1000; // remind once an appointment is within 24h
@@ -27,7 +28,7 @@ export async function runReminderSweep(): Promise<{ sent: number; failed: number
       client: { email: { not: null } },
     },
     include: {
-      client: { select: { firstName: true, lastName: true, email: true } },
+      client: { select: { firstName: true, lastName: true, email: true, phone: true, smsConsentedAt: true } },
       service: { select: { name: true } },
       practitioner: { select: { name: true } },
       organization: {
@@ -55,6 +56,20 @@ export async function runReminderSweep(): Promise<{ sent: number; failed: number
         branding: appt.organization,
         manageUrl: `${baseUrl}/manage/${publicToken}`,
       });
+      if (appt.client.phone && appt.client.smsConsentedAt) {
+        try {
+          await sendSms({
+            to: appt.client.phone,
+            body: buildAppointmentReminderSms({
+              serviceName: appt.service?.name ?? "Session",
+              startTime: appt.startTime,
+            }),
+          });
+        } catch (err) {
+          console.warn(`[reminder-sweep] Failed to send reminder SMS for appointment ${appt.id}:`, err);
+        }
+      }
+
       await db.appointment.update({
         where: { id: appt.id },
         data: { reminderSentAt: new Date() },

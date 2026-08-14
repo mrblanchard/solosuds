@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { sendAppointmentReminder } from "@/lib/email";
 import { formatDate } from "@/lib/utils";
 import { ensurePublicToken } from "@/lib/scheduling";
+import { sendSms, buildAppointmentReminderSms } from "@/lib/twilio";
 
 export async function POST(
   req: Request,
@@ -20,7 +21,7 @@ export async function POST(
   const appointment = await db.appointment.findFirst({
     where: { id, organizationId: orgId },
     include: {
-      client: { select: { id: true, firstName: true, lastName: true, email: true } },
+      client: { select: { id: true, firstName: true, lastName: true, email: true, phone: true, smsConsentedAt: true } },
       practitioner: { select: { name: true } },
       service: { select: { name: true } },
     },
@@ -58,6 +59,20 @@ export async function POST(
     branding,
     manageUrl: `${baseUrl}/manage/${publicToken}`,
   });
+
+  if (appointment.client.phone && appointment.client.smsConsentedAt) {
+    try {
+      await sendSms({
+        to: appointment.client.phone,
+        body: buildAppointmentReminderSms({
+          serviceName: appointment.service?.name ?? "Appointment",
+          startTime: appointment.startTime,
+        }),
+      });
+    } catch (err) {
+      console.warn("[send-reminder] Failed to send reminder SMS:", err);
+    }
+  }
 
   // Track last reminder sent
   await db.appointment.update({
