@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import ScheduleViewSwitcher from "@/components/schedule/schedule-view-switcher";
+import ScheduleCalendar from "@/components/schedule/schedule-calendar";
+import { ScheduleAgenda } from "@/components/schedule/schedule-agenda";
 import BookingLinkBanner from "@/components/schedule/booking-link-banner";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -74,7 +75,14 @@ export default async function SchedulePage() {
 
       <BookingLinkBanner orgSlug={org?.slug ?? ""} />
 
-      <ScheduleViewSwitcher events={events} appointments={appointments} orgTimezone={org?.timezone ?? "America/New_York"} />
+      <div>
+        <h2 className="mb-3 text-lg font-semibold text-gray-900">Agenda</h2>
+        <div className="max-h-[480px] overflow-y-auto rounded-xl border border-gray-100 bg-gray-50/50 p-4">
+          <ScheduleAgenda appointments={appointments} orgTimezone={org?.timezone ?? "America/New_York"} />
+        </div>
+      </div>
+
+      <ScheduleCalendar events={events} />
     </div>
   );
 }
