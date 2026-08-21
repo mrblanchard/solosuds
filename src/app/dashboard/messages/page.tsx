@@ -39,7 +39,7 @@ export default async function MessagesPage({ searchParams }: Props) {
     : null;
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
+    <div className="flex h-[calc(100vh-4rem)] bg-white rounded-xl border border-gray-100 overflow-hidden">
       {/* Client list — full width on mobile when no client selected; hidden on mobile when thread is open */}
       <aside className={`flex flex-col border-r border-gray-100 w-full md:w-72 md:flex md:shrink-0 ${selectedClient ? "hidden md:flex" : "flex"}`}>
         <div className="p-4 border-b border-gray-100">
