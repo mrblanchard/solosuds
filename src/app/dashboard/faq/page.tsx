@@ -175,7 +175,7 @@ const sections = [
     items: [
       {
         q: "What is the client document portal?",
-        a: "The client document portal is a secure, password-free web page where your clients can upload documents to you and download documents you've shared with them. It's accessible at your practice's portal link — for example: app.solosuds.com/portal/your-practice-name.",
+        a: "The client document portal is a secure, password-free web page where your clients can upload documents to you and download documents you've shared with them. It's accessible at your practice's portal link — for example: solosuds.com/portal/your-practice-name.",
       },
       {
         q: "How do clients access the portal without an account?",

@@ -32,14 +32,14 @@ export async function POST(
       where: { id: clientId, organizationId: orgId },
       select: { id: true, firstName: true, lastName: true, email: true, phone: true, smsConsentedAt: true },
     }),
-    db.organization.findUnique({ where: { id: orgId }, select: { name: true } }),
+    db.organization.findUnique({ where: { id: orgId }, select: { name: true, slug: true } }),
   ]);
 
   if (!form) return NextResponse.json({ error: "Form not found" }, { status: 404 });
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
   if (!org) return NextResponse.json({ error: "Organization not found" }, { status: 404 });
 
-  const formUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/intake/${form.id}?clientId=${client.id}`;
+  const formUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/intake/${org.slug}/${form.id}?clientId=${client.id}`;
   const clientName = `${client.firstName} ${client.lastName}`;
 
   if (type === "email") {

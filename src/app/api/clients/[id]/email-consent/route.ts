@@ -99,11 +99,11 @@ export async function POST(
 
   const org = await db.organization.findUnique({
     where: { id: orgId },
-    select: { name: true },
+    select: { name: true, slug: true },
   });
 
-  const baseUrl = process.env.NEXTAUTH_URL || "https://app.solosuds.com";
-  const formLink = `${baseUrl}/intake/${consentForm.id}?clientId=${clientId}`;
+  const baseUrl = process.env.NEXTAUTH_URL || "https://solosuds.com";
+  const formLink = `${baseUrl}/intake/${org?.slug ?? ""}/${consentForm.id}?clientId=${clientId}`;
 
   const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">

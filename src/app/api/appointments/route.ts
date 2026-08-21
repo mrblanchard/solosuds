@@ -192,7 +192,7 @@ export async function POST(req: Request) {
     try {
       const org = await db.organization.findUnique({
         where: { id: orgId },
-        select: { noteType: true, defaultIntakeFormId: true },
+        select: { noteType: true, defaultIntakeFormId: true, slug: true },
       });
 
       await db.soapNote.create({
@@ -216,7 +216,7 @@ export async function POST(req: Request) {
 
         if (intakeForm) {
           const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
-          const intakeUrl = `${baseUrl}/intake/${intakeForm.id}?clientId=${resolvedClientId}`;
+          const intakeUrl = `${baseUrl}/intake/${org.slug}/${intakeForm.id}?clientId=${resolvedClientId}`;
           try {
             const { sendEmail } = await import("@/lib/email");
             await sendEmail({

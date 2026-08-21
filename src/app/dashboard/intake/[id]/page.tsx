@@ -17,7 +17,7 @@ export default async function IntakeFormDetailPage({
   const session = await auth();
   if (!session?.user?.organizationId) notFound();
 
-  const [form, clients] = await Promise.all([
+  const [form, clients, org] = await Promise.all([
     db.intakeForm.findFirst({
       where: { id, organizationId: session.user.organizationId },
       include: { _count: { select: { submissions: true } } },
@@ -27,11 +27,12 @@ export default async function IntakeFormDetailPage({
       select: { id: true, firstName: true, lastName: true, email: true, phone: true },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     }),
+    db.organization.findUnique({ where: { id: session.user.organizationId }, select: { slug: true } }),
   ]);
 
   if (!form) notFound();
 
-  const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/intake/${form.id}`;
+  const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/intake/${org?.slug ?? ""}/${form.id}`;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-6">
