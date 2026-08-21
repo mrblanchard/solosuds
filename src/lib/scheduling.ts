@@ -122,9 +122,14 @@ interface AvailabilityParams {
   date: string; // YYYY-MM-DD
 }
 
+export interface SlotInfo {
+  time: string; // "HH:mm", wall-clock in the organization's own timezone (org.timezone)
+  available: boolean; // false = already booked, or already past — show it, but disabled/grayed
+}
+
 interface AvailabilityResult {
-  slots: string[]; // "HH:mm" start times, as wall-clock time in the organization's own timezone (org.timezone)
-  fullyBooked: boolean; // true if there are no bookable slots left, for any reason
+  slots: SlotInfo[]; // every slot in the business-hours window, not just the open ones — so the UI can show the full picture and gray out what's taken
+  fullyBooked: boolean; // true if none of `slots` are available, for any reason
   reason?: "closed" | "capped" | "unavailable"; // why fullyBooked is true, so the UI can decide whether a waitlist even makes sense
 }
 
@@ -177,7 +182,7 @@ export async function getAvailableSlots({ organizationId, serviceId, date }: Ava
   const slotMs = org.bookingSlotMinutes * 60000;
   const now = new Date();
 
-  const slots: string[] = [];
+  const slots: SlotInfo[] = [];
   let cursor = zonedTimeToUtc(date, org.bookingStartHour, 0, org.timezone);
   const windowEnd = zonedTimeToUtc(date, org.bookingEndHour, 0, org.timezone);
 
@@ -193,14 +198,13 @@ export async function getAvailableSlots({ organizationId, serviceId, date }: Ava
       (a) => a.startTime.getTime() < slotEnd.getTime() && a.endTime.getTime() > slotStart.getTime()
     );
 
-    if (!isPast && !overlaps) {
-      slots.push(formatZonedHHmm(slotStart, org.timezone));
-    }
+    slots.push({ time: formatZonedHHmm(slotStart, org.timezone), available: !isPast && !overlaps });
 
     cursor = new Date(cursor.getTime() + slotMs);
   }
 
-  return { slots, fullyBooked: slots.length === 0, reason: slots.length === 0 ? "unavailable" : undefined };
+  const anyAvailable = slots.some((s) => s.available);
+  return { slots, fullyBooked: !anyAvailable, reason: anyAvailable ? undefined : "unavailable" };
 }
 
 /**
@@ -248,7 +252,7 @@ export async function notifyWaitlistForOpening({
   if (!org || entries.length === 0) return 0;
 
   const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
-  const bookingUrl = `${baseUrl}/book?org=${org.id}`;
+  const bookingUrl = `${baseUrl}/book/${org.slug}`;
 
   await Promise.allSettled(
     entries.map(async (entry) => {

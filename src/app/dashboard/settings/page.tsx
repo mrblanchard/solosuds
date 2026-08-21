@@ -21,7 +21,7 @@ export default async function SettingsPage() {
     db.organization.findUnique({
       where: { id: session.user.organizationId },
       select: {
-        id: true, name: true, phone: true, email: true, address: true, website: true, timezone: true, practiceType: true, noteType: true, defaultIntakeFormId: true, inviteCode: true, plan: true,
+        id: true, name: true, slug: true, phone: true, email: true, address: true, website: true, timezone: true, practiceType: true, noteType: true, defaultIntakeFormId: true, inviteCode: true, plan: true,
         stripeConnectAccountId: true, stripeConnectChargesEnabled: true, stripeConnectDetailsSubmitted: true, stripeConnectPayoutsEnabled: true,
         venmoHandle: true, cashAppHandle: true, paypalHandle: true, squareHandle: true, zelleHandle: true,
         bookingStartHour: true, bookingEndHour: true, bookingDays: true, bookingSlotMinutes: true, maxDailyAppointments: true,
@@ -60,7 +60,7 @@ export default async function SettingsPage() {
           <OrgSettings org={org} intakeForms={intakeForms} plan={org.plan ?? "solo"} />
           <PaymentsSettings org={org} />
           <BookingSettings
-            orgId={org.id}
+            orgSlug={org.slug}
             bookingStartHour={org.bookingStartHour}
             bookingEndHour={org.bookingEndHour}
             bookingDays={org.bookingDays}

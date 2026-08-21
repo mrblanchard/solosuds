@@ -7,6 +7,11 @@ import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 import { formatSlotLabel } from "@/lib/utils";
 
+interface SlotInfo {
+  time: string; // "HH:mm"
+  available: boolean;
+}
+
 interface Props {
   token: string;
   orgId: string;
@@ -39,7 +44,7 @@ export default function ManageBookingClient({
 
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [slots, setSlots] = useState<string[]>([]);
+  const [slots, setSlots] = useState<SlotInfo[]>([]);
   const [fullyBooked, setFullyBooked] = useState(false);
   const [dayClosed, setDayClosed] = useState(false);
   const [slotsError, setSlotsError] = useState(false);
@@ -204,18 +209,22 @@ export default function ManageBookingClient({
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {slots.map((slot) => (
                       <button
-                        key={slot}
+                        key={slot.time}
                         type="button"
-                        onClick={() => setTime(slot)}
-                        className="flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-sm transition-colors"
+                        disabled={!slot.available}
+                        title={slot.available ? undefined : "Already booked"}
+                        onClick={() => slot.available && setTime(slot.time)}
+                        className={`flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-sm transition-colors ${
+                          !slot.available ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300 line-through" : ""
+                        }`}
                         style={
-                          time === slot
+                          slot.available && time === slot.time
                             ? { borderColor: accent, backgroundColor: `${accent}1a`, color: accent }
                             : undefined
                         }
                       >
                         <Clock className="h-3 w-3" />
-                        {formatSlotLabel(slot)}
+                        {formatSlotLabel(slot.time)}
                       </button>
                     ))}
                   </div>

@@ -1,12 +1,14 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import PublicBookingForm from "@/components/booking/public-booking-form";
-import { AppFooter } from "@/components/layout/app-footer";
+import { BookingPageShell } from "@/components/booking/booking-page-shell";
 
 interface Props {
   searchParams: Promise<{ org?: string }>;
 }
 
+// Kept alongside /book/[slug] for backward compatibility — this exact URL
+// shape is already handed out in existing links, QR codes, and the approved
+// Twilio toll-free verification's opt-in flow URL. Don't remove.
 export default async function BookingPage({ searchParams }: Props) {
   const { org: orgId } = await searchParams;
   if (!orgId) notFound();
@@ -25,33 +27,5 @@ export default async function BookingPage({ searchParams }: Props) {
 
   if (!org) notFound();
 
-  const accent = org.primaryColor && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(org.primaryColor)
-    ? org.primaryColor
-    : undefined;
-
-  return (
-    <div className="min-h-dvh bg-gray-50 px-4 py-12">
-      <div className="mx-auto max-w-lg">
-        <div className="mb-8 text-center">
-          {org.logoUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={org.logoUrl} alt={org.name} className="mx-auto mb-4 h-14 w-auto object-contain" />
-          )}
-          <h1 className="text-2xl font-bold" style={{ color: accent ?? "#111827" }}>
-            Book with {org.name}
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Choose a service and your preferred time below.
-          </p>
-        </div>
-        <PublicBookingForm
-          orgId={org.id}
-          orgName={org.name}
-          services={services}
-          primaryColor={org.primaryColor}
-        />
-      </div>
-      <AppFooter />
-    </div>
-  );
+  return <BookingPageShell org={org} services={services} />;
 }

@@ -9,7 +9,7 @@ import { CalendarDays, Copy, Check, ExternalLink, Settings2 } from "lucide-react
 import Link from "next/link";
 
 interface BookingSettingsProps {
-  orgId: string;
+  orgSlug: string;
   bookingStartHour: number;
   bookingEndHour: number;
   bookingDays: number[];
@@ -20,7 +20,7 @@ interface BookingSettingsProps {
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function BookingSettings({
-  orgId,
+  orgSlug,
   bookingStartHour,
   bookingEndHour,
   bookingDays,
@@ -43,7 +43,7 @@ export default function BookingSettings({
     setOrigin(window.location.origin);
   }, []);
 
-  const bookingUrl = origin ? `${origin}/book?org=${orgId}` : "";
+  const bookingUrl = origin ? `${origin}/book/${orgSlug}` : "";
 
   async function copyLink() {
     if (!bookingUrl) return;

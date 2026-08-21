@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import ScheduleCalendar from "@/components/schedule/schedule-calendar";
+import ScheduleViewSwitcher from "@/components/schedule/schedule-view-switcher";
 import BookingLinkBanner from "@/components/schedule/booking-link-banner";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -26,17 +26,21 @@ export default async function SchedulePage() {
   const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const end = new Date(now.getFullYear(), now.getMonth() + 3, 0);
 
-  const appointments = await db.appointment.findMany({
-    where: {
-      organizationId: orgId,
-      startTime: { gte: start, lte: end },
-    },
-    include: {
-      client: { select: { firstName: true, lastName: true } },
-      service: { select: { name: true } },
-    },
-    orderBy: { startTime: "asc" },
-  });
+  const [org, appointments] = await Promise.all([
+    db.organization.findUnique({ where: { id: orgId }, select: { slug: true, timezone: true } }),
+    db.appointment.findMany({
+      where: {
+        organizationId: orgId,
+        startTime: { gte: start, lte: end },
+      },
+      include: {
+        client: { select: { firstName: true, lastName: true, phone: true, email: true } },
+        service: { select: { name: true } },
+        practitioner: { select: { name: true } },
+      },
+      orderBy: { startTime: "asc" },
+    }),
+  ]);
 
   const events = appointments.map((appt) => ({
     id: appt.id,
@@ -68,9 +72,9 @@ export default async function SchedulePage() {
         </Link>
       </div>
 
-      <BookingLinkBanner orgId={orgId} />
+      <BookingLinkBanner orgSlug={org?.slug ?? ""} />
 
-      <ScheduleCalendar events={events} />
+      <ScheduleViewSwitcher events={events} appointments={appointments} orgTimezone={org?.timezone ?? "America/New_York"} />
     </div>
   );
 }

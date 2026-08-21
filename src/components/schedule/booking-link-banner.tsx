@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Copy, Check, ExternalLink, Settings2, Wrench } from "lucide-react";
 
-export default function BookingLinkBanner({ orgId }: { orgId: string }) {
+export default function BookingLinkBanner({ orgSlug }: { orgSlug: string }) {
   const [origin, setOrigin] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -13,7 +13,7 @@ export default function BookingLinkBanner({ orgId }: { orgId: string }) {
     setOrigin(window.location.origin);
   }, []);
 
-  const bookingUrl = origin ? `${origin}/book?org=${orgId}` : "";
+  const bookingUrl = origin ? `${origin}/book/${orgSlug}` : "";
 
   async function copyLink() {
     if (!bookingUrl) return;

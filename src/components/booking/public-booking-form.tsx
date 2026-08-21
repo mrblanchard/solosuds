@@ -30,6 +30,11 @@ function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 254;
 }
 
+interface SlotInfo {
+  time: string; // "HH:mm"
+  available: boolean;
+}
+
 export default function PublicBookingForm({ orgId, orgName, services, primaryColor }: Props) {
   const [step, setStep] = useState<"service" | "details" | "confirm">("service");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -45,7 +50,7 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
   const [error, setError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
 
-  const [slots, setSlots] = useState<string[]>([]);
+  const [slots, setSlots] = useState<SlotInfo[]>([]);
   const [fullyBooked, setFullyBooked] = useState(false);
   const [dayClosed, setDayClosed] = useState(false);
   const [slotsError, setSlotsError] = useState(false);
@@ -316,18 +321,22 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
                   <div className="mt-2 grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {slots.map((slot) => (
                       <button
-                        key={slot}
+                        key={slot.time}
                         type="button"
-                        onClick={() => setTime(slot)}
-                        className="flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-sm transition-colors"
+                        disabled={!slot.available}
+                        title={slot.available ? undefined : "Already booked"}
+                        onClick={() => slot.available && setTime(slot.time)}
+                        className={`flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-sm transition-colors ${
+                          !slot.available ? "cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300 line-through" : ""
+                        }`}
                         style={
-                          time === slot
+                          slot.available && time === slot.time
                             ? { borderColor: accent, backgroundColor: `${accent}1a`, color: accent }
                             : undefined
                         }
                       >
                         <Clock className="h-3 w-3" />
-                        {formatSlotLabel(slot)}
+                        {formatSlotLabel(slot.time)}
                       </button>
                     ))}
                   </div>

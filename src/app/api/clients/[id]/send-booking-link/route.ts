@@ -24,12 +24,12 @@ export async function POST(
 
   const org = await db.organization.findUnique({
     where: { id: orgId },
-    select: { id: true, name: true, logoUrl: true, primaryColor: true, brandFont: true, emailSignature: true, replyToEmail: true },
+    select: { id: true, name: true, slug: true, logoUrl: true, primaryColor: true, brandFont: true, emailSignature: true, replyToEmail: true },
   });
   if (!org) return NextResponse.json({ error: "Organization not found" }, { status: 404 });
 
   const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
-  const bookingUrl = `${baseUrl}/book?org=${org.id}`;
+  const bookingUrl = `${baseUrl}/book/${org.slug}`;
 
   if (method === "email") {
     if (!client.email) return NextResponse.json({ error: "This client has no email on file" }, { status: 400 });
