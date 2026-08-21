@@ -39,7 +39,7 @@ export const ALL_NAV: Record<string, NavItem> = {
   notes:      { href: "/dashboard/notes",    label: "Notes",        icon: FileText },
   intake:     { href: "/dashboard/intake",   label: "Intake Forms", icon: ClipboardList },
   email:      { href: "/dashboard/email",    label: "Email",        icon: Mail },
-  messages:   { href: "/dashboard/messages", label: "Messages",     icon: MessageSquare, disabled: true },
+  messages:   { href: "/dashboard/messages", label: "Messages",     icon: MessageSquare },
   billing:    { href: "/dashboard/billing",  label: "Billing",      icon: CreditCard },
   settings:    { href: "/dashboard/settings",     label: "Settings",     icon: Settings },
   whitelabel:  { href: "/dashboard/white-label",  label: "White Label",  icon: Paintbrush },

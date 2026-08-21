@@ -23,7 +23,7 @@ export default async function MessagesPage({ searchParams }: Props) {
     db.client.findMany({
       where: { organizationId: orgId, status: "ACTIVE" },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
-      select: { id: true, firstName: true, lastName: true, email: true },
+      select: { id: true, firstName: true, lastName: true, email: true, phone: true, smsConsentedAt: true },
     }),
     selectedClientId
       ? db.message.findMany({
@@ -65,8 +65,10 @@ export default async function MessagesPage({ searchParams }: Props) {
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {client.firstName} {client.lastName}
                       </p>
-                      {client.email && (
-                        <p className="text-xs text-gray-400 truncate">{client.email}</p>
+                      {client.phone && client.smsConsentedAt ? (
+                        <p className="text-xs text-gray-400 truncate">{client.phone}</p>
+                      ) : (
+                        <p className="text-xs text-amber-600 truncate">Not opted in to texts</p>
                       )}
                     </div>
                   </Link>
@@ -148,7 +150,10 @@ export default async function MessagesPage({ searchParams }: Props) {
               )}
             </div>
 
-            <MessageComposer clientId={selectedClient.id} />
+            <MessageComposer
+              clientId={selectedClient.id}
+              canText={!!(selectedClient.phone && selectedClient.smsConsentedAt)}
+            />
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">

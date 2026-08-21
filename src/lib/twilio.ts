@@ -59,6 +59,13 @@ export function buildOptInConfirmationSms(orgName: string): string {
   return `${brandPrefix(orgName)}: You are now opted in to receive appointment text notifications. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.`;
 }
 
+/** "{Practice} via SoloSuds: {content} Reply STOP to opt out." — a practitioner's own free-text message to a client. */
+export function buildFreeformMessageSms(opts: { orgName: string; content: string }): string {
+  const body = opts.content.trim();
+  const punctuated = /[.!?]$/.test(body) ? body : `${body}.`;
+  return `${brandPrefix(opts.orgName)}: ${punctuated} Reply STOP to opt out.`;
+}
+
 function getTwilio() {
   if (_client) return _client;
   const sid = process.env.TWILIO_ACCOUNT_SID;
