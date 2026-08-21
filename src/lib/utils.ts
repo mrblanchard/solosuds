@@ -14,6 +14,14 @@ export function formatCurrency(cents: number): string {
   }).format(cents / 100);
 }
 
+/** Formats a booking-availability "HH:mm" 24-hour slot value for display as 12-hour, e.g. "14:00" -> "2:00 PM". */
+export function formatSlotLabel(slot: string): string {
+  const [hh, mm] = slot.split(":").map(Number);
+  const period = hh >= 12 ? "PM" : "AM";
+  const hour12 = hh % 12 === 0 ? 12 : hh % 12;
+  return `${hour12}:${String(mm).padStart(2, "0")} ${period}`;
+}
+
 export function formatDate(date: Date | string, fmt = "MMMM d, yyyy"): string {
   // Prisma returns date-only fields as UTC midnight Date objects. Formatting them
   // with local timezone shifts the day back by 1 in negative-offset zones.

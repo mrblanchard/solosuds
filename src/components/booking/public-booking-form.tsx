@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import Link from "next/link";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatSlotLabel } from "@/lib/utils";
 import { formatPhone, stripPhone, titleCase, normalizeEmail } from "@/lib/utils";
 import { CheckCircle, Clock } from "lucide-react";
 
@@ -28,14 +28,6 @@ interface Props {
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 254;
-}
-
-/** Formats a "HH:mm" 24-hour slot value for display as 12-hour, e.g. "14:00" -> "2:00 PM". */
-function formatSlotLabel(slot: string): string {
-  const [hh, mm] = slot.split(":").map(Number);
-  const period = hh >= 12 ? "PM" : "AM";
-  const hour12 = hh % 12 === 0 ? 12 : hh % 12;
-  return `${hour12}:${String(mm).padStart(2, "0")} ${period}`;
 }
 
 export default function PublicBookingForm({ orgId, orgName, services, primaryColor }: Props) {
@@ -115,17 +107,14 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
     setError(null);
     setSubmitting(true);
 
-    const startTime = new Date(`${date}T${time}`);
-    const endTime = new Date(startTime.getTime() + selectedService.durationMinutes * 60000);
-
     const res = await fetch("/api/book", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         orgId,
         serviceId: selectedService.id,
-        startTime: startTime.toISOString(),
-        endTime: endTime.toISOString(),
+        date,
+        time,
         clientFirstName: firstName.trim(),
         clientLastName: lastName.trim(),
         clientEmail: normalizeEmail(email),

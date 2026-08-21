@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendWaitlistOpening } from "@/lib/email";
 import { sendSms, buildWaitlistOpeningSms } from "@/lib/twilio";
+import { zonedTimeToUtc, getZonedHourFraction, getZonedDayOfWeek, getZonedDayBounds, getZonedDateString, formatZonedHHmm } from "@/lib/timezone";
 
 const ACTIVE_STATUSES = ["SCHEDULED", "CONFIRMED", "IN_PROGRESS", "COMPLETED"] as const;
 
@@ -78,25 +79,26 @@ export async function validateBookingWindow({
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const org = await db.organization.findUnique({
     where: { id: organizationId },
-    select: { bookingStartHour: true, bookingEndHour: true, bookingDays: true, maxDailyAppointments: true },
+    select: { bookingStartHour: true, bookingEndHour: true, bookingDays: true, maxDailyAppointments: true, timezone: true },
   });
   if (!org) return { ok: false, error: "Organization not found" };
 
-  const dayOfWeek = startTime.getDay();
+  // "Business hours" only mean something in the org's own timezone — reading
+  // wall-clock day/hour off `startTime` directly would use the server
+  // process's timezone (UTC on Vercel) instead, which is exactly what let a
+  // client pick an in-hours slot the server then rejected (or vice versa).
+  const dayOfWeek = getZonedDayOfWeek(startTime, org.timezone);
   if (!org.bookingDays.includes(dayOfWeek)) {
     return { ok: false, error: "That day isn't available for booking." };
   }
 
-  const hour = startTime.getHours() + startTime.getMinutes() / 60;
+  const hour = getZonedHourFraction(startTime, org.timezone);
   if (hour < org.bookingStartHour || hour >= org.bookingEndHour) {
     return { ok: false, error: "That time is outside business hours." };
   }
 
   if (org.maxDailyAppointments != null) {
-    const dayStart = new Date(startTime);
-    dayStart.setHours(0, 0, 0, 0);
-    const dayEnd = new Date(startTime);
-    dayEnd.setHours(23, 59, 59, 999);
+    const [dayStart, dayEnd] = getZonedDayBounds(getZonedDateString(startTime, org.timezone), org.timezone);
 
     const count = await db.appointment.count({
       where: {
@@ -121,7 +123,7 @@ interface AvailabilityParams {
 }
 
 interface AvailabilityResult {
-  slots: string[]; // "HH:mm" start times, in the server's local time (matches how dates are combined elsewhere in booking)
+  slots: string[]; // "HH:mm" start times, as wall-clock time in the organization's own timezone (org.timezone)
   fullyBooked: boolean; // true if there are no bookable slots left, for any reason
   reason?: "closed" | "capped" | "unavailable"; // why fullyBooked is true, so the UI can decide whether a waitlist even makes sense
 }
@@ -137,6 +139,7 @@ export async function getAvailableSlots({ organizationId, serviceId, date }: Ava
         bookingDays: true,
         bookingSlotMinutes: true,
         maxDailyAppointments: true,
+        timezone: true,
       },
     }),
     db.service.findFirst({
@@ -147,9 +150,13 @@ export async function getAvailableSlots({ organizationId, serviceId, date }: Ava
 
   if (!org || !service) return { slots: [], fullyBooked: true, reason: "unavailable" };
 
-  const dayStart = new Date(`${date}T00:00:00`);
-  const dayEnd = new Date(`${date}T23:59:59.999`);
-  const dayOfWeek = dayStart.getDay();
+  // "date" is a bare calendar day (no timezone attached), so its day-of-week
+  // is unambiguous — but the actual bookable window (dayStart/dayEnd, and
+  // every slot boundary below) has to be anchored in the org's own timezone,
+  // not the server process's, or a slot the client sees as in-hours can get
+  // rejected as "outside business hours" once submitted.
+  const dayOfWeek = new Date(`${date}T00:00:00Z`).getUTCDay();
+  const [dayStart, dayEnd] = getZonedDayBounds(date, org.timezone);
 
   if (!org.bookingDays.includes(dayOfWeek)) return { slots: [], fullyBooked: true, reason: "closed" };
 
@@ -171,10 +178,8 @@ export async function getAvailableSlots({ organizationId, serviceId, date }: Ava
   const now = new Date();
 
   const slots: string[] = [];
-  let cursor = new Date(`${date}T00:00:00`);
-  cursor.setHours(org.bookingStartHour, 0, 0, 0);
-  const windowEnd = new Date(`${date}T00:00:00`);
-  windowEnd.setHours(org.bookingEndHour, 0, 0, 0);
+  let cursor = zonedTimeToUtc(date, org.bookingStartHour, 0, org.timezone);
+  const windowEnd = zonedTimeToUtc(date, org.bookingEndHour, 0, org.timezone);
 
   while (cursor.getTime() + durationMs <= windowEnd.getTime()) {
     const slotStart = cursor;
@@ -189,9 +194,7 @@ export async function getAvailableSlots({ organizationId, serviceId, date }: Ava
     );
 
     if (!isPast && !overlaps) {
-      const hh = String(slotStart.getHours()).padStart(2, "0");
-      const mm = String(slotStart.getMinutes()).padStart(2, "0");
-      slots.push(`${hh}:${mm}`);
+      slots.push(formatZonedHHmm(slotStart, org.timezone));
     }
 
     cursor = new Date(cursor.getTime() + slotMs);

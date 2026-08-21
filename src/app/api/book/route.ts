@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
 import { hasConflict, validateBookingWindow } from "@/lib/scheduling";
 import { sendSms, buildAppointmentConfirmationSms } from "@/lib/twilio";
+import { zonedTimeToUtc, formatZonedDisplay } from "@/lib/timezone";
 
 const SMS_OPT_IN_CONFIRMATION =
   "SoloSuds: You are now opted in to receive appointment text notifications. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.";
@@ -14,8 +15,8 @@ export async function POST(request: NextRequest) {
     const {
       orgId,
       serviceId,
-      startTime,
-      endTime,
+      date,
+      time,
       clientFirstName,
       clientLastName,
       clientEmail,
@@ -24,8 +25,14 @@ export async function POST(request: NextRequest) {
       notes,
     } = body;
 
-    if (!orgId || !serviceId || !startTime || !endTime || !clientFirstName || !clientLastName || !clientEmail) {
+    if (!orgId || !serviceId || !date || !time || !clientFirstName || !clientLastName || !clientEmail) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+    }
+    if (typeof time !== "string" || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+      return NextResponse.json({ error: "Invalid time" }, { status: 400 });
     }
 
     if (typeof clientFirstName !== "string" || clientFirstName.length > 100) {
@@ -55,9 +62,18 @@ export async function POST(request: NextRequest) {
     });
     if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });
 
+    // Derive the actual instant server-side from the org's own timezone,
+    // rather than trusting a client-computed timestamp — a browser building
+    // `new Date(`${date}T${time}`)` interprets it in ITS OWN local timezone,
+    // which silently drifts from what the availability endpoint (also
+    // anchored to org.timezone) considered "in business hours."
+    const [hh, mm] = time.split(":").map(Number);
+    const startTime = zonedTimeToUtc(date, hh, mm, org.timezone);
+    const endTime = new Date(startTime.getTime() + service.durationMinutes * 60000);
+
     const windowCheck = await validateBookingWindow({
       organizationId: orgId,
-      startTime: new Date(startTime),
+      startTime,
     });
     if (!windowCheck.ok) {
       return NextResponse.json({ error: windowCheck.error }, { status: 409 });
@@ -65,8 +81,8 @@ export async function POST(request: NextRequest) {
 
     const conflict = await hasConflict({
       organizationId: orgId,
-      startTime: new Date(startTime),
-      endTime: new Date(endTime),
+      startTime,
+      endTime,
     });
     if (conflict) {
       return NextResponse.json(
@@ -110,8 +126,8 @@ export async function POST(request: NextRequest) {
         organizationId: orgId,
         clientId: client.id,
         serviceId,
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
+        startTime,
+        endTime,
         status: "SCHEDULED",
         notes: notes ?? null,
         publicToken: randomUUID(),
@@ -120,6 +136,7 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
     const manageUrl = `${baseUrl}/manage/${appointment.publicToken}`;
+    const zonedDisplay = formatZonedDisplay(startTime, org.timezone);
 
     // Send confirmation email
     if (clientEmail) {
@@ -128,11 +145,11 @@ export async function POST(request: NextRequest) {
           to: clientEmail,
           clientName: `${clientFirstName} ${clientLastName}`,
           practitionerName: org.name,
-          appointmentDate: new Date(startTime).toLocaleDateString(),
-          appointmentTime: new Date(startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          appointmentDate: zonedDisplay.dateStr,
+          appointmentTime: zonedDisplay.timeStr,
           serviceName: service.name,
-          startDateTime: startTime,
-          endDateTime: endTime,
+          startDateTime: startTime.toISOString(),
+          endDateTime: endTime.toISOString(),
           manageUrl,
           kind: "confirmation",
         });

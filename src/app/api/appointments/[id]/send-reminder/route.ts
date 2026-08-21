@@ -2,9 +2,9 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { sendAppointmentReminder } from "@/lib/email";
-import { formatDate } from "@/lib/utils";
 import { ensurePublicToken } from "@/lib/scheduling";
 import { sendSms, buildAppointmentReminderSms } from "@/lib/twilio";
+import { formatZonedDisplay } from "@/lib/timezone";
 
 export async function POST(
   req: Request,
@@ -34,15 +34,12 @@ export async function POST(
 
   const branding = await db.organization.findUnique({
     where: { id: orgId },
-    select: { name: true, logoUrl: true, primaryColor: true, brandFont: true, emailSignature: true, replyToEmail: true },
+    select: { name: true, logoUrl: true, primaryColor: true, brandFont: true, emailSignature: true, replyToEmail: true, timezone: true },
   });
 
-  const apptDate = formatDate(appointment.startTime);
-  const apptTime = appointment.startTime.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
+  const zonedDisplay = formatZonedDisplay(appointment.startTime, branding?.timezone ?? "America/New_York");
+  const apptDate = zonedDisplay.dateStr;
+  const apptTime = zonedDisplay.timeStr;
 
   const publicToken = await ensurePublicToken(appointment.id, appointment.publicToken);
   const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
+import { formatSlotLabel } from "@/lib/utils";
 
 interface Props {
   token: string;
@@ -25,7 +26,6 @@ export default function ManageBookingClient({
   status: initialStatus,
   serviceId,
   serviceName,
-  durationMinutes,
   formattedDate,
   formattedTime,
   clientName,
@@ -97,12 +97,10 @@ export default function ManageBookingClient({
     setSubmitting(true);
     setError(null);
     try {
-      const newStart = new Date(`${date}T${time}`);
-      const newEnd = new Date(newStart.getTime() + durationMinutes * 60000);
       const res = await fetch(`/api/manage/${token}/reschedule`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ startTime: newStart.toISOString(), endTime: newEnd.toISOString() }),
+        body: JSON.stringify({ date, time }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -155,7 +153,7 @@ export default function ManageBookingClient({
 
         {rescheduled && (
           <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
-            Rescheduled to {rescheduled.date} at {rescheduled.time}.
+            Rescheduled to {rescheduled.date} at {formatSlotLabel(rescheduled.time)}.
           </div>
         )}
 
@@ -217,7 +215,7 @@ export default function ManageBookingClient({
                         }
                       >
                         <Clock className="h-3 w-3" />
-                        {slot}
+                        {formatSlotLabel(slot)}
                       </button>
                     ))}
                   </div>

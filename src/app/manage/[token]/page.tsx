@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { formatDate } from "@/lib/utils";
+import { formatZonedDisplay } from "@/lib/timezone";
 import { AppFooter } from "@/components/layout/app-footer";
 import ManageBookingClient from "@/components/booking/manage-booking-client";
 
@@ -17,7 +17,7 @@ export default async function ManageBookingPage({ params }: Props) {
       client: { select: { firstName: true, lastName: true } },
       service: { select: { id: true, name: true, durationMinutes: true } },
       organization: {
-        select: { id: true, name: true, logoUrl: true, primaryColor: true },
+        select: { id: true, name: true, logoUrl: true, primaryColor: true, timezone: true },
       },
     },
   });
@@ -27,6 +27,8 @@ export default async function ManageBookingPage({ params }: Props) {
   const accent = appointment.organization.primaryColor && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(appointment.organization.primaryColor)
     ? appointment.organization.primaryColor
     : undefined;
+
+  const zonedDisplay = formatZonedDisplay(appointment.startTime, appointment.organization.timezone);
 
   return (
     <div className="min-h-dvh bg-gray-50 px-4 py-12">
@@ -50,8 +52,8 @@ export default async function ManageBookingPage({ params }: Props) {
           serviceName={appointment.service?.name ?? "Appointment"}
           durationMinutes={appointment.service?.durationMinutes ?? 60}
           clientName={appointment.client ? `${appointment.client.firstName} ${appointment.client.lastName}` : null}
-          formattedDate={formatDate(appointment.startTime, "MMMM d, yyyy")}
-          formattedTime={formatDate(appointment.startTime, "h:mm a")}
+          formattedDate={zonedDisplay.dateStr}
+          formattedTime={zonedDisplay.timeStr}
           accent={accent}
         />
       </div>

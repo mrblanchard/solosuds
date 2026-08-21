@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hasConflict, notifyWaitlistForOpening, validateBookingWindow } from "@/lib/scheduling";
 import { sendAppointmentReminder } from "@/lib/email";
-import { formatDate } from "@/lib/utils";
 import { sendSms, buildAppointmentRescheduledSms } from "@/lib/twilio";
+import { zonedTimeToUtc, formatZonedDisplay } from "@/lib/timezone";
 
 export async function PATCH(
   req: Request,
@@ -11,20 +11,20 @@ export async function PATCH(
 ) {
   const { token } = await params;
   const body = await req.json();
-  const { startTime, endTime } = body;
+  const { date, time } = body;
 
-  if (!startTime || !endTime) {
-    return NextResponse.json({ error: "startTime and endTime are required" }, { status: 400 });
+  if (!date || !time || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+    return NextResponse.json({ error: "A valid date and time are required" }, { status: 400 });
   }
 
   const appointment = await db.appointment.findFirst({
     where: { publicToken: token },
     include: {
       client: { select: { firstName: true, lastName: true, email: true, phone: true, smsConsentedAt: true } },
-      service: { select: { name: true } },
+      service: { select: { name: true, durationMinutes: true } },
       practitioner: { select: { name: true } },
       organization: {
-        select: { name: true, logoUrl: true, primaryColor: true, brandFont: true, emailSignature: true, replyToEmail: true },
+        select: { name: true, logoUrl: true, primaryColor: true, brandFont: true, emailSignature: true, replyToEmail: true, timezone: true },
       },
     },
   });
@@ -36,8 +36,12 @@ export async function PATCH(
     return NextResponse.json({ error: "This appointment can no longer be rescheduled" }, { status: 400 });
   }
 
-  const newStart = new Date(startTime);
-  const newEnd = new Date(endTime);
+  // Derive the instant server-side from the org's own timezone — see the
+  // matching comment in /api/book for why this can't be trusted from the client.
+  const [hh, mm] = time.split(":").map(Number);
+  const durationMinutes = appointment.service?.durationMinutes ?? 60;
+  const newStart = zonedTimeToUtc(date, hh, mm, appointment.organization.timezone);
+  const newEnd = new Date(newStart.getTime() + durationMinutes * 60000);
 
   const windowCheck = await validateBookingWindow({
     organizationId: appointment.organizationId,
@@ -73,14 +77,16 @@ export async function PATCH(
   const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
   const manageUrl = `${baseUrl}/manage/${token}`;
 
+  const zonedDisplay = formatZonedDisplay(newStart, appointment.organization.timezone);
+
   if (appointment.client?.email) {
     try {
       await sendAppointmentReminder({
         to: appointment.client.email,
         clientName: `${appointment.client.firstName} ${appointment.client.lastName}`,
         practitionerName: appointment.practitioner?.name ?? appointment.organization.name,
-        appointmentDate: formatDate(newStart, "MMMM d, yyyy"),
-        appointmentTime: formatDate(newStart, "h:mm a"),
+        appointmentDate: zonedDisplay.dateStr,
+        appointmentTime: zonedDisplay.timeStr,
         serviceName: appointment.service?.name ?? "Session",
         startDateTime: newStart.toISOString(),
         endDateTime: newEnd.toISOString(),

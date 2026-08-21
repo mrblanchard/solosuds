@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { sendAppointmentReminder } from "@/lib/email";
-import { formatDate } from "@/lib/utils";
 import { hasConflict } from "@/lib/scheduling";
+import { formatZonedDisplay } from "@/lib/timezone";
 
 const schema = z.object({
   // Client: either select an existing client by id, OR pass a name to create one on the fly
@@ -159,6 +159,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 
+  const orgForTimezone = await db.organization.findUnique({ where: { id: orgId }, select: { timezone: true } });
+  const orgTimezone = orgForTimezone?.timezone ?? "America/New_York";
+  const zonedDisplay = formatZonedDisplay(appointment.startTime, orgTimezone);
+
   // Send reminder email only if we have a client with an email
   if (sendReminder && client?.email) {
     try {
@@ -171,8 +175,8 @@ export async function POST(req: Request) {
         to: client.email,
         clientName: `${client.firstName} ${client.lastName}`,
         practitionerName: practitioner?.name ?? "Your practitioner",
-        appointmentDate: formatDate(appointment.startTime, "MMMM d, yyyy"),
-        appointmentTime: formatDate(appointment.startTime, "h:mm a"),
+        appointmentDate: zonedDisplay.dateStr,
+        appointmentTime: zonedDisplay.timeStr,
         serviceName: appointment.service?.name ?? "Session",
         startDateTime: appointment.startTime.toISOString(),
         endDateTime: appointment.endTime.toISOString(),
@@ -220,7 +224,7 @@ export async function POST(req: Request) {
               subject: `Please complete: ${intakeForm.title}`,
               html: `
                 <p>Hi ${client!.firstName},</p>
-                <p>You have an upcoming appointment scheduled for ${formatDate(appointment.startTime, "MMMM d, yyyy")} at ${formatDate(appointment.startTime, "h:mm a")}.</p>
+                <p>You have an upcoming appointment scheduled for ${zonedDisplay.dateStr} at ${zonedDisplay.timeStr}.</p>
                 <p>Please take a moment to fill out the following form before your visit:</p>
                 <p><a href="${intakeUrl}" style="display:inline-block;padding:10px 20px;background-color:#6366f1;color:white;border-radius:8px;text-decoration:none;font-weight:500;">Complete ${intakeForm.title}</a></p>
                 <p>Thank you!</p>

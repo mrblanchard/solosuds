@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
-import { formatDate } from "@/lib/utils";
 import { ensurePublicToken } from "@/lib/scheduling";
 import { sendSms, buildAppointmentReminderSms } from "@/lib/twilio";
+import { formatZonedDisplay } from "@/lib/timezone";
 
 const SWEEP_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const REMINDER_WINDOW_MS = 24 * 60 * 60 * 1000; // remind once an appointment is within 24h
@@ -32,7 +32,7 @@ export async function runReminderSweep(): Promise<{ sent: number; failed: number
       service: { select: { name: true } },
       practitioner: { select: { name: true } },
       organization: {
-        select: { name: true, logoUrl: true, primaryColor: true, brandFont: true, emailSignature: true, replyToEmail: true },
+        select: { name: true, logoUrl: true, primaryColor: true, brandFont: true, emailSignature: true, replyToEmail: true, timezone: true },
       },
     },
   });
@@ -44,12 +44,13 @@ export async function runReminderSweep(): Promise<{ sent: number; failed: number
     if (!appt.client?.email) continue;
     try {
       const publicToken = await ensurePublicToken(appt.id, appt.publicToken);
+      const zonedDisplay = formatZonedDisplay(appt.startTime, appt.organization.timezone);
       await sendAppointmentReminder({
         to: appt.client.email,
         clientName: `${appt.client.firstName} ${appt.client.lastName}`,
         practitionerName: appt.practitioner?.name ?? appt.organization.name,
-        appointmentDate: formatDate(appt.startTime, "MMMM d, yyyy"),
-        appointmentTime: formatDate(appt.startTime, "h:mm a"),
+        appointmentDate: zonedDisplay.dateStr,
+        appointmentTime: zonedDisplay.timeStr,
         serviceName: appt.service?.name ?? "Session",
         startDateTime: appt.startTime.toISOString(),
         endDateTime: appt.endTime.toISOString(),
