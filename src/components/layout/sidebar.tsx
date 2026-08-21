@@ -49,21 +49,21 @@ export const ALL_NAV: Record<string, NavItem> = {
 // Per-type nav order + optional label overrides
 const NAV_CONFIG: Record<NonNullable<PracticeType>, { order: string[]; labels?: Partial<Record<string, string>> }> = {
   THERAPY: {
-    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "billing", "settings", "whitelabel", "faq", "messages"],
+    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "messages", "billing", "settings", "whitelabel", "faq"],
   },
   SALON: {
-    order: ["dashboard", "schedule", "clients", "billing", "notes", "intake", "email", "settings", "whitelabel", "faq", "messages"],
+    order: ["dashboard", "schedule", "clients", "messages", "billing", "notes", "intake", "email", "settings", "whitelabel", "faq"],
     labels: { notes: "Session Notes" },
   },
   MEDICAL: {
-    order: ["dashboard", "clients", "intake", "notes", "schedule", "email", "billing", "settings", "whitelabel", "faq", "messages"],
+    order: ["dashboard", "clients", "intake", "notes", "schedule", "email", "messages", "billing", "settings", "whitelabel", "faq"],
   },
   FITNESS: {
-    order: ["dashboard", "schedule", "clients", "billing", "notes", "intake", "email", "settings", "whitelabel", "faq", "messages"],
+    order: ["dashboard", "schedule", "clients", "messages", "billing", "notes", "intake", "email", "settings", "whitelabel", "faq"],
     labels: { notes: "Session Notes", intake: "Health Forms" },
   },
   OTHER: {
-    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "billing", "settings", "whitelabel", "faq", "messages"],
+    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "messages", "billing", "settings", "whitelabel", "faq"],
   },
 };
 
