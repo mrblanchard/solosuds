@@ -2,6 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { sanitizeEmailHtml } from "@/lib/sanitize";
+import { generateSlug } from "@/lib/utils";
+
+/** Generates a unique org slug from `name`, appending -2, -3, ... on collision. Excludes `excludeOrgId` from the collision check (so renaming an org to a name close to its own current slug doesn't self-collide). */
+async function uniqueSlugFrom(name: string, excludeOrgId: string): Promise<string> {
+  const base = generateSlug(name) || "practice";
+  let candidate = base;
+  let suffix = 2;
+  while (
+    await db.organization.findFirst({
+      where: { slug: candidate, id: { not: excludeOrgId } },
+      select: { id: true },
+    })
+  ) {
+    candidate = `${base}-${suffix}`;
+    suffix++;
+  }
+  return candidate;
+}
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -76,10 +94,28 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Invalid max daily appointments" }, { status: 400 });
     }
 
+    // The booking link, team invite context, etc. all derive from the org's
+    // slug — keep it in sync with the name instead of leaving it frozen at
+    // whatever the org was called at signup. This does mean an org's public
+    // booking URL changes when they rename — acceptable here since the slug
+    // is new enough that few links are in the wild yet, and correctness
+    // (the link visibly matching the practice's real name) matters more.
+    let newSlug: string | undefined;
+    if (name !== undefined) {
+      const current = await db.organization.findUnique({
+        where: { id: session.user.organizationId },
+        select: { name: true },
+      });
+      if (current && current.name !== name.trim()) {
+        newSlug = await uniqueSlugFrom(name.trim(), session.user.organizationId);
+      }
+    }
+
     const updated = await db.organization.update({
       where: { id: session.user.organizationId },
       data: {
         ...(name !== undefined && { name: name.trim() }),
+        ...(newSlug !== undefined && { slug: newSlug }),
         ...(phone !== undefined && { phone: phone || null }),
         ...(email !== undefined && { email: email || null }),
         ...(address !== undefined && { address: address || null }),
