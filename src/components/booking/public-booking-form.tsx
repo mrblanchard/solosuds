@@ -186,7 +186,8 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
           <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
           <h2 className="text-xl font-semibold text-gray-900">Booking Confirmed!</h2>
           <p className="mt-2 text-sm text-gray-500">
-            We&apos;ll send a confirmation to {email}. See you soon!
+            We&apos;ll send a confirmation to {email}
+            {phone && smsConsent ? <> and a text to {phone}</> : null}. See you soon!
           </p>
         </CardContent>
       </Card>
