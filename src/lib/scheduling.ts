@@ -264,7 +264,7 @@ export async function notifyWaitlistForOpening({
       if (entry.clientPhone && entry.smsConsentedAt) {
         await sendSms({
           to: entry.clientPhone,
-          body: buildWaitlistOpeningSms({ openingDate, bookingUrl }),
+          body: buildWaitlistOpeningSms({ orgName: org.name, openingDate, bookingUrl }),
         }).catch((err) => {
           console.error(`[waitlist] Failed to send SMS to ${entry.clientPhone}:`, err);
         });

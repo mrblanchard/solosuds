@@ -4,42 +4,59 @@ import { formatDate, formatDateTime } from "@/lib/utils";
 
 let _client: ReturnType<typeof Twilio> | null = null;
 
-// All client-facing SMS bodies open with "SoloSuds:" and end with an
-// opt-out instruction, matching the A2P 10DLC campaign's registered sample
-// messages. Keep these in sync with the campaign registration if either
-// changes — Twilio vets sample copy against what actually gets sent.
+// All client-facing SMS bodies open with "{Practice Name} via SoloSuds:" and
+// end with an opt-out instruction. The "via SoloSuds" is intentional, not
+// cosmetic: the A2P 10DLC / toll-free registration's sample messages and use
+// case description identify the sender as "SoloSuds," so every message has
+// to keep that string present even while surfacing the practitioner's own
+// business name for white-labeling. Don't drop "SoloSuds" from these — that
+// would deviate from what was actually approved on the registered number.
+// Keep the copy in sync with the registration if either changes.
 
-/** "SoloSuds: You're confirmed for {service} on {date}. Manage: {url}. Reply STOP to opt out." */
+function brandPrefix(orgName: string): string {
+  return `${orgName} via SoloSuds`;
+}
+
+/** "{Practice} via SoloSuds: You're confirmed for {service} on {date}. Manage: {url}. Reply STOP to opt out." */
 export function buildAppointmentConfirmationSms(opts: {
+  orgName: string;
   serviceName: string;
   startTime: Date | string;
   manageUrl: string;
 }): string {
-  return `SoloSuds: You're confirmed for ${opts.serviceName} on ${formatDateTime(opts.startTime)}. Manage: ${opts.manageUrl}. Reply STOP to opt out.`;
+  return `${brandPrefix(opts.orgName)}: You're confirmed for ${opts.serviceName} on ${formatDateTime(opts.startTime)}. Manage: ${opts.manageUrl}. Reply STOP to opt out.`;
 }
 
-/** "SoloSuds: Reminder, your {service} appointment is {date}. Reply STOP to opt out." */
+/** "{Practice} via SoloSuds: Reminder, your {service} appointment is {date}. Reply STOP to opt out." */
 export function buildAppointmentReminderSms(opts: {
+  orgName: string;
   serviceName: string;
   startTime: Date | string;
 }): string {
-  return `SoloSuds: Reminder, your ${opts.serviceName} appointment is ${formatDateTime(opts.startTime)}. Reply STOP to opt out.`;
+  return `${brandPrefix(opts.orgName)}: Reminder, your ${opts.serviceName} appointment is ${formatDateTime(opts.startTime)}. Reply STOP to opt out.`;
 }
 
-/** "SoloSuds: Your appointment was rescheduled to {date}. Details: {url}. Reply STOP to opt out." */
+/** "{Practice} via SoloSuds: Your appointment was rescheduled to {date}. Details: {url}. Reply STOP to opt out." */
 export function buildAppointmentRescheduledSms(opts: {
+  orgName: string;
   startTime: Date | string;
   manageUrl: string;
 }): string {
-  return `SoloSuds: Your appointment was rescheduled to ${formatDateTime(opts.startTime)}. Details: ${opts.manageUrl}. Reply STOP to opt out.`;
+  return `${brandPrefix(opts.orgName)}: Your appointment was rescheduled to ${formatDateTime(opts.startTime)}. Details: ${opts.manageUrl}. Reply STOP to opt out.`;
 }
 
-/** "SoloSuds: A spot opened up on {date}. Book now: {url}. Reply STOP to opt out." */
+/** "{Practice} via SoloSuds: A spot opened up on {date}. Book now: {url}. Reply STOP to opt out." */
 export function buildWaitlistOpeningSms(opts: {
+  orgName: string;
   openingDate: Date | string;
   bookingUrl: string;
 }): string {
-  return `SoloSuds: A spot opened up on ${formatDate(opts.openingDate, "MMMM d, yyyy")}. Book now: ${opts.bookingUrl}. Reply STOP to opt out.`;
+  return `${brandPrefix(opts.orgName)}: A spot opened up on ${formatDate(opts.openingDate, "MMMM d, yyyy")}. Book now: ${opts.bookingUrl}. Reply STOP to opt out.`;
+}
+
+/** "{Practice} via SoloSuds: You are now opted in to receive appointment text notifications. ..." */
+export function buildOptInConfirmationSms(orgName: string): string {
+  return `${brandPrefix(orgName)}: You are now opted in to receive appointment text notifications. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.`;
 }
 
 function getTwilio() {

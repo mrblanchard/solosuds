@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { sendSms } from "@/lib/twilio";
-
-const SMS_OPT_IN_CONFIRMATION =
-  "SoloSuds: You are now opted in to receive appointment text notifications. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.";
+import { sendSms, buildOptInConfirmationSms } from "@/lib/twilio";
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     if (smsConsent && phone) {
       try {
-        await sendSms({ to: phone, body: SMS_OPT_IN_CONFIRMATION });
+        await sendSms({ to: phone, body: buildOptInConfirmationSms(org.name) });
       } catch (err) {
         console.warn("Failed to send SMS opt-in confirmation:", err);
       }

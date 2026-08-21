@@ -59,7 +59,7 @@ export async function POST(
     try {
       await sendSms({
         to: client.phone,
-        body: `SoloSuds: Hi ${client.firstName}, book your next appointment with ${org.name} here: ${bookingUrl}. Reply HELP for help, STOP to opt out.`,
+        body: `${org.name} via SoloSuds: Hi ${client.firstName}, book your next appointment here: ${bookingUrl}. Reply HELP for help, STOP to opt out.`,
       });
     } catch (err) {
       console.error("[send-booking-link] sms failed:", err);

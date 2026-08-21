@@ -23,7 +23,7 @@ export async function POST(
     return NextResponse.json({ error: "type and clientId are required" }, { status: 400 });
   }
 
-  const [form, client] = await Promise.all([
+  const [form, client, org] = await Promise.all([
     db.intakeForm.findFirst({
       where: { id, organizationId: orgId },
       select: { id: true, title: true },
@@ -32,10 +32,12 @@ export async function POST(
       where: { id: clientId, organizationId: orgId },
       select: { id: true, firstName: true, lastName: true, email: true, phone: true, smsConsentedAt: true },
     }),
+    db.organization.findUnique({ where: { id: orgId }, select: { name: true } }),
   ]);
 
   if (!form) return NextResponse.json({ error: "Form not found" }, { status: 404 });
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+  if (!org) return NextResponse.json({ error: "Organization not found" }, { status: 404 });
 
   const formUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/intake/${form.id}?clientId=${client.id}`;
   const clientName = `${client.firstName} ${client.lastName}`;
@@ -73,7 +75,7 @@ export async function POST(
       );
     }
 
-    const smsBody = `SoloSuds: Hi ${client.firstName}, please complete your intake form here: ${formUrl}. Reply HELP for help, STOP to opt out.`;
+    const smsBody = `${org.name} via SoloSuds: Hi ${client.firstName}, please complete your intake form here: ${formUrl}. Reply HELP for help, STOP to opt out.`;
 
     let sid: string | undefined;
     try {

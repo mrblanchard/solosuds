@@ -62,6 +62,7 @@ export async function runReminderSweep(): Promise<{ sent: number; failed: number
           await sendSms({
             to: appt.client.phone,
             body: buildAppointmentReminderSms({
+              orgName: appt.organization.name,
               serviceName: appt.service?.name ?? "Session",
               startTime: appt.startTime,
             }),

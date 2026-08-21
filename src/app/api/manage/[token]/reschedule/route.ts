@@ -103,7 +103,7 @@ export async function PATCH(
     try {
       await sendSms({
         to: appointment.client.phone,
-        body: buildAppointmentRescheduledSms({ startTime: newStart, manageUrl }),
+        body: buildAppointmentRescheduledSms({ orgName: appointment.organization.name, startTime: newStart, manageUrl }),
       });
     } catch (err) {
       console.error("[reschedule] Failed to send confirmation SMS:", err);

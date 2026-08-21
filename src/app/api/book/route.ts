@@ -3,11 +3,8 @@ import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
 import { hasConflict, validateBookingWindow } from "@/lib/scheduling";
-import { sendSms, buildAppointmentConfirmationSms } from "@/lib/twilio";
+import { sendSms, buildAppointmentConfirmationSms, buildOptInConfirmationSms } from "@/lib/twilio";
 import { zonedTimeToUtc, formatZonedDisplay } from "@/lib/timezone";
-
-const SMS_OPT_IN_CONFIRMATION =
-  "SoloSuds: You are now opted in to receive appointment text notifications. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.";
 
 export async function POST(request: NextRequest) {
   try {
@@ -162,7 +159,7 @@ export async function POST(request: NextRequest) {
     // Send the one-time SMS opt-in confirmation the moment a client consents.
     if (newlyOptedIntoSms && client.phone) {
       try {
-        await sendSms({ to: client.phone, body: SMS_OPT_IN_CONFIRMATION });
+        await sendSms({ to: client.phone, body: buildOptInConfirmationSms(org.name) });
       } catch (err) {
         console.warn("Failed to send SMS opt-in confirmation:", err);
       }
@@ -175,6 +172,7 @@ export async function POST(request: NextRequest) {
         await sendSms({
           to: client.phone,
           body: buildAppointmentConfirmationSms({
+            orgName: org.name,
             serviceName: service.name,
             startTime,
             manageUrl,

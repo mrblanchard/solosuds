@@ -62,6 +62,7 @@ export async function POST(
       await sendSms({
         to: appointment.client.phone,
         body: buildAppointmentReminderSms({
+          orgName: branding?.name ?? "Your practice",
           serviceName: appointment.service?.name ?? "Appointment",
           startTime: appointment.startTime,
         }),
