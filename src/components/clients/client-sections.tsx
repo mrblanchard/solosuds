@@ -45,7 +45,7 @@ interface Appointment {
   startTime: Date | string;
   status: string;
   service?: { name: string } | null;
-  practitioner: { name: string | null };
+  practitioner: { name: string | null } | null;
 }
 
 interface Invoice {
@@ -334,7 +334,7 @@ export default function ClientSections({
                       {formatDate(appt.startTime, "MMM d, yyyy · h:mm a")}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {appt.service?.name ?? "Session"} · {appt.practitioner.name}
+                      {appt.service?.name ?? "Session"} · {appt.practitioner?.name ?? "Unassigned"}
                     </p>
                   </div>
                   <Badge

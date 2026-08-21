@@ -28,6 +28,9 @@ export async function POST(
   });
 
   if (!appointment) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!appointment.client) {
+    return NextResponse.json({ error: "This appointment has no client to remind" }, { status: 400 });
+  }
   if (!appointment.client.email) {
     return NextResponse.json({ error: "Client has no email address" }, { status: 400 });
   }
@@ -47,7 +50,7 @@ export async function POST(
   await sendAppointmentReminder({
     to: appointment.client.email,
     clientName: `${appointment.client.firstName} ${appointment.client.lastName}`,
-    practitionerName: appointment.practitioner.name ?? "Your Practitioner",
+    practitionerName: appointment.practitioner?.name ?? "Your Practitioner",
     appointmentDate: apptDate,
     appointmentTime: apptTime,
     serviceName: appointment.service?.name ?? "Appointment",

@@ -222,7 +222,7 @@ export interface DashboardAppt {
   startTime: Date | string;
   status: string;
   service?: { name: string } | null;
-  client: { firstName: string; lastName: string };
+  client: { firstName: string; lastName: string } | null;
 }
 
 export interface DashboardNote {
@@ -536,7 +536,7 @@ export default function DashboardWidgets({
               >
                 <div className="min-w-0">
                   <p className="font-medium text-gray-900 truncate text-sm">
-                    {appt.client.firstName} {appt.client.lastName}
+                    {appt.client ? `${appt.client.firstName} ${appt.client.lastName}` : "No client"}
                   </p>
                   <p className="text-xs text-gray-500">
                     {appt.service?.name ?? "Session"} · {formatDateTime(appt.startTime)}
@@ -649,7 +649,7 @@ export default function DashboardWidgets({
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
-                    {appt.client.firstName} {appt.client.lastName}
+                    {appt.client ? `${appt.client.firstName} ${appt.client.lastName}` : "No client"}
                   </p>
                   <p className="text-xs text-gray-500">
                     {appt.service?.name ?? "Session"} · {formatDateTime(appt.startTime)}

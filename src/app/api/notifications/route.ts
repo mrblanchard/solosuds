@@ -127,7 +127,7 @@ export async function GET() {
       id: `upcoming:${appt.id}`,
       type: "upcoming_appointment" as const,
       title: "Upcoming appointment",
-      body: `${appt.client.firstName} ${appt.client.lastName}${appt.service ? ` · ${appt.service.name}` : ""} · ${new Date(appt.startTime).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`,
+      body: `${appt.client ? `${appt.client.firstName} ${appt.client.lastName}` : "No client"}${appt.service ? ` · ${appt.service.name}` : ""} · ${new Date(appt.startTime).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`,
       href: `/dashboard/schedule/${appt.id}`,
       timestamp: appt.startTime,
       isNew: false, // upcoming appts aren't "new", they're reminders
@@ -136,7 +136,7 @@ export async function GET() {
       id: `new_appt:${appt.id}`,
       type: "new_appointment" as const,
       title: "New appointment scheduled",
-      body: `${appt.client.firstName} ${appt.client.lastName}${appt.service ? ` · ${appt.service.name}` : ""} · ${new Date(appt.startTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+      body: `${appt.client ? `${appt.client.firstName} ${appt.client.lastName}` : "No client"}${appt.service ? ` · ${appt.service.name}` : ""} · ${new Date(appt.startTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
       href: `/dashboard/schedule/${appt.id}`,
       timestamp: appt.createdAt,
       isNew: appt.createdAt > seenAt,
