@@ -30,6 +30,14 @@ function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 254;
 }
 
+/** Formats a "HH:mm" 24-hour slot value for display as 12-hour, e.g. "14:00" -> "2:00 PM". */
+function formatSlotLabel(slot: string): string {
+  const [hh, mm] = slot.split(":").map(Number);
+  const period = hh >= 12 ? "PM" : "AM";
+  const hour12 = hh % 12 === 0 ? 12 : hh % 12;
+  return `${hour12}:${String(mm).padStart(2, "0")} ${period}`;
+}
+
 export default function PublicBookingForm({ orgId, orgName, services, primaryColor }: Props) {
   const [step, setStep] = useState<"service" | "details" | "confirm">("service");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -329,7 +337,7 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
                         }
                       >
                         <Clock className="h-3 w-3" />
-                        {slot}
+                        {formatSlotLabel(slot)}
                       </button>
                     ))}
                   </div>
