@@ -23,7 +23,7 @@ export async function GET(
     return new NextResponse(null, { status: 404 });
   }
 
-  return new NextResponse(file.body, {
+  return new NextResponse(file.body as BodyInit, {
     headers: {
       "Content-Type": file.contentType,
       "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",

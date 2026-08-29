@@ -6,14 +6,14 @@ const services = [
   {
     id: "s1",
     name: "Initial Consultation",
-    duration: 60,
+    durationMinutes: 60,
     price: 12000,
     description: "First visit",
   },
   {
     id: "s2",
     name: "Follow-up",
-    duration: 30,
+    durationMinutes: 30,
     price: null,
     description: null,
   },

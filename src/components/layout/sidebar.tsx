@@ -23,7 +23,7 @@ import {
   Wrench,
 } from "lucide-react";
 
-type PracticeType = "THERAPY" | "SALON" | "MEDICAL" | "FITNESS" | "OTHER" | undefined;
+type PracticeType = "THERAPY" | "SALON" | "MEDICAL" | "FITNESS" | "LESSONS" | "OTHER" | undefined;
 
 interface NavItem {
   href: string;
@@ -62,6 +62,10 @@ const NAV_CONFIG: Record<NonNullable<PracticeType>, { order: string[]; labels?: 
     order: ["dashboard", "schedule", "clients", "messages", "billing", "notes", "intake", "email", "settings", "whitelabel", "faq"],
     labels: { notes: "Session Notes", intake: "Health Forms" },
   },
+  LESSONS: {
+    order: ["dashboard", "schedule", "clients", "messages", "billing", "notes", "intake", "email", "settings", "whitelabel", "faq"],
+    labels: { notes: "Session Notes" },
+  },
   OTHER: {
     order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "messages", "billing", "settings", "whitelabel", "faq"],
   },
@@ -72,6 +76,7 @@ const PRACTICE_LABELS: Record<NonNullable<PracticeType>, string> = {
   SALON:   "Salon & Beauty",
   MEDICAL: "Medical Practice",
   FITNESS: "Fitness & Wellness",
+  LESSONS: "Lessons & Tutoring",
   OTHER:   "General Practice",
 };
 

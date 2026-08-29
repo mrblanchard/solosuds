@@ -63,14 +63,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Extract sender email (format: "Name <email@domain.com>" or just "email@domain.com")
-    const fromRaw = (fullEmail as Record<string, unknown>).from as string || data.from;
+    const fromRaw = (fullEmail as unknown as Record<string, unknown>).from as string || data.from;
     const fromMatch = fromRaw.match(/<([^>]+)>/) || [null, fromRaw];
     const fromEmail = (fromMatch[1] || fromRaw).trim().toLowerCase();
 
-    const subject = (fullEmail as Record<string, unknown>).subject as string || data.subject || "(No subject)";
-    const rawHtmlBody = (fullEmail as Record<string, unknown>).html as string || "";
+    const subject = (fullEmail as unknown as Record<string, unknown>).subject as string || data.subject || "(No subject)";
+    const rawHtmlBody = (fullEmail as unknown as Record<string, unknown>).html as string || "";
     const htmlBody = rawHtmlBody ? sanitizeEmailHtml(rawHtmlBody) : "";
-    const textBody = (fullEmail as Record<string, unknown>).text as string || "";
+    const textBody = (fullEmail as unknown as Record<string, unknown>).text as string || "";
 
     // Try to match sender to a client by email
     const client = await db.client.findFirst({
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Extract attachment metadata
-    const rawAttachments = (fullEmail as Record<string, unknown>).attachments as Array<{
+    const rawAttachments = (fullEmail as unknown as Record<string, unknown>).attachments as Array<{
       id: string;
       filename: string;
       content_type: string;

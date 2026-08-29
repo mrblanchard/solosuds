@@ -1,4 +1,4 @@
-import { SignJWT, jwtVerify } from "jose";
+import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 import { cookies } from "next/headers";
 
 const COOKIE_NAME = "portal-session";
@@ -8,7 +8,10 @@ function getSecret() {
   return new TextEncoder().encode(process.env.NEXTAUTH_SECRET!);
 }
 
-export interface PortalPayload {
+// Extends JWTPayload (rather than a bare interface) so it carries jose's
+// index signature — SignJWT requires that structurally, even though a plain
+// object with just these two fields works identically at runtime.
+export interface PortalPayload extends JWTPayload {
   clientId: string;
   orgId: string;
 }

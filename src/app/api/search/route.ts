@@ -126,7 +126,7 @@ export async function GET(req: NextRequest) {
     ...appointments.map((a) => ({
       type: "appointment" as const,
       id: a.id,
-      title: `${a.client.firstName} ${a.client.lastName}`,
+      title: a.client ? `${a.client.firstName} ${a.client.lastName}` : "No client",
       subtitle: `Appointment · ${new Date(a.startTime).toLocaleDateString()} · ${a.status}`,
       href: `/dashboard/schedule/${a.id}`,
     })),

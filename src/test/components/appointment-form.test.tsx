@@ -7,15 +7,14 @@ vi.mock("next/navigation", () => ({
 }));
 
 const clients = [{ id: "c1", firstName: "Jane", lastName: "Smith" }];
-const practitioners = [{ id: "p1", name: "Dr. Lee" }];
 const services = [{ id: "s1", name: "Massage", durationMinutes: 60 }];
 
 function renderForm(props = {}) {
   return render(
     <AppointmentForm
       clients={clients}
-      practitioners={practitioners}
       services={services}
+      currentUserId="u1"
       {...props}
     />
   );
@@ -25,22 +24,26 @@ describe("AppointmentForm", () => {
   describe("rendering", () => {
     it("renders all field labels", () => {
       renderForm();
-      expect(screen.getByText("Client *")).toBeInTheDocument();
-      expect(screen.getByText("Practitioner *")).toBeInTheDocument();
+      expect(screen.getByText(/^Client\b/)).toBeInTheDocument();
       expect(screen.getByText("Service")).toBeInTheDocument();
       expect(screen.getByText("Start Time *")).toBeInTheDocument();
       expect(screen.getByText("End Time *")).toBeInTheDocument();
       expect(screen.getByText(/Notes/)).toBeInTheDocument();
     });
 
-    it("renders client options", () => {
+    it("defaults to a free-text client field when no defaultClientId is given", () => {
       renderForm();
-      expect(screen.getByText("Jane Smith")).toBeInTheDocument();
+      const input = screen.getByLabelText(/Client/) as HTMLInputElement;
+      expect(input.tagName).toBe("INPUT");
+      expect(input).toHaveAttribute("placeholder", "e.g. Sarah Johnson");
     });
 
-    it("renders practitioner options", () => {
+    it("can switch to an existing-client dropdown via the toggle", () => {
       renderForm();
-      expect(screen.getByText("Dr. Lee")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Existing client" }));
+      const select = screen.getByLabelText(/Client/);
+      expect(select.tagName).toBe("SELECT");
+      expect(screen.getByText("Jane Smith")).toBeInTheDocument();
     });
 
     it("renders service options", () => {
@@ -50,22 +53,17 @@ describe("AppointmentForm", () => {
 
     it("pre-selects client when defaultClientId is provided", () => {
       renderForm({ defaultClientId: "c1" });
-      const select = screen.getByLabelText("Client *") as HTMLSelectElement;
+      const select = screen.getByLabelText(/Client/) as HTMLSelectElement;
+      expect(select.tagName).toBe("SELECT");
       expect(select.value).toBe("c1");
     });
   });
 
   describe("accessibility - label/id associations", () => {
-    it("client label is linked to client select", () => {
+    it("client label is linked to the client field", () => {
       renderForm();
-      const select = screen.getByLabelText("Client *");
-      expect(select.tagName).toBe("SELECT");
-    });
-
-    it("practitioner label is linked to practitioner select", () => {
-      renderForm();
-      const select = screen.getByLabelText("Practitioner *");
-      expect(select.tagName).toBe("SELECT");
+      const field = screen.getByLabelText(/Client/);
+      expect(field.tagName).toBe("INPUT");
     });
 
     it("service label is linked to service select", () => {
@@ -100,19 +98,11 @@ describe("AppointmentForm", () => {
   });
 
   describe("validation", () => {
-    it("shows client required error when submitting empty form", async () => {
+    it("shows start time required error when submitting empty form", async () => {
       renderForm();
       fireEvent.click(screen.getByRole("button", { name: /Book Appointment/i }));
       await waitFor(() => {
-        expect(screen.getByText("Client is required")).toBeInTheDocument();
-      });
-    });
-
-    it("shows practitioner required error when submitting empty form", async () => {
-      renderForm();
-      fireEvent.click(screen.getByRole("button", { name: /Book Appointment/i }));
-      await waitFor(() => {
-        expect(screen.getByText("Practitioner is required")).toBeInTheDocument();
+        expect(screen.getByText("Start time is required")).toBeInTheDocument();
       });
     });
   });

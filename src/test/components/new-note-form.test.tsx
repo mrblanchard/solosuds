@@ -10,7 +10,7 @@ const clients = [
   { id: "c1", firstName: "Jane", lastName: "Smith" },
   { id: "c2", firstName: "Bob", lastName: "Jones" },
 ];
-const templates = [{ id: "t1", name: "SOAP Template" }];
+const templates = [{ id: "t1", name: "SOAP Template", isDefault: false }];
 
 function renderForm(props = {}) {
   return render(

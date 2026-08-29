@@ -31,7 +31,10 @@ const adapter = {
       await db.account.delete({ where: { id: account.id } });
       return null;
     }
-    return account.user;
+    // Prisma's organizationId is `string | null`; next-auth's User type (see
+    // src/types/next-auth.d.ts) declares it `string | undefined` — same "no
+    // org yet" meaning, different null-ish value, so just normalize it.
+    return { ...account.user, organizationId: account.user.organizationId ?? undefined };
   },
 
   // Override linkAccount to use upsert so stale/orphaned Account records
@@ -113,7 +116,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!passwordMatch) return null;
 
-        return user;
+        // Same organizationId null/undefined normalization as getUserByAccount above.
+        return { ...user, organizationId: user.organizationId ?? undefined };
       },
     }),
   ],

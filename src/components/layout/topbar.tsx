@@ -17,6 +17,7 @@ const PRACTICE_LABELS: Record<string, string> = {
   SALON:   "Salon & Beauty",
   MEDICAL: "Medical Practice",
   FITNESS: "Fitness & Wellness",
+  LESSONS: "Lessons & Tutoring",
   OTHER:   "General Practice",
 };
 

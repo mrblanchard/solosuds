@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AppFooter } from "@/components/layout/app-footer";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,12 @@ function RegisterContent() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>({
-    resolver: zodResolver(activeSchema),
+    // activeSchema's shape varies at runtime (fromGoogle/inviteCode toggle which
+    // fields are optional), so zodResolver infers a union across all 4 possible
+    // shapes instead of unifying with the single static RegisterForm type this
+    // form actually uses. The cast doesn't change behavior — zodResolver's
+    // runtime validation logic is identical regardless of which branch is active.
+    resolver: zodResolver(activeSchema) as Resolver<RegisterForm>,
   });
 
   useEffect(() => {

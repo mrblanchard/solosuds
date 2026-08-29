@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { AppFooter } from "@/components/layout/app-footer";
-import { Turnstile } from "@marsidev/react-turnstile";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 const schema = z.object({
   email: z.string().email("Invalid email address").max(254, "Email is too long"),
@@ -43,7 +43,7 @@ function LoginForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const [urlErrorMessage, setUrlErrorMessage] = useState<string | null>(null);
   const [cfToken, setCfToken] = useState<string | null>(null);
-  const turnstileRef = useRef<{ reset: () => void } | null>(null);
+  const turnstileRef = useRef<TurnstileInstance | null>(null);
 
   // Read URL error only after mount to avoid server/client hydration mismatch
   useEffect(() => {
