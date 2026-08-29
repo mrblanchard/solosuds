@@ -70,8 +70,8 @@ describe("PublicBookingForm", () => {
       goToStep2();
       expect(screen.getByText(/First name/i)).toBeInTheDocument();
       expect(screen.getByText(/Last name/i)).toBeInTheDocument();
-      expect(screen.getByText(/Email/i)).toBeInTheDocument();
-      expect(screen.getByText(/Phone/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Phone/i)).toBeInTheDocument();
       expect(screen.getByText(/Notes for the practitioner/i)).toBeInTheDocument();
     });
 

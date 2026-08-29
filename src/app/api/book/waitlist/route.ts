@@ -8,8 +8,11 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
     const body = await request.json();
     const { orgId, serviceId, firstName, lastName, email, phone, smsConsent, preferredDate, notes } = body;
 
-    if (!orgId || !firstName || !lastName || !email) {
+    if (!orgId || !firstName || !lastName) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    if (!email && !phone) {
+      return NextResponse.json({ error: "Please provide an email or phone number so we can confirm your booking." }, { status: 400 });
     }
     if (typeof firstName !== "string" || firstName.length > 100) {
       return NextResponse.json({ error: "Invalid first name" }, { status: 400 });
@@ -17,7 +20,7 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
     if (typeof lastName !== "string" || lastName.length > 100) {
       return NextResponse.json({ error: "Invalid last name" }, { status: 400 });
     }
-    if (typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (email && (typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
     }
     if (phone && (typeof phone !== "string" || !/^[+]?[\d\s()-]{7,20}$/.test(phone))) {
@@ -25,6 +28,12 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
     }
     if (smsConsent && !phone) {
       return NextResponse.json({ error: "A phone number is required to opt in to text messages" }, { status: 400 });
+    }
+    if (!email && phone && !smsConsent) {
+      return NextResponse.json(
+        { error: "Since you didn't provide an email, please check the box to receive a text confirmation." },
+        { status: 400 }
+      );
     }
     if (notes && (typeof notes !== "string" || notes.length > 1000)) {
       return NextResponse.json({ error: "Notes are too long" }, { status: 400 });
@@ -39,7 +48,7 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
         serviceId: serviceId || undefined,
         clientFirstName: firstName,
         clientLastName: lastName,
-        clientEmail: email,
+        clientEmail: email || null,
         clientPhone: phone || null,
         smsConsentedAt: smsConsent && phone ? new Date() : null,
         // Bare "YYYY-MM-DD" strings parse as UTC midnight per the JS spec, but the

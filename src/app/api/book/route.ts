@@ -23,8 +23,11 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
       notes,
     } = body;
 
-    if (!orgId || !serviceId || !date || !time || !clientFirstName || !clientLastName || !clientEmail) {
+    if (!orgId || !serviceId || !date || !time || !clientFirstName || !clientLastName) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    if (!clientEmail && !clientPhone) {
+      return NextResponse.json({ error: "Please provide an email or phone number so we can confirm your booking." }, { status: 400 });
     }
     if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return NextResponse.json({ error: "Invalid date" }, { status: 400 });
@@ -39,7 +42,7 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
     if (typeof clientLastName !== "string" || clientLastName.length > 100) {
       return NextResponse.json({ error: "Invalid last name" }, { status: 400 });
     }
-    if (typeof clientEmail !== "string" || clientEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail)) {
+    if (clientEmail && (typeof clientEmail !== "string" || clientEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail))) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
     }
     if (clientPhone && (typeof clientPhone !== "string" || !/^[+]?[\d\s()-]{7,20}$/.test(clientPhone))) {
@@ -47,6 +50,15 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
     }
     if (smsConsent && !clientPhone) {
       return NextResponse.json({ error: "A phone number is required to opt in to text messages" }, { status: 400 });
+    }
+    // No email on file, so the confirmation text is the only way to reach
+    // them — require the opt-in rather than silently booking with no
+    // confirmation sent at all.
+    if (!clientEmail && clientPhone && !smsConsent) {
+      return NextResponse.json(
+        { error: "Since you didn't provide an email, please check the box to receive a text confirmation." },
+        { status: 400 }
+      );
     }
     if (notes && (typeof notes !== "string" || notes.length > 5000)) {
       return NextResponse.json({ error: "Notes are too long" }, { status: 400 });
@@ -89,10 +101,14 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
       );
     }
 
-    // Find or create client
-    let client = await db.client.findFirst({
-      where: { organizationId: orgId, email: clientEmail },
-    });
+    // Find or create client — match by email first, falling back to phone
+    // when no email was given (one of the two is guaranteed by validation above).
+    let client = clientEmail
+      ? await db.client.findFirst({ where: { organizationId: orgId, email: clientEmail } })
+      : null;
+    if (!client && clientPhone) {
+      client = await db.client.findFirst({ where: { organizationId: orgId, phone: clientPhone } });
+    }
 
     // Only true when this request is the moment the client first opts in, so we
     // don't re-send the opt-in confirmation on every subsequent booking.
@@ -105,7 +121,7 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
           organizationId: orgId,
           firstName: clientFirstName,
           lastName: clientLastName,
-          email: clientEmail,
+          email: clientEmail || null,
           phone: clientPhone ?? null,
           status: "ACTIVE",
           smsConsentedAt: newlyOptedIntoSms ? new Date() : null,
@@ -158,9 +174,15 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
     }
 
     // Send the one-time SMS opt-in confirmation the moment a client consents.
+    // If they didn't give an email, the text is their only confirmation
+    // channel — send the actual appointment details instead of the generic
+    // opt-in notice (which has no booking info in it at all).
     if (newlyOptedIntoSms && client.phone) {
+      const body = clientEmail
+        ? buildOptInConfirmationSms(org.name)
+        : buildAppointmentConfirmationSms({ orgName: org.name, serviceName: service.name, startTime, manageUrl });
       try {
-        await sendSms({ to: client.phone, body: buildOptInConfirmationSms(org.name) });
+        await sendSms({ to: client.phone, body });
       } catch (err) {
         console.warn("Failed to send SMS opt-in confirmation:", err);
       }

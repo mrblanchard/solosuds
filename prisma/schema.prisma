@@ -461,7 +461,7 @@ model WaitlistEntry {
   service        Service?       @relation(fields: [serviceId], references: [id])
   clientFirstName String
   clientLastName  String
-  clientEmail     String
+  clientEmail     String?
   clientPhone     String?
   smsConsentedAt  DateTime?      // set when the client opts in to appointment texts; null = not opted in
   preferredDate   DateTime?     // null = any opening

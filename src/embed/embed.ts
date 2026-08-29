@@ -204,18 +204,28 @@ class BookingWidget {
   }
 
   private async submitBooking() {
-    if (!this.selectedService || !this.date || !this.time || !this.firstName || !this.lastName || !this.email) {
+    if (!this.selectedService || !this.date || !this.time || !this.firstName || !this.lastName) {
       this.error = "Please fill in all required fields.";
       this.render();
       return;
     }
-    if (!isValidEmail(this.email)) {
+    if (!this.email && !this.phone) {
+      this.error = "Please provide an email or phone number so we can confirm your booking.";
+      this.render();
+      return;
+    }
+    if (this.email && !isValidEmail(this.email)) {
       this.error = "Please enter a valid email address.";
       this.render();
       return;
     }
     if (this.phone && !/^[+]?[\d-]{7,20}$/.test(stripPhone(this.phone))) {
       this.error = "Please enter a valid phone number.";
+      this.render();
+      return;
+    }
+    if (!this.email && this.phone && !this.smsConsent) {
+      this.error = "Since you didn't provide an email, please check the box to receive a text confirmation.";
       this.render();
       return;
     }
@@ -257,13 +267,28 @@ class BookingWidget {
   }
 
   private async submitWaitlist() {
-    if (!this.firstName || !this.lastName || !this.email) {
-      this.error = "Please fill in your name and email.";
+    if (!this.firstName || !this.lastName) {
+      this.error = "Please fill in your name.";
       this.render();
       return;
     }
-    if (!isValidEmail(this.email)) {
+    if (!this.email && !this.phone) {
+      this.error = "Please provide an email or phone number so we can notify you.";
+      this.render();
+      return;
+    }
+    if (this.email && !isValidEmail(this.email)) {
       this.error = "Please enter a valid email address.";
+      this.render();
+      return;
+    }
+    if (this.phone && !/^[+]?[\d-]{7,20}$/.test(stripPhone(this.phone))) {
+      this.error = "Please enter a valid phone number.";
+      this.render();
+      return;
+    }
+    if (!this.email && this.phone && !this.smsConsent) {
+      this.error = "Since you didn't provide an email, please check the box to receive a text confirmation.";
       this.render();
       return;
     }
@@ -314,22 +339,30 @@ class BookingWidget {
   }
 
   private renderConfirmed() {
+    const willText = !!(this.phone && this.smsConsent);
+    const destinations = [
+      this.email ? `an email to ${this.email}` : null,
+      willText ? `a text to ${this.phone}` : null,
+    ].filter(Boolean);
     return h("div", { className: "ss-card" }, [
       h("div", { className: "ss-confirm" }, [
         h("p", { className: "ss-confirm-title", text: "Booking confirmed!" }),
         h("p", {
           className: "ss-confirm-text",
-          text: `We'll send a confirmation to ${this.email}${this.phone && this.smsConsent ? " and a text to " + this.phone : ""}. See you soon!`,
+          text: `We'll send ${destinations.join(" and ")}. See you soon!`,
         }),
       ]),
     ]);
   }
 
   private renderWaitlisted() {
+    const text = this.email
+      ? `We'll email ${this.email} the moment a spot opens up.`
+      : `We'll text ${this.phone} the moment a spot opens up.`;
     return h("div", { className: "ss-card" }, [
       h("div", { className: "ss-confirm" }, [
         h("p", { className: "ss-confirm-title", text: "You're on the waitlist!" }),
-        h("p", { className: "ss-confirm-text", text: `We'll email ${this.email} the moment a spot opens up.` }),
+        h("p", { className: "ss-confirm-text", text }),
       ]),
     ]);
   }
@@ -487,7 +520,9 @@ class BookingWidget {
   }
 
   private renderContactFields() {
-    const wrap = h("div", {}, []);
+    const wrap = h("div", {}, [
+      h("p", { className: "ss-note", text: "We need at least an email or a phone number to confirm your booking." }),
+    ]);
 
     const row = h("div", { className: "ss-row-2" });
     row.appendChild(
@@ -511,7 +546,7 @@ class BookingWidget {
     wrap.appendChild(row);
 
     wrap.appendChild(
-      this.textField("Email", this.email, "email", true, {
+      this.textField("Email", this.email, "email", !this.phone, {
         onInput: (v) => (this.email = v),
         onBlur: () => {
           this.email = normalizeEmail(this.email);
@@ -520,7 +555,12 @@ class BookingWidget {
       })
     );
 
-    const phoneField = h("div", { className: "ss-field" }, [h("label", { className: "ss-label", text: "Phone" })]);
+    const phoneField = h("div", { className: "ss-field" }, [
+      h("label", { className: "ss-label" }, [
+        document.createTextNode("Phone "),
+        !this.email ? h("span", { className: "ss-required", text: "*" }) : null,
+      ]),
+    ]);
     const phoneInput = h("input", { className: "ss-input" }) as HTMLInputElement;
     phoneInput.type = "tel";
     phoneInput.placeholder = "802-258-0000";
@@ -529,7 +569,8 @@ class BookingWidget {
       this.phone = formatPhone(phoneInput.value);
       if (!this.phone) this.smsConsent = false;
       // Re-render on blur only, to avoid fighting cursor position while typing;
-      // but we do need the consent checkbox to appear once a phone is entered.
+      // but we do need the consent checkbox (and the email/phone required
+      // asterisks) to update once a phone is entered or cleared.
       const shouldShowConsent = !!this.phone;
       const hasConsentBlock = !!this.root.querySelector(".ss-consent");
       if (shouldShowConsent !== hasConsentBlock) this.render();
@@ -576,11 +617,18 @@ class BookingWidget {
       this.smsConsent = checkbox.checked;
     });
     label.appendChild(checkbox);
-    label.appendChild(
-      h("span", {
-        text: `I agree to receive appointment text messages from ${this.org?.name ?? "this business"} via SoloSuds at the number above. Msg & data rates may apply. Reply STOP to opt out.`,
-      })
+    const span = h("span", {});
+    if (!this.email) {
+      span.appendChild(
+        h("strong", { text: "Required, since no email was provided* — " })
+      );
+    }
+    span.appendChild(
+      document.createTextNode(
+        `I agree to receive appointment text messages from ${this.org?.name ?? "this business"} via SoloSuds at the number above. Msg & data rates may apply. Reply STOP to opt out.`
+      )
     );
+    label.appendChild(span);
     return label;
   }
 

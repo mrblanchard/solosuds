@@ -256,14 +256,16 @@ export async function notifyWaitlistForOpening({
 
   await Promise.allSettled(
     entries.map(async (entry) => {
-      await sendWaitlistOpening({
-        to: entry.clientEmail,
-        clientName: `${entry.clientFirstName} ${entry.clientLastName}`,
-        bookingUrl,
-        branding: org,
-      }).catch((err) => {
-        console.error(`[waitlist] Failed to notify ${entry.clientEmail}:`, err);
-      });
+      if (entry.clientEmail) {
+        await sendWaitlistOpening({
+          to: entry.clientEmail,
+          clientName: `${entry.clientFirstName} ${entry.clientLastName}`,
+          bookingUrl,
+          branding: org,
+        }).catch((err) => {
+          console.error(`[waitlist] Failed to notify ${entry.clientEmail}:`, err);
+        });
+      }
 
       if (entry.clientPhone && entry.smsConsentedAt) {
         await sendSms({

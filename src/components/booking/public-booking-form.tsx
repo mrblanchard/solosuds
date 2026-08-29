@@ -88,20 +88,28 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
   }, [loadSlots]);
 
   async function submit() {
-    if (!selectedService || !date || !time || !firstName || !lastName || !email) {
+    if (!selectedService || !date || !time || !firstName || !lastName) {
       setError("Please fill in all required fields.");
+      return;
+    }
+    if (!email && !phone) {
+      setError("Please provide an email or phone number so we can confirm your booking.");
       return;
     }
     if (firstName.length > 100 || lastName.length > 100) {
       setError("Name is too long.");
       return;
     }
-    if (!isValidEmail(email)) {
+    if (email && !isValidEmail(email)) {
       setError("Please enter a valid email address.");
       return;
     }
     if (phone && !/^[+]?[\d-]{7,20}$/.test(stripPhone(phone))) {
       setError("Please enter a valid phone number.");
+      return;
+    }
+    if (!email && phone && !smsConsent) {
+      setError("Since you didn't provide an email, please check the box to receive a text confirmation.");
       return;
     }
     if (notes.length > 5000) {
@@ -141,12 +149,24 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
   }
 
   async function submitWaitlist() {
-    if (!firstName || !lastName || !email) {
-      setError("Please fill in your name and email.");
+    if (!firstName || !lastName) {
+      setError("Please fill in your name.");
       return;
     }
-    if (!isValidEmail(email)) {
+    if (!email && !phone) {
+      setError("Please provide an email or phone number so we can notify you.");
+      return;
+    }
+    if (email && !isValidEmail(email)) {
       setError("Please enter a valid email address.");
+      return;
+    }
+    if (phone && !/^[+]?[\d-]{7,20}$/.test(stripPhone(phone))) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+    if (!email && phone && !smsConsent) {
+      setError("Since you didn't provide an email, please check the box to receive a text confirmation.");
       return;
     }
     setError(null);
@@ -185,14 +205,18 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
   }
 
   if (confirmed) {
+    const willText = !!(phone && smsConsent);
+    const destinations = [
+      email ? `an email to ${email}` : null,
+      willText ? `a text to ${phone}` : null,
+    ].filter(Boolean);
     return (
       <Card>
         <CardContent className="py-16 text-center">
           <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
           <h2 className="text-xl font-semibold text-gray-900">Booking Confirmed!</h2>
           <p className="mt-2 text-sm text-gray-500">
-            We&apos;ll send a confirmation to {email}
-            {phone && smsConsent ? <> and a text to {phone}</> : null}. See you soon!
+            We&apos;ll send {destinations.join(" and ")}. See you soon!
           </p>
         </CardContent>
       </Card>
@@ -206,7 +230,7 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
           <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
           <h2 className="text-xl font-semibold text-gray-900">You&apos;re on the waitlist!</h2>
           <p className="mt-2 text-sm text-gray-500">
-            We&apos;ll email {email} the moment a spot opens up.
+            We&apos;ll {email ? <>email {email}</> : <>text {phone}</>} the moment a spot opens up.
           </p>
         </CardContent>
       </Card>
@@ -367,8 +391,12 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
               </div>
             </div>
 
+            <p className="text-xs text-gray-500">
+              We need at least an email or a phone number to confirm your booking.
+            </p>
+
             <div>
-              <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
+              <Label htmlFor="email">Email {!phone && <span className="text-red-500">*</span>}</Label>
               <Input
                 id="email"
                 type="email"
@@ -380,7 +408,7 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
             </div>
 
             <div>
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="phone">Phone {!email && <span className="text-red-500">*</span>}</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -404,6 +432,12 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
                   className="mt-0.5 rounded border-gray-300 text-indigo-600"
                 />
                 <span>
+                  {!email && (
+                    <strong className="text-gray-900">
+                      Required, since no email was provided
+                      <span className="text-red-500">*</span> —{" "}
+                    </strong>
+                  )}
                   I agree to receive appointment text messages (booking confirmations, reminders, reschedule
                   notices, and waitlist alerts) from {orgName} via SoloSuds at the number above. Msg frequency
                   varies. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help.{" "}
