@@ -1,4 +1,4 @@
-export type LeadSoftware = "Fullslate" | "Acuity" | "MassageBook" | "Square" | "Mindbody" | "None visible" | "Unknown";
+export type LeadSoftware = "Fullslate" | "Acuity" | "MassageBook" | "Square" | "Mindbody" | "Wix Bookings" | "None visible" | "Unknown";
 
 export interface Lead {
   id: string;

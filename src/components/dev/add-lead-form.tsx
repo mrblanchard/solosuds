@@ -17,7 +17,7 @@ const schema = z.object({
   phone: z.string().regex(/^[+]?[\d\s()-]{7,20}$/, "Invalid phone number").optional().or(z.literal("")),
   website: z.string().max(300).optional().or(z.literal("")),
   location: z.string().min(1, "Location is required").max(200),
-  software: z.enum(["Fullslate", "Acuity", "MassageBook", "Square", "Mindbody", "None visible", "Unknown"]),
+  software: z.enum(["Fullslate", "Acuity", "MassageBook", "Square", "Mindbody", "Wix Bookings", "None visible", "Unknown"]),
   talkingPoint: z.string().max(1000).optional().or(z.literal("")),
 });
 
@@ -106,6 +106,7 @@ export default function AddLeadForm() {
             <option value="MassageBook">MassageBook</option>
             <option value="Square">Square</option>
             <option value="Mindbody">Mindbody</option>
+            <option value="Wix Bookings">Wix Bookings</option>
           </select>
         </Field>
         <Field label="Talking point" error={errors.talkingPoint?.message} className="sm:col-span-2">
