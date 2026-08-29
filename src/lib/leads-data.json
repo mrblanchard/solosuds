@@ -46,35 +46,35 @@
   {
     "id": "body-abode",
     "business": "Body Abode Wellness",
-    "contact": "Michele",
+    "contact": "Michele Meulendyk, LMT",
     "email": null,
-    "phone": null,
+    "phone": "(907) 491-0505",
     "website": "bodyabodewellness.com",
     "location": "Brattleboro, VT",
     "software": "Unknown",
-    "talkingPoint": "Site only has a contact form, no published email/phone. Use the site form or find her on Facebook/Instagram first."
+    "talkingPoint": "No published email, only a contact form. Phone is listed on her contact page (907 area code kept from elsewhere, still a live number)."
   },
   {
     "id": "healthy-balance",
     "business": "A Healthy Balance",
     "contact": "Melissa Jane Hall",
-    "email": null,
-    "phone": null,
+    "email": "ahealthybalance@gmail.com",
+    "phone": "(802) 579-9644",
     "website": "brattleboromassage.com",
     "location": "Brattleboro, VT",
-    "software": "Unknown",
-    "talkingPoint": "No published contact info. Check her booking page or socials for a direct line before reaching out."
+    "software": "Fullslate",
+    "talkingPoint": "Paying for Fullslate just for booking, same wedge as Centered Healing: SoloSUDS adds notes, intake forms, and invoicing for about the same price."
   },
   {
     "id": "keene-massage-therapy",
     "business": "Keene Massage Therapy",
     "contact": "Christine Fleming, Jerrica Gaudreau",
     "email": null,
-    "phone": null,
+    "phone": "(603) 852-1965",
     "website": "keenemassagetherapy.com",
     "location": "Keene, NH",
     "software": "Fullslate",
-    "talkingPoint": "Two therapists on Fullslate, same wedge as Centered Healing: bundle notes, intake, and invoicing."
+    "talkingPoint": "Two therapists on Fullslate, same wedge as Centered Healing: bundle notes, intake, and invoicing. No published email, phone only."
   },
   {
     "id": "integrative-massage-therapy",
@@ -107,12 +107,12 @@
     "website": "deeprootsmb.com",
     "location": "Keene, NH",
     "software": "None visible",
-    "talkingPoint": "Email is Cloudflare-obfuscated on site. Call instead, no booking software found."
+    "talkingPoint": "Large collective (20+ LMTs listed on staff page), no single owner/contact named. Email is Cloudflare-obfuscated on site, can't be read directly, call instead."
   },
   {
     "id": "devine-back-body",
     "business": "Devine Back & Body Care",
-    "contact": null,
+    "contact": "Dr. Devine",
     "email": "109devinespa@gmail.com",
     "phone": "(603) 357-1500",
     "website": "devinebackandbody.com",
