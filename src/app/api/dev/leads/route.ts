@@ -10,7 +10,7 @@ const leadSchema = z.object({
   phone: z.string().regex(/^[+]?[\d\s()-]{7,20}$/, "Invalid phone number").optional().or(z.literal("")),
   website: z.string().max(300).optional().or(z.literal("")),
   location: z.string().min(1, "Location is required").max(200),
-  software: z.enum(["Fullslate", "Acuity", "MassageBook", "None visible", "Unknown"]),
+  software: z.enum(["Fullslate", "Acuity", "MassageBook", "Square", "None visible", "Unknown"]),
   talkingPoint: z.string().max(1000).optional().or(z.literal("")),
 });
 
