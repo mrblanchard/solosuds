@@ -1,11 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Phone, Mail, Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { Phone, Mail, Globe, Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Lead } from "@/lib/leads-types";
 import { buildEmail, mailtoHref } from "@/lib/leads-email";
 import AddLeadForm from "@/components/dev/add-lead-form";
+
+/** Leads are entered as bare domains ("greenmountainmassage.com") as often as full URLs. */
+function websiteHref(website: string): string {
+  return /^https?:\/\//i.test(website) ? website : `https://${website}`;
+}
 
 export default function LeadsClient({ leads }: { leads: Lead[] }) {
   const [query, setQuery] = useState("");
@@ -15,7 +20,7 @@ export default function LeadsClient({ leads }: { leads: Lead[] }) {
     const q = query.trim().toLowerCase();
     if (!q) return leads;
     return leads.filter((lead) =>
-      [lead.business, lead.contact, lead.location, lead.software, lead.talkingPoint]
+      [lead.business, lead.contact, lead.location, lead.software, lead.talkingPoint, lead.website]
         .filter(Boolean)
         .some((field) => field!.toLowerCase().includes(q))
     );
@@ -87,7 +92,7 @@ function LeadRow({ lead, expanded, onToggle }: { lead: Lead; expanded: boolean; 
 
       {expanded && (
         <div className="border-t border-gray-100 px-5 py-4 space-y-3 bg-gray-50">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Phone</p>
               {lead.phone ? (
@@ -104,6 +109,21 @@ function LeadRow({ lead, expanded, onToggle }: { lead: Lead; expanded: boolean; 
                 <p className="text-sm text-gray-700">{lead.email}</p>
               ) : (
                 <p className="text-sm text-gray-400">Not published</p>
+              )}
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Website</p>
+              {lead.website ? (
+                <a
+                  href={websiteHref(lead.website)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:underline"
+                >
+                  <Globe className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{lead.website}</span>
+                </a>
+              ) : (
+                <p className="text-sm text-gray-400">Not found</p>
               )}
             </div>
           </div>

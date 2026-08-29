@@ -17,6 +17,23 @@ export function AppFooter() {
             </p>
           </div>
 
+          {/* Product */}
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Product</p>
+            <Link
+              href="/features"
+              className="text-sm text-gray-600 transition-colors hover:text-indigo-600"
+            >
+              Features
+            </Link>
+            <Link
+              href="/#pricing"
+              className="text-sm text-gray-600 transition-colors hover:text-indigo-600"
+            >
+              Pricing
+            </Link>
+          </div>
+
           {/* Support */}
           <div className="flex flex-col gap-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Support</p>

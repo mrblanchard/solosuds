@@ -8,6 +8,7 @@ const leadSchema = z.object({
   contact: z.string().max(200).optional().or(z.literal("")),
   email: z.string().email("Invalid email").max(254).optional().or(z.literal("")),
   phone: z.string().regex(/^[+]?[\d\s()-]{7,20}$/, "Invalid phone number").optional().or(z.literal("")),
+  website: z.string().max(300).optional().or(z.literal("")),
   location: z.string().min(1, "Location is required").max(200),
   software: z.enum(["Fullslate", "Acuity", "MassageBook", "None visible", "Unknown"]),
   talkingPoint: z.string().max(1000).optional().or(z.literal("")),
@@ -24,12 +25,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
   }
 
-  const { contact, email, phone, talkingPoint, ...rest } = parsed.data;
+  const { contact, email, phone, website, talkingPoint, ...rest } = parsed.data;
   const lead = await appendLead({
     ...rest,
     contact: contact || null,
     email: email || null,
     phone: phone || null,
+    website: website || null,
     talkingPoint: talkingPoint || "",
   });
 

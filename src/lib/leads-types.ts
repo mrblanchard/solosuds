@@ -6,6 +6,7 @@ export interface Lead {
   contact: string | null;
   email: string | null;
   phone: string | null;
+  website?: string | null;
   location: string;
   software: LeadSoftware;
   talkingPoint: string;

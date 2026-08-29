@@ -15,6 +15,7 @@ const schema = z.object({
   contact: z.string().max(200).optional().or(z.literal("")),
   email: z.string().email("Invalid email").max(254).optional().or(z.literal("")),
   phone: z.string().regex(/^[+]?[\d\s()-]{7,20}$/, "Invalid phone number").optional().or(z.literal("")),
+  website: z.string().max(300).optional().or(z.literal("")),
   location: z.string().min(1, "Location is required").max(200),
   software: z.enum(["Fullslate", "Acuity", "MassageBook", "None visible", "Unknown"]),
   talkingPoint: z.string().max(1000).optional().or(z.literal("")),
@@ -89,6 +90,9 @@ export default function AddLeadForm() {
         </Field>
         <Field label="Location *" error={errors.location?.message}>
           <Input {...register("location")} placeholder="e.g. Brattleboro, VT" />
+        </Field>
+        <Field label="Website" error={errors.website?.message}>
+          <Input {...register("website")} placeholder="e.g. greenmountainmassage.com" />
         </Field>
         <Field label="Current software" error={errors.software?.message}>
           <select

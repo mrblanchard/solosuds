@@ -145,6 +145,13 @@ export default function LandingPage() {
             <p className="mt-3 text-gray-500 max-w-xl mx-auto">
               From first appointment to final invoice, SoloSUDS handles the workflow.
             </p>
+            <Link
+              href="/features"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+            >
+              See the full feature breakdown
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
