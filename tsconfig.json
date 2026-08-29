@@ -30,5 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "solosuds"]
+  "exclude": ["node_modules", "solosuds", "src/embed"]
 }

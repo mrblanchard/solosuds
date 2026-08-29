@@ -5,8 +5,9 @@ import { sendAppointmentReminder } from "@/lib/email";
 import { hasConflict, validateBookingWindow } from "@/lib/scheduling";
 import { sendSms, buildAppointmentConfirmationSms, buildOptInConfirmationSms } from "@/lib/twilio";
 import { zonedTimeToUtc, formatZonedDisplay } from "@/lib/timezone";
+import { withCorsRoute, corsPreflight } from "@/lib/cors";
 
-export async function POST(request: NextRequest) {
+export const POST = withCorsRoute(async (request: NextRequest) => {
   try {
     const body = await request.json();
     const {
@@ -188,4 +189,6 @@ export async function POST(request: NextRequest) {
     console.error("[POST /api/book]", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+});
+
+export const OPTIONS = corsPreflight;

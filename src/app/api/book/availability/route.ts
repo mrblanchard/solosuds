@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAvailableSlots } from "@/lib/scheduling";
+import { withCorsRoute, corsPreflight } from "@/lib/cors";
 
-export async function GET(request: NextRequest) {
+export const GET = withCorsRoute(async (request: NextRequest) => {
   const { searchParams } = request.nextUrl;
   const orgId = searchParams.get("orgId");
   const serviceId = searchParams.get("serviceId");
@@ -13,4 +14,6 @@ export async function GET(request: NextRequest) {
 
   const result = await getAvailableSlots({ organizationId: orgId, serviceId, date });
   return NextResponse.json(result);
-}
+});
+
+export const OPTIONS = corsPreflight;

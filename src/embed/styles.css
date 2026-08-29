@@ -1,0 +1,274 @@
+/*
+ * Lives inside a Shadow DOM per widget instance, so none of this can leak
+ * into the host page's styles and none of the host page's styles (including
+ * a CSS reset or Tailwind preflight) can leak in here. No class-name
+ * prefixing needed for that reason — the shadow boundary already does it.
+ */
+
+:host {
+  all: initial;
+  --ss-accent: #4f46e5;
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #111827;
+  font-size: 15px;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.ss-root *,
+.ss-root *::before,
+.ss-root *::after {
+  box-sizing: border-box;
+}
+
+.ss-root {
+  max-width: 28rem;
+}
+
+.ss-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  background: #fff;
+  overflow: hidden;
+}
+
+.ss-card + .ss-card {
+  margin-top: 1rem;
+}
+
+.ss-card-header {
+  padding: 1.25rem 1.25rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ss-card-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.ss-card-body {
+  padding: 1.25rem;
+}
+
+.ss-back {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.75rem;
+  color: var(--ss-accent);
+  cursor: pointer;
+}
+.ss-back:hover {
+  text-decoration: underline;
+}
+
+.ss-service {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 0.9rem;
+  background: #fff;
+  cursor: pointer;
+  margin-bottom: 0.65rem;
+}
+.ss-service:hover {
+  border-color: var(--ss-accent);
+}
+.ss-service-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.ss-service-name {
+  font-weight: 600;
+  margin: 0;
+}
+.ss-service-desc {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+.ss-service-duration {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+.ss-service-price {
+  font-weight: 600;
+  color: var(--ss-accent);
+  white-space: nowrap;
+}
+
+.ss-field {
+  margin-bottom: 1rem;
+}
+.ss-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.35rem;
+}
+.ss-required {
+  color: #ef4444;
+}
+.ss-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: inherit;
+  background: #fff;
+}
+.ss-input:focus {
+  outline: 2px solid var(--ss-accent);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.ss-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.ss-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.ss-slot {
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+}
+.ss-slot:hover:not(:disabled) {
+  border-color: var(--ss-accent);
+}
+.ss-slot[data-selected="true"] {
+  border-color: var(--ss-accent);
+  background: color-mix(in srgb, var(--ss-accent) 10%, white);
+  color: var(--ss-accent);
+}
+.ss-slot:disabled {
+  color: #d1d5db;
+  text-decoration: line-through;
+  cursor: not-allowed;
+  background: #f9fafb;
+}
+
+.ss-note {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.ss-consent {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #4b5563;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+.ss-consent input {
+  margin-top: 0.2rem;
+}
+.ss-consent a {
+  color: var(--ss-accent);
+}
+
+.ss-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: #fff;
+  background: var(--ss-accent);
+  cursor: pointer;
+}
+.ss-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.ss-button-outline {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.ss-alert {
+  border-radius: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+.ss-alert-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+.ss-alert-warn {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+.ss-alert-info {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+}
+
+.ss-confirm {
+  text-align: center;
+  padding: 2.5rem 1.25rem;
+}
+.ss-confirm-icon {
+  color: #22c55e;
+  margin-bottom: 0.75rem;
+}
+.ss-confirm-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+}
+.ss-confirm-text {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.ss-loading {
+  color: #9ca3af;
+  font-size: 0.85rem;
+  padding: 0.5rem 0;
+}
+
+.ss-footer {
+  text-align: center;
+  font-size: 0.7rem;
+  color: #9ca3af;
+  margin-top: 0.75rem;
+}
+.ss-footer a {
+  color: inherit;
+}

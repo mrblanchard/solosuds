@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CalendarDays, Copy, Check, ExternalLink, Settings2 } from "lucide-react";
+import { CalendarDays, Copy, Check, ExternalLink, Settings2, Code2 } from "lucide-react";
 import Link from "next/link";
 
 interface BookingSettingsProps {
@@ -29,6 +29,7 @@ export default function BookingSettings({
 }: BookingSettingsProps) {
   const [origin, setOrigin] = useState("");
   const [copied, setCopied] = useState(false);
+  const [snippetCopied, setSnippetCopied] = useState(false);
 
   const [startHour, setStartHour] = useState(bookingStartHour);
   const [endHour, setEndHour] = useState(bookingEndHour);
@@ -44,6 +45,9 @@ export default function BookingSettings({
   }, []);
 
   const bookingUrl = origin ? `${origin}/book/${orgSlug}` : "";
+  const embedSnippet = origin
+    ? `<div data-solosuds-booking="${orgSlug}"></div>\n<script src="${origin}/embed.js" async></script>`
+    : "";
 
   async function copyLink() {
     if (!bookingUrl) return;
@@ -61,6 +65,22 @@ export default function BookingSettings({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  }
+
+  async function copySnippet() {
+    if (!embedSnippet) return;
+    try {
+      await navigator.clipboard.writeText(embedSnippet);
+    } catch {
+      const el = document.createElement("textarea");
+      el.value = embedSnippet;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+    }
+    setSnippetCopied(true);
+    setTimeout(() => setSnippetCopied(false), 2000);
   }
 
   function toggleDay(day: number) {
@@ -152,6 +172,43 @@ export default function BookingSettings({
                 </Button>
               </a>
             )}
+          </div>
+        </div>
+
+        {/* Embed widget */}
+        <div className="rounded-lg border border-gray-100 p-4 space-y-2">
+          <p className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+            <Code2 className="h-4 w-4 text-gray-400" />
+            Embed on your website
+          </p>
+          <p className="text-xs text-gray-500">
+            Paste this into your website to show the booking widget directly on your own page,
+            instead of sending clients to your booking link.
+          </p>
+          <div className="flex items-start gap-2">
+            <pre className="flex-1 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-600 font-mono whitespace-pre-wrap break-all">
+              {embedSnippet || "Loading…"}
+            </pre>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={copySnippet}
+              disabled={!embedSnippet}
+              className="shrink-0"
+            >
+              {snippetCopied ? (
+                <>
+                  <Check className="h-4 w-4 mr-1 text-green-500" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 mr-1" />
+                  Copy
+                </>
+              )}
+            </Button>
           </div>
         </div>
 

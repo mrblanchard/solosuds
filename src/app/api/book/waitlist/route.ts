@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sendSms, buildOptInConfirmationSms } from "@/lib/twilio";
+import { withCorsRoute, corsPreflight } from "@/lib/cors";
 
-export async function POST(request: NextRequest) {
+export const POST = withCorsRoute(async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { orgId, serviceId, firstName, lastName, email, phone, smsConsent, preferredDate, notes } = body;
@@ -63,4 +64,6 @@ export async function POST(request: NextRequest) {
     console.error("[POST /api/book/waitlist]", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+});
+
+export const OPTIONS = corsPreflight;
