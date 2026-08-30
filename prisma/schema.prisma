@@ -118,6 +118,7 @@ model Organization {
   documents     Document[]
   discountCodes DiscountCode[]
   waitlistEntries WaitlistEntry[]
+  exportAuditLogs ExportAuditLog[]
 }
 
 // ─── Users / Practitioners ────────────────────────────────────────────────────
@@ -584,6 +585,19 @@ model DocumentAuditLog {
   actor      String   // "client" | userId
   ip         String?
   at         DateTime @default(now())
+}
+
+// ─── Data Export (customer data portability) ─────────────────────────────────
+
+model ExportAuditLog {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  userId         String       // User.id of who triggered the export
+  dataType       String       // "clients" | "appointments" | "invoices" | "notes"
+  recordCount    Int
+  ip             String?
+  at             DateTime     @default(now())
 }
 
 model ClientPortalOTP {

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Bell, CreditCard, Trash2, AlertTriangle, CheckCircle, PauseCircle, PlayCircle, ArrowUpCircle } from "lucide-react";
+import { Bell, CreditCard, Trash2, AlertTriangle, CheckCircle, PauseCircle, ArrowUpCircle, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -27,9 +27,17 @@ interface Org {
   createdAt: Date;
 }
 
+interface ExportCounts {
+  clients: number;
+  appointments: number;
+  invoices: number;
+  notes: number;
+}
+
 interface Props {
   user: User;
   org: Org;
+  exportCounts: ExportCounts;
 }
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "success" | "warning" | "destructive" | "outline"> = {
@@ -50,7 +58,7 @@ const STATUS_LABEL: Record<string, string> = {
   paused: "Paused",
 };
 
-export default function AccountClient({ user, org }: Props) {
+export default function AccountClient({ user, org, exportCounts }: Props) {
   const router = useRouter();
   const [notificationsEnabled, setNotificationsEnabled] = useState(user.notificationsEnabled);
   const [savingNotif, setSavingNotif] = useState(false);
@@ -159,7 +167,7 @@ export default function AccountClient({ user, org }: Props) {
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-xs font-medium uppercase text-gray-400">Name</p>
-            <p className="mt-1 text-gray-900">{user.name ?? "—"}</p>
+            <p className="mt-1 text-gray-900">{user.name ?? "Not set"}</p>
           </div>
           <div>
             <p className="text-xs font-medium uppercase text-gray-400">Email</p>
@@ -207,6 +215,51 @@ export default function AccountClient({ user, org }: Props) {
           </button>
         </div>
       </section>
+
+      {/* Data export */}
+      {isOwnerOrAdmin && (
+        <section className="rounded-2xl border border-gray-100 bg-white p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Download className="h-5 w-5 text-gray-400" />
+            <h2 className="text-base font-semibold text-gray-900">Export Your Data</h2>
+          </div>
+          <p className="text-sm text-gray-500">
+            Download a CSV copy of your organization&apos;s data at any time, whether you want a
+            quick backup or you are taking your data elsewhere. Each download is logged for your
+            records.
+          </p>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <a href="/api/export/clients" className="block">
+              <Button variant="outline" size="sm" className="w-full justify-between">
+                <span>Clients ({exportCounts.clients})</span>
+                <Download className="h-4 w-4" />
+              </Button>
+            </a>
+            <a href="/api/export/appointments" className="block">
+              <Button variant="outline" size="sm" className="w-full justify-between">
+                <span>Appointments ({exportCounts.appointments})</span>
+                <Download className="h-4 w-4" />
+              </Button>
+            </a>
+            <a href="/api/export/invoices" className="block">
+              <Button variant="outline" size="sm" className="w-full justify-between">
+                <span>Invoices ({exportCounts.invoices})</span>
+                <Download className="h-4 w-4" />
+              </Button>
+            </a>
+            <a href="/api/export/notes" className="block">
+              <Button variant="outline" size="sm" className="w-full justify-between">
+                <span>Session Notes Log ({exportCounts.notes})</span>
+                <Download className="h-4 w-4" />
+              </Button>
+            </a>
+          </div>
+          <p className="text-xs text-gray-400">
+            The Session Notes Log includes dates, clients, and status only, not clinical note
+            content.
+          </p>
+        </section>
+      )}
 
       {/* Subscription */}
       {isOwnerOrAdmin && (

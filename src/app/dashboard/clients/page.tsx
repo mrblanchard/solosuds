@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import TableSearch from "@/components/ui/table-search";
-import { Users, Plus, Upload } from "lucide-react";
+import { Users, Plus, Upload, Download } from "lucide-react";
 import ClientTable from "@/components/clients/client-table";
 import { Prisma } from "@prisma/client";
 
@@ -22,6 +22,8 @@ export default async function ClientsPage({
   const session = await auth();
   const orgId = session?.user?.organizationId!;
   const params = await searchParams;
+
+  const canExport = session?.user?.role === "OWNER" || session?.user?.role === "ADMIN";
 
   const orderBy = SORT_MAP[params.sort ?? ""] ?? [{ lastName: "asc" }, { firstName: "asc" }];
 
@@ -55,6 +57,14 @@ export default async function ClientsPage({
           <p className="mt-1 text-sm text-gray-500">{clients.length} clients</p>
         </div>
         <div className="flex gap-2">
+          {canExport && (
+            <a href="/api/export/clients">
+              <Button variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </a>
+          )}
           <Link href="/dashboard/clients/import">
             <Button variant="outline">
               <Upload className="h-4 w-4 mr-2" />

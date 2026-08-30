@@ -7,7 +7,9 @@ export default async function AccountPage() {
   const session = await auth();
   if (!session?.user?.id || !session?.user?.organizationId) redirect("/login");
 
-  const [user, org] = await Promise.all([
+  const orgId = session.user.organizationId;
+
+  const [user, org, clientCount, appointmentCount, invoiceCount, noteCount] = await Promise.all([
     db.user.findUnique({
       where: { id: session.user.id },
       select: {
@@ -20,7 +22,7 @@ export default async function AccountPage() {
       },
     }),
     db.organization.findUnique({
-      where: { id: session.user.organizationId },
+      where: { id: orgId },
       select: {
         id: true,
         name: true,
@@ -32,9 +34,24 @@ export default async function AccountPage() {
         createdAt: true,
       },
     }),
+    db.client.count({ where: { organizationId: orgId } }),
+    db.appointment.count({ where: { organizationId: orgId } }),
+    db.invoice.count({ where: { organizationId: orgId } }),
+    db.soapNote.count({ where: { organizationId: orgId } }),
   ]);
 
   if (!user || !org) notFound();
 
-  return <AccountClient user={user} org={org} />;
+  return (
+    <AccountClient
+      user={user}
+      org={org}
+      exportCounts={{
+        clients: clientCount,
+        appointments: appointmentCount,
+        invoices: invoiceCount,
+        notes: noteCount,
+      }}
+    />
+  );
 }
