@@ -77,7 +77,7 @@ export default async function SchedulePage() {
 
       <div>
         <h2 className="mb-3 text-lg font-semibold text-gray-900">Agenda</h2>
-        <div className="max-h-[480px] overflow-y-auto rounded-xl border border-gray-100 bg-gray-50 p-4">
+        <div className="max-h-[480px] overflow-y-auto rounded-xl border border-gray-100 bg-gray-50/50 p-4">
           <ScheduleAgenda appointments={appointments} orgTimezone={org?.timezone ?? "America/New_York"} />
         </div>
       </div>

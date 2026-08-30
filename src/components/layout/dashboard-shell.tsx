@@ -45,7 +45,7 @@ export function DashboardShell({
   }
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-gray-50">
+    <div className="flex h-dvh overflow-hidden bg-gray-50/80">
       <Sidebar
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
