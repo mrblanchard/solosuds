@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -28,6 +28,26 @@ interface ScheduleCalendarProps {
 export default function ScheduleCalendar({ events }: ScheduleCalendarProps) {
   const router = useRouter();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const calendarRef = useRef<FullCalendar>(null);
+
+  // A 7-day week grid is unusable at phone width, so default to a single-day
+  // view below the sm breakpoint. Only re-applies when actually crossing that
+  // breakpoint (not on every resize tick), so it doesn't stomp on a view the
+  // user picked manually while staying on the same side of the breakpoint.
+  const lastBucket = useRef<"narrow" | "wide" | null>(null);
+  useEffect(() => {
+    function applyResponsiveView() {
+      const api = calendarRef.current?.getApi();
+      if (!api) return;
+      const bucket = window.innerWidth < 640 ? "narrow" : "wide";
+      if (bucket === lastBucket.current) return;
+      lastBucket.current = bucket;
+      api.changeView(bucket === "narrow" ? "timeGridDay" : "timeGridWeek");
+    }
+    applyResponsiveView();
+    window.addEventListener("resize", applyResponsiveView);
+    return () => window.removeEventListener("resize", applyResponsiveView);
+  }, []);
 
   const handleEventClick = useCallback((info: EventClickArg) => {
     router.push(`/dashboard/schedule/${info.event.id}`);
@@ -39,8 +59,9 @@ export default function ScheduleCalendar({ events }: ScheduleCalendarProps) {
   }, [router]);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
+    <div className="rounded-xl border border-gray-200 bg-white p-4 overflow-x-auto">
       <FullCalendar
+        ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="timeGridWeek"
         headerToolbar={{
