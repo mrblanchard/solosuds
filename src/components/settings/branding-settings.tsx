@@ -2,12 +2,17 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { Upload, X, Palette, Image as ImageIcon, Type, Mail, Eye, EyeOff, Building2 } from "lucide-react";
+
+const CKEditorWrapper = dynamic(
+  () => import("@/components/email/ckeditor-wrapper"),
+  { ssr: false, loading: () => <div className="h-[200px] bg-gray-50 animate-pulse rounded" /> }
+);
 
 // Curated list of popular Google Fonts
 const GOOGLE_FONTS = [
@@ -45,6 +50,9 @@ export default function BrandingSettings({ org }: Props) {
   const [showFontPicker, setShowFontPicker] = useState(false);
   const [emailSignature, setEmailSignature] = useState(org.emailSignature ?? "");
   const [showSignaturePreview, setShowSignaturePreview] = useState(false);
+  // Bumping this forces the (uncontrolled-after-mount) signature editor to remount
+  // with fresh initial content, e.g. after the Clear button empties it.
+  const [signatureEditorKey, setSignatureEditorKey] = useState(0);
   const [uploading, setUploading] = useState<"logo" | "favicon" | null>(null);
   const [savingColor, setSavingColor] = useState(false);
   const [savingFont, setSavingFont] = useState(false);
@@ -341,16 +349,16 @@ export default function BrandingSettings({ org }: Props) {
             <Mail className="h-4 w-4" /> Email Signature
           </Label>
           <p className="text-xs text-gray-500">
-            Appended to all outgoing emails. HTML is supported (bold, links, etc.).
+            Appended to all outgoing emails. Use the toolbar below to format it.
           </p>
-          <Textarea
-            id="emailSignature"
-            value={emailSignature}
-            onChange={e => setEmailSignature(e.target.value)}
-            placeholder={`e.g.\n<strong>Jane Smith, LMT</strong><br>\nRelax & Restore Massage<br>\n📞 (555) 123-4567 · <a href="https://example.com">book online</a>`}
-            rows={5}
-            className="font-mono text-sm"
-          />
+          <div className="border border-gray-200 rounded-md overflow-hidden">
+            <CKEditorWrapper
+              key={signatureEditorKey}
+              initialData={emailSignature}
+              placeholder="e.g. Jane Smith, LMT, Relax and Restore Massage, (555) 123-4567"
+              onChange={html => setEmailSignature(html)}
+            />
+          </div>
           <div className="flex items-center gap-2 flex-wrap">
             <Button type="button" size="sm" onClick={saveSignature} disabled={savingSignature}>
               {savingSignature ? "Saving..." : "Save Signature"}
@@ -367,7 +375,17 @@ export default function BrandingSettings({ org }: Props) {
               </Button>
             )}
             {emailSignature && (
-              <Button type="button" variant="ghost" size="sm" className="text-red-400" onClick={() => { setEmailSignature(""); fetch("/api/settings/organization", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ emailSignature: null }) }); }}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-red-400"
+                onClick={() => {
+                  setEmailSignature("");
+                  setSignatureEditorKey(k => k + 1);
+                  fetch("/api/settings/organization", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ emailSignature: null }) });
+                }}
+              >
                 <X className="mr-1 h-3.5 w-3.5" /> Clear
               </Button>
             )}
