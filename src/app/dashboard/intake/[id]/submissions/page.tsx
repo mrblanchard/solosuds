@@ -49,7 +49,7 @@ export default async function SubmissionsPage({
       </div>
 
       {submissions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
           <Inbox className="h-10 w-10 text-gray-300 mb-3" />
           <p className="text-gray-400">No submissions yet</p>
           <p className="mt-1 text-sm text-gray-400">

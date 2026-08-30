@@ -198,7 +198,7 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
           </Button>
         </div>
 
-        <div className="rounded-xl border border-gray-100 overflow-hidden">
+        <div className="rounded-xl border border-gray-100 bg-white overflow-hidden">
           <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
@@ -303,7 +303,7 @@ export default function NewInvoiceForm({ clients, defaultClientId, defaultAppoin
           </div>
         </div>
 
-        <div className="rounded-xl border border-gray-100 p-4 space-y-3">
+        <div className="rounded-xl border border-gray-100 bg-white p-4 space-y-3">
           <p className="text-xs font-medium uppercase text-gray-400">Summary</p>
           <div className="space-y-1 text-sm">
             <div className="flex justify-between">

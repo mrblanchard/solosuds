@@ -78,7 +78,7 @@ export default async function NotesPage({
       <TableSearch placeholder="Search by client name…" className="max-w-sm" />
 
       {/* Status filter tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-2 border-b border-gray-200 bg-white rounded-t-xl px-2">
         {[
           { label: "All", value: "" },
           { label: "Drafts", value: "DRAFT" },
@@ -107,7 +107,7 @@ export default async function NotesPage({
 
       {/* Notes list */}
       {notes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-white py-16 text-center">
           <FileText className="h-12 w-12 text-gray-300 mb-3" />
           <h3 className="text-sm font-medium text-gray-900">No notes yet</h3>
           <p className="mt-1 text-sm text-gray-500">

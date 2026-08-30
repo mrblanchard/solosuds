@@ -65,7 +65,7 @@ export default function NoteTemplateList({ templates: initial }: Props) {
       )}
 
       {templates.length === 0 && !showForm && (
-        <div className="rounded-2xl border border-dashed border-gray-200 py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
           <p className="text-gray-400 mb-2">No templates yet</p>
           <p className="text-sm text-gray-400">
             Create a template to pre-fill notes with prompts and default billing codes.

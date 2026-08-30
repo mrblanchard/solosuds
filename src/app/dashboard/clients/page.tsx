@@ -107,7 +107,7 @@ export default async function ClientsPage({
       </div>
 
       {clients.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-white py-16 text-center">
           <Users className="h-12 w-12 text-gray-300 mb-3" />
           <h3 className="text-sm font-medium text-gray-900">No clients found</h3>
           <p className="mt-1 text-sm text-gray-500">Add your first client to get started.</p>

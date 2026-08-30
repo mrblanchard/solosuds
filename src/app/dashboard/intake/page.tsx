@@ -36,7 +36,7 @@ export default async function IntakeFormsPage() {
       </div>
 
       {forms.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
           <p className="text-gray-400 mb-4">No intake forms yet</p>
           <Link href="/dashboard/intake/new">
             <Button variant="outline">Create your first form</Button>

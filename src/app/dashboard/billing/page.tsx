@@ -99,7 +99,7 @@ export default async function BillingPage({
       <TableSearch placeholder="Search by client name…" className="max-w-sm" />
 
       {/* Status filter */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-2 border-b border-gray-200 bg-white rounded-t-xl px-2">
         {["", "DRAFT", "SENT", "PAID", "OVERDUE", "VOID"].map((s) => {
           const base = new URLSearchParams();
           if (s) base.set("status", s);
@@ -122,7 +122,7 @@ export default async function BillingPage({
       </div>
 
       {invoices.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-white py-16 text-center">
           <CreditCard className="h-12 w-12 text-gray-300 mb-3" />
           <h3 className="text-sm font-medium text-gray-900">No invoices</h3>
           <p className="mt-1 text-sm text-gray-500">Create your first invoice to get paid.</p>

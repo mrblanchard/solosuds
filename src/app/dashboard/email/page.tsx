@@ -82,7 +82,7 @@ export default async function EmailPage({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 border-b border-gray-200">
+      <div className="flex gap-1 mb-4 border-b border-gray-200 bg-white rounded-t-xl px-2 pt-1">
         <Link
           href="/dashboard/email"
           className={`px-4 py-2 text-sm font-medium rounded-t-md transition-colors ${

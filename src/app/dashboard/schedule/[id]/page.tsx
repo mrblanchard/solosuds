@@ -45,7 +45,7 @@ export default async function AppointmentDetailPage({ params }: Props) {
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
       {/* Header */}
-      <div className="flex items-start justify-between rounded-xl bg-white/80 backdrop-blur-sm px-4 py-3 -mx-2">
+      <div className="flex items-start justify-between rounded-xl bg-white px-4 py-3 -mx-2">
         <div>
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-bold text-gray-900">
