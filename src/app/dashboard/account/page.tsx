@@ -9,7 +9,7 @@ export default async function AccountPage() {
 
   const orgId = session.user.organizationId;
 
-  const [user, org, clientCount, appointmentCount, invoiceCount, noteCount] = await Promise.all([
+  const [user, org, clientCount, appointmentCount, invoiceCount, noteCount, documentCount] = await Promise.all([
     db.user.findUnique({
       where: { id: session.user.id },
       select: {
@@ -38,6 +38,7 @@ export default async function AccountPage() {
     db.appointment.count({ where: { organizationId: orgId } }),
     db.invoice.count({ where: { organizationId: orgId } }),
     db.soapNote.count({ where: { organizationId: orgId } }),
+    db.document.count({ where: { organizationId: orgId } }),
   ]);
 
   if (!user || !org) notFound();
@@ -51,6 +52,7 @@ export default async function AccountPage() {
         appointments: appointmentCount,
         invoices: invoiceCount,
         notes: noteCount,
+        documents: documentCount,
       }}
     />
   );

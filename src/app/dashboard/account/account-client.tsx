@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Bell, CreditCard, Trash2, AlertTriangle, CheckCircle, PauseCircle, ArrowUpCircle, Download } from "lucide-react";
+import { Bell, CreditCard, Trash2, AlertTriangle, CheckCircle, PauseCircle, ArrowUpCircle, Download, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -32,6 +32,7 @@ interface ExportCounts {
   appointments: number;
   invoices: number;
   notes: number;
+  documents: number;
 }
 
 interface Props {
@@ -258,6 +259,31 @@ export default function AccountClient({ user, org, exportCounts }: Props) {
             The Session Notes Log includes dates, clients, and status only, not clinical note
             content.
           </p>
+        </section>
+      )}
+
+      {/* Full account export */}
+      {user.role === "OWNER" && (
+        <section className="rounded-2xl border border-gray-100 bg-white p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Archive className="h-5 w-5 text-gray-400" />
+            <h2 className="text-base font-semibold text-gray-900">Download Everything</h2>
+          </div>
+          <p className="text-sm text-gray-500">
+            Get a complete copy of everything in your account: your full client list, every
+            appointment and invoice, the full content of your SOAP/session notes, intake form
+            submissions, messages, tasks, and every file you or your clients have uploaded
+            ({exportCounts.documents} document{exportCounts.documents === 1 ? "" : "s"}), all in
+            one .zip file. This is the whole practice, not just a quick backup, so it&apos;s only
+            available to the account owner. Use it any time you want a full local copy, or if
+            you&apos;re planning to leave SoloSuds.
+          </p>
+          <a href="/api/export/all" className="block sm:inline-block">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto justify-center gap-1.5">
+              <Archive className="h-4 w-4" />
+              Download full account archive (.zip)
+            </Button>
+          </a>
         </section>
       )}
 
