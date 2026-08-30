@@ -278,7 +278,7 @@ export async function sendThankYouEmail({
   return getResend().emails.send({
     from: `${branding?.name || process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
     to,
-    subject: `Thank you for your session — ${sessionDate}`,
+    subject: `Thank you for your session: ${sessionDate}`,
     html: buildBrandedEmail(content, branding),
     ...replyToHeader(branding),
   });

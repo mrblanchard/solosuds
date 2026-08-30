@@ -27,7 +27,7 @@ export default function InvoiceActions({ invoice }: Props) {
       setMessage(
         data.emailSent
           ? "Invoice sent to client by email."
-          : "Status updated, but the email couldn't be sent — use Copy Payment Link instead."
+          : "Status updated, but the email couldn't be sent. Use Copy Payment Link instead."
       );
     }
     setLoading(false);

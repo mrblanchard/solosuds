@@ -67,7 +67,7 @@ export function ClientContactCard({
             <InfoRow
               icon={Phone}
               label="Emergency Contact"
-              value={`${emergencyName} — ${emergencyPhone ?? ""}`}
+              value={emergencyPhone ? `${emergencyName}, ${emergencyPhone}` : emergencyName}
             />
           )}
 

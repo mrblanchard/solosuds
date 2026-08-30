@@ -620,7 +620,7 @@ class BookingWidget {
     const span = h("span", {});
     if (!this.email) {
       span.appendChild(
-        h("strong", { text: "Required, since no email was provided* — " })
+        h("strong", { text: "Required, since no email was provided*: " })
       );
     }
     span.appendChild(

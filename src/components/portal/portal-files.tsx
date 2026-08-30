@@ -88,7 +88,7 @@ export default function PortalFiles({ orgSlug, initialDocs }: Props) {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-sm font-semibold text-gray-900">Upload a document</h2>
-            <p className="text-xs text-gray-500 mt-0.5">PDF, images, Word docs — up to 25 MB</p>
+            <p className="text-xs text-gray-500 mt-0.5">PDF, images, Word docs, up to 25 MB</p>
           </div>
           <Button
             size="sm"

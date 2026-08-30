@@ -137,7 +137,7 @@ export async function POST(req: Request) {
           content: [
             {
               heading: "How email works",
-              body: "When you send an email, it travels across the internet through many different computer systems before it reaches its destination — a bit like a postcard being passed from person to person. Unlike a sealed letter, a standard email can potentially be read by others along the way.",
+              body: "When you send an email, it travels across the internet through many different computer systems before it reaches its destination, a bit like a postcard being passed from person to person. Unlike a sealed letter, a standard email can potentially be read by others along the way.",
             },
             {
               heading: "What this means for your health information",
@@ -145,11 +145,11 @@ export async function POST(req: Request) {
             },
             {
               heading: "What is HIPAA?",
-              body: "HIPAA is a federal law that protects your private health information. Fully secure messaging systems use strong encryption (think of it as a combination lock that only you and your provider can open). Standard email — like Gmail, Yahoo, or Outlook — does not always guarantee that same level of protection.",
+              body: "HIPAA is a federal law that protects your private health information. Fully secure messaging systems use strong encryption (think of it as a combination lock that only you and your provider can open). Standard email, like Gmail, Yahoo, or Outlook, does not always guarantee that same level of protection.",
             },
             {
               heading: "You are in control",
-              body: "You do not have to consent. Saying no will not affect your care in any way. If you do consent, you can change your mind at any time — just let your provider know and they will stop sending emails immediately.",
+              body: "You do not have to consent. Saying no will not affect your care in any way. If you do consent, you can change your mind at any time, just let your provider know and they will stop sending emails immediately.",
             },
           ],
         },

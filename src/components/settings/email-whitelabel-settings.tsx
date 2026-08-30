@@ -58,7 +58,7 @@ export default function EmailWhiteLabelSettings({ initialReplyToEmail }: Props) 
               <p className="font-medium">How outgoing email works</p>
               <p className="text-blue-700">
                 Emails are sent from <span className="font-mono font-semibold">no-reply@solosuds.com</span> using
-                your practice name as the display name — so clients see your brand, not "SoloSuds".
+                your practice name as the display name, so clients see your brand, not "SoloSuds".
               </p>
               <p className="text-blue-700">
                 Set a <strong>reply-to address</strong> below so that when a client hits Reply, it goes
@@ -118,7 +118,7 @@ export default function EmailWhiteLabelSettings({ initialReplyToEmail }: Props) 
             <div className="flex gap-2 text-gray-600">
               <span className="w-16 shrink-0 text-gray-400">Reply-To:</span>
               <span className={replyTo.trim() ? "text-green-700 font-semibold" : "text-gray-400 italic"}>
-                {replyTo.trim() || "not set — replies bounce"}
+                {replyTo.trim() || "not set, replies bounce"}
               </span>
             </div>
           </div>

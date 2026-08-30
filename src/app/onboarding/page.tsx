@@ -56,7 +56,7 @@ const PRACTICE_OPTIONS: PracticeOption[] = [
     type: "OTHER",
     emoji: "💼",
     label: "Other / General",
-    subtitle: "Something else — get a clean slate",
+    subtitle: "Something else, get a clean slate",
     features: ["Full access to all features", "Customize as you go", "No assumptions about your workflow"],
   },
 ];

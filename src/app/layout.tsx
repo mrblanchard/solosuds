@@ -9,7 +9,7 @@ import { Analytics } from "@vercel/analytics/next";
 const nunito = Nunito({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
-  title: "SoloSuds — Clinical Documentation for Modern Practices",
+  title: "SoloSuds: Clinical Documentation for Modern Practices",
   description:
     "SOAP notes, scheduling, client management, and billing for healthcare SMBs.",
   icons: {

@@ -86,7 +86,7 @@ export default async function AppointmentDetailPage({ params }: Props) {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Practitioner</span>
-              <span className="text-gray-900">{appointment.practitioner?.name ?? "—"}</span>
+              <span className="text-gray-900">{appointment.practitioner?.name ?? "No practitioner"}</span>
             </div>
             {appointment.service && (
               <div className="flex justify-between">

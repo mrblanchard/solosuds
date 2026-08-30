@@ -150,7 +150,7 @@ function RegisterContent() {
               ? inviteOrgName
                 ? `You've been invited to join ${inviteOrgName}`
                 : "Verifying invite link…"
-              : "Start your 14-day free trial — no credit card required"}
+              : "Start your 14-day free trial, no credit card required"}
           </p>
         </div>
 

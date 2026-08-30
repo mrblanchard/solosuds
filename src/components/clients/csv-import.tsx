@@ -17,7 +17,7 @@ import {
 import Link from "next/link";
 
 const SCHEMA_FIELDS = [
-  { value: "", label: "— Skip —" },
+  { value: "", label: "(Skip)" },
   { value: "firstName", label: "First Name" },
   { value: "lastName", label: "Last Name" },
   { value: "email", label: "Email" },

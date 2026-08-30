@@ -140,7 +140,7 @@ export async function GET(req: NextRequest) {
     ...notes.map((n) => ({
       type: "note" as const,
       id: n.id,
-      title: `SOAP Note — ${n.client.firstName} ${n.client.lastName}`,
+      title: `SOAP Note: ${n.client.firstName} ${n.client.lastName}`,
       subtitle: `${new Date(n.sessionDate).toLocaleDateString()} · ${n.status}`,
       href: `/dashboard/notes/${n.id}`,
     })),

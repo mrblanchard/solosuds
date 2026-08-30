@@ -72,9 +72,9 @@ export default function LandingPage() {
             <p className="mt-3 text-gray-500 max-w-2xl mx-auto">
               The name tells the whole story.{" "}
               <strong className="text-gray-700">Solo</strong>&nbsp; because it&apos;s built
-              for independent practitioners — just you and your clients, no enterprise
+              for independent practitioners, just you and your clients, no enterprise
               bloat.{" "}
-              <strong className="text-gray-700">Suds</strong> is the platform itself —
+              <strong className="text-gray-700">Suds</strong> is the platform itself:
               Scheduling, Unified client management, Documentation, and Sync.
             </p>
           </div>
@@ -188,10 +188,10 @@ export default function LandingPage() {
                 White Label
               </div>
               <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-                Make it yours — your brand, your portal
+                Make it yours: your brand, your portal
               </h2>
               <p className="mt-4 text-lg text-indigo-100 leading-relaxed">
-                SoloSuds fades into the background so your practice shines. Customize your logo, colors, and client-facing portal to match your brand — no "Powered by" watermarks.
+                SoloSuds fades into the background so your practice shines. Customize your logo, colors, and client-facing portal to match your brand, no "Powered by" watermarks.
               </p>
               <ul className="mt-8 space-y-3">
                 {[
@@ -226,7 +226,7 @@ export default function LandingPage() {
                   />
                 ))}
               </div>
-              <p className="text-xs text-indigo-200">Your clients see your brand — not ours.</p>
+              <p className="text-xs text-indigo-200">Your clients see your brand, not ours.</p>
               <div className="rounded-xl bg-white/10 border border-white/20 p-4 text-sm">
                 <p className="text-white font-medium">From: Your Practice Name</p>
                 <p className="text-indigo-200 text-xs mt-0.5">reply-to: hello@yourpractice.com</p>
@@ -256,13 +256,13 @@ const soloLetters = [
     letter: "O",
     label: "Owned",
     description:
-      "Your brand, your client data, your portal. White label the entire experience so clients only see you — not us.",
+      "Your brand, your client data, your portal. White label the entire experience so clients only see you, not us.",
   },
   {
     letter: "L",
     label: "Lightweight",
     description:
-      "Set up in minutes, not months. No IT department required — just sign up, configure, and start seeing clients.",
+      "Set up in minutes, not months. No IT department required, just sign up, configure, and start seeing clients.",
   },
   {
     letter: "O",
@@ -277,19 +277,19 @@ const sudsLetters = [
     letter: "S",
     label: "Scheduling",
     description:
-      "Online booking & calendar management — let clients book themselves while you stay in full control of your time.",
+      "Online booking & calendar management: let clients book themselves while you stay in full control of your time.",
   },
   {
     letter: "U",
     label: "Unified",
     description:
-      "Client profiles & full communication history in one place — everything you need to know about a client at a glance.",
+      "Client profiles & full communication history in one place: everything you need to know about a client at a glance.",
   },
   {
     letter: "D",
     label: "Documentation",
     description:
-      "The SOAP notes themselves — structured, stored securely, and accessible for every session.",
+      "The SOAP notes themselves: structured, stored securely, and accessible for every session.",
   },
   {
     letter: "S",
@@ -315,19 +315,19 @@ const features = [
   {
     title: "SOAP Notes",
     icon: FileText,
-    description: "Write, sign, and store structured SOAP notes for every session — fast, organized, and always accessible.",
+    description: "Write, sign, and store structured SOAP notes for every session: fast, organized, and always accessible.",
     bullets: ["SOAP & session note types", "Draft, sign & lock notes", "Note templates", "Amendment tracking"],
   },
   {
     title: "Billing & Invoicing",
     icon: CreditCard,
-    description: "Create invoices, accept card payments, and track what's owed — all without leaving the app.",
+    description: "Create invoices, accept card payments, and track what's owed, all without leaving the app.",
     bullets: ["Stripe payment processing", "CPT code fields", "Invoice history", "Payment status tracking"],
   },
   {
     title: "White Label Branding",
     icon: Palette,
-    description: "Make the app your own — your logo, your colors, your domain. Clients see your brand, not ours.",
+    description: "Make the app your own: your logo, your colors, your domain. Clients see your brand, not ours.",
     bullets: ["Upload logo & favicon", "Custom brand colors", "Branded client portal", "Custom email sender name"],
   },
 ];

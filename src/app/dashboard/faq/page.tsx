@@ -91,7 +91,7 @@ const sections = [
       },
       {
         q: "What do the note statuses mean?",
-        a: "DRAFT: Work in progress, fully editable. SIGNED: You've signed it (records who signed and when), still editable. LOCKED: Finalized and read-only — cannot be edited or deleted. AMENDED: A locked note that has been amended.",
+        a: "DRAFT: Work in progress, fully editable. SIGNED: You've signed it (records who signed and when), still editable. LOCKED: Finalized and read-only, cannot be edited or deleted. AMENDED: A locked note that has been amended.",
       },
       {
         q: "Can I duplicate a note?",
@@ -146,7 +146,7 @@ const sections = [
     items: [
       {
         q: "What is email consent and why do I need it?",
-        a: "Standard email is not fully encrypted — it travels through multiple servers before reaching its destination, and could theoretically be read by others along the way. Under HIPAA, sending protected health information via standard email requires that the patient understands this risk and explicitly consents. SoloSuds enforces this by gating all email communication behind a signed consent form.",
+        a: "Standard email is not fully encrypted. It travels through multiple servers before reaching its destination, and could theoretically be read by others along the way. Under HIPAA, sending protected health information via standard email requires that the patient understands this risk and explicitly consents. SoloSuds enforces this by gating all email communication behind a signed consent form.",
       },
       {
         q: "How does the email consent flow work?",
@@ -154,11 +154,11 @@ const sections = [
       },
       {
         q: "What are the consent statuses?",
-        a: "NONE: No consent form has been sent yet. PENDING: The consent form was sent and you're waiting for the client to sign it. CONSENTED: The client has signed — email is unlocked. REVOKED: You have revoked email access for this client (see below).",
+        a: "NONE: No consent form has been sent yet. PENDING: The consent form was sent and you're waiting for the client to sign it. CONSENTED: The client has signed, email is unlocked. REVOKED: You have revoked email access for this client (see below).",
       },
       {
         q: "How do I send the consent form?",
-        a: "Open the email thread for a client (Dashboard → Email → select the client). If they haven't consented, you'll see a notice at the bottom with a \"Send Consent Form\" button. Click it — the client will receive an email with a link to the consent form. You can resend it at any time if they haven't responded.",
+        a: "Open the email thread for a client (Dashboard → Email → select the client). If they haven't consented, you'll see a notice at the bottom with a \"Send Consent Form\" button. Click it, and the client will receive an email with a link to the consent form. You can resend it at any time if they haven't responded.",
       },
       {
         q: "Can I revoke a client's email consent?",
@@ -166,7 +166,7 @@ const sections = [
       },
       {
         q: "Can I delete the consent form or a signed submission?",
-        a: "No — this is intentional. The Email Communication Consent form cannot be deleted from your intake forms list. Signed consent submissions are permanently protected and will never be removed, even if you permanently delete the client record. This is an important audit trail.",
+        a: "No, this is intentional. The Email Communication Consent form cannot be deleted from your intake forms list. Signed consent submissions are permanently protected and will never be removed, even if you permanently delete the client record. This is an important audit trail.",
       },
     ],
   },
@@ -175,7 +175,7 @@ const sections = [
     items: [
       {
         q: "What is the client document portal?",
-        a: "The client document portal is a secure, password-free web page where your clients can upload documents to you and download documents you've shared with them. It's accessible at your practice's portal link — for example: solosuds.com/portal/your-practice-name.",
+        a: "The client document portal is a secure, password-free web page where your clients can upload documents to you and download documents you've shared with them. It's accessible at your practice's portal link, for example: solosuds.com/portal/your-practice-name.",
       },
       {
         q: "How do clients access the portal without an account?",
@@ -183,7 +183,7 @@ const sections = [
       },
       {
         q: "How do I share the portal link with a client?",
-        a: "Go to the client's profile page and scroll to the Documents section. Click \"Copy portal link\" — this copies your practice's portal URL to your clipboard. You can paste it into an email, text, or any message to the client.",
+        a: "Go to the client's profile page and scroll to the Documents section. Click \"Copy portal link\": this copies your practice's portal URL to your clipboard. You can paste it into an email, text, or any message to the client.",
       },
       {
         q: "How do I share a document WITH a client?",
@@ -195,7 +195,7 @@ const sections = [
       },
       {
         q: "Are the documents secure and HIPAA-compliant?",
-        a: "Yes. All files are stored in Cloudflare R2 with AES-256 encryption at rest. All data is encrypted in transit with HTTPS/TLS. Files are never accessible via a permanent public URL — every download goes through the server, which verifies authorization and generates a signed URL that expires after 15 minutes. Every upload and download is recorded in an audit log.",
+        a: "Yes. All files are stored in Cloudflare R2 with AES-256 encryption at rest. All data is encrypted in transit with HTTPS/TLS. Files are never accessible via a permanent public URL, every download goes through the server, which verifies authorization and generates a signed URL that expires after 15 minutes. Every upload and download is recorded in an audit log.",
       },
       {
         q: "What file types and sizes are supported?",
@@ -203,7 +203,7 @@ const sections = [
       },
       {
         q: "Can clients delete their own uploads?",
-        a: "Yes — clients can delete files they uploaded themselves from the portal. They cannot delete files that were shared with them by the practice. Practitioners can delete any document from the client profile in the dashboard.",
+        a: "Yes, clients can delete files they uploaded themselves from the portal. They cannot delete files that were shared with them by the practice. Practitioners can delete any document from the client profile in the dashboard.",
       },
       {
         q: "Can I see a record of who accessed which files?",

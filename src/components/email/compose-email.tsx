@@ -128,18 +128,18 @@ export default function ComposeEmail({ clients, replyTo }: Props) {
           onChange={(e) => setSelectedClientId(e.target.value)}
           className="mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400"
         >
-          <option value="">— Select a client (optional) —</option>
+          <option value="">Select a client (optional)</option>
           {clients.map((c) => (
             <option key={c.id} value={c.id}>
               {c.firstName} {c.lastName} {c.email ? `(${c.email})` : ""}
-              {c.emailConsentStatus !== "CONSENTED" ? " — no consent" : ""}
+              {c.emailConsentStatus !== "CONSENTED" ? " (no consent)" : ""}
             </option>
           ))}
         </select>
         {consentBlocked && (
           <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-800">
             {selectedClient?.emailConsentStatus === "PENDING" ? (
-              <p>{selectedClient.firstName} has a consent form pending — email will be available once they sign it.</p>
+              <p>{selectedClient.firstName} has a consent form pending. Email will be available once they sign it.</p>
             ) : consentSent ? (
               <p className="font-medium text-green-700">
                 ✓ Consent form sent to {selectedClient?.firstName}. Email will be available once they sign it.

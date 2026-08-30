@@ -84,7 +84,7 @@ export default function DiscountCodesSettings({ initialCodes }: { initialCodes: 
       if (!res.ok) throw new Error("Failed to update code");
     } catch {
       setCodes((prev) => prev.map((c) => (c.id === id ? { ...c, active: !active } : c)));
-      setError("Failed to update the code — please try again.");
+      setError("Failed to update the code, please try again.");
     }
   }
 
@@ -98,7 +98,7 @@ export default function DiscountCodesSettings({ initialCodes }: { initialCodes: 
       if (!res.ok) throw new Error("Failed to delete code");
     } catch {
       setCodes(previous);
-      setError("Failed to delete the code — please try again.");
+      setError("Failed to delete the code, please try again.");
     }
   }
 

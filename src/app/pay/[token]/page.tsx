@@ -128,13 +128,13 @@ export default async function PayInvoicePage({ params, searchParams }: Props) {
 
         {isPaid ? (
           <div className="rounded-xl border border-green-100 bg-green-50 p-6 text-center">
-            <p className="text-lg font-semibold text-green-700">Paid — thank you!</p>
+            <p className="text-lg font-semibold text-green-700">Paid, thank you!</p>
           </div>
         ) : (
           <div className="space-y-3">
             {paid === "1" && (
               <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-center text-sm text-indigo-700">
-                Payment received — finalizing... this page will update shortly.
+                Payment received, finalizing... this page will update shortly.
               </div>
             )}
 

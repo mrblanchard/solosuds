@@ -30,6 +30,6 @@ export async function POST() {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Stripe error";
     console.error("[settings/stripe-connect/dashboard-link]", message);
-    return NextResponse.json({ error: "Unable to open Stripe dashboard — finish onboarding first." }, { status: 400 });
+    return NextResponse.json({ error: "Unable to open Stripe dashboard, finish onboarding first." }, { status: 400 });
   }
 }

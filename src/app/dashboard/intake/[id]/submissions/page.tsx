@@ -44,7 +44,7 @@ export default async function SubmissionsPage({
         </Link>
         <span className="text-gray-300">/</span>
         <h1 className="text-xl font-bold text-gray-900 truncate">
-          {form.title} — Submissions
+          {form.title}: Submissions
         </h1>
       </div>
 

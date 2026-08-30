@@ -49,7 +49,7 @@ export default async function PortalFilesPage({ params }: Props) {
             {org.logoUrl && (
               <img src={org.logoUrl} alt={org.name} className="mx-auto h-10 mb-3 object-contain" />
             )}
-            <h1 className="text-xl font-bold text-gray-900">{org.name} — Client Portal</h1>
+            <h1 className="text-xl font-bold text-gray-900">{org.name}: Client Portal</h1>
             <p className="text-sm text-gray-500 mt-1">
               Signed in as {client.firstName} {client.lastName}
             </p>

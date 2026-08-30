@@ -159,7 +159,7 @@ export default async function BillingPage({
                     {formatDate(inv.createdAt, "MMM d, yyyy")}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {inv.dueDate ? formatDate(inv.dueDate, "MMM d, yyyy") : "—"}
+                    {inv.dueDate ? formatDate(inv.dueDate, "MMM d, yyyy") : "-"}
                   </td>
                   <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                     {formatCurrency(inv.total)}

@@ -53,10 +53,10 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
     }
     if (primaryColor !== undefined && primaryColor && !/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(primaryColor)) {
-      return NextResponse.json({ error: "Invalid color — use a hex value like #5a4f8a" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid color, use a hex value like #5a4f8a" }, { status: 400 });
     }
 
-    const validPracticeTypes = ["THERAPY", "SALON", "MEDICAL", "FITNESS", "OTHER"];
+    const validPracticeTypes = ["THERAPY", "SALON", "MEDICAL", "FITNESS", "LESSONS", "OTHER"];
     if (practiceType !== undefined && !validPracticeTypes.includes(practiceType)) {
       return NextResponse.json({ error: "Invalid practice type" }, { status: 400 });
     }

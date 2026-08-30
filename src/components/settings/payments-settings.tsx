@@ -43,8 +43,8 @@ function PaymentsSettingsInner({ org }: Props) {
 
   useEffect(() => {
     const status = searchParams.get("stripe_connect");
-    if (status === "return") setMessage("Stripe setup complete — check your status below.");
-    else if (status === "refresh") setMessage("Setup was interrupted — click Continue Setup to finish.");
+    if (status === "return") setMessage("Stripe setup complete, check your status below.");
+    else if (status === "refresh") setMessage("Setup was interrupted, click Continue Setup to finish.");
   }, [searchParams]);
 
   async function connectStripe() {
@@ -137,7 +137,7 @@ function PaymentsSettingsInner({ org }: Props) {
             <CreditCard className="h-4 w-4" /> Card Payments (Stripe)
           </Label>
           <p className="text-xs text-gray-500">
-            Connect your own Stripe account to accept card payments on invoices. Funds go directly to you — SoloSuds takes no fee.
+            Connect your own Stripe account to accept card payments on invoices. Funds go directly to you, SoloSuds takes no fee.
           </p>
           <div className="flex flex-wrap items-center gap-2">
             {!connected && (
@@ -176,7 +176,7 @@ function PaymentsSettingsInner({ org }: Props) {
             <Wallet className="h-4 w-4" /> Other Payment Methods
           </Label>
           <p className="text-xs text-gray-500">
-            Add links for other ways clients can pay. They&apos;ll appear on invoices and payment emails — you&apos;ll still need to mark these invoices as paid manually.
+            Add links for other ways clients can pay. They&apos;ll appear on invoices and payment emails, and you&apos;ll still need to mark these invoices as paid manually.
           </p>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -435,7 +435,7 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
                   {!email && (
                     <strong className="text-gray-900">
                       Required, since no email was provided
-                      <span className="text-red-500">*</span> —{" "}
+                      <span className="text-red-500">*</span>:{" "}
                     </strong>
                   )}
                   I agree to receive appointment text messages (booking confirmations, reminders, reschedule

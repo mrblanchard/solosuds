@@ -127,7 +127,7 @@ export default function BookingSettings({
       <CardContent className="space-y-5">
         <p className="text-sm text-gray-500">
           Share your booking page with clients so they can request appointments
-          online — no account needed.
+          online, no account needed.
         </p>
 
         {/* Booking link */}

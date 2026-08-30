@@ -119,7 +119,7 @@ export default function PortalAccessForm({ orgSlug, orgName }: Props) {
       </form>
 
       <p className="mt-4 text-xs text-gray-400 text-center">
-        Your identity is verified with a one-time code — no password or account required.
+        Your identity is verified with a one-time code, no password or account required.
       </p>
     </div>
   );
