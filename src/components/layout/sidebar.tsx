@@ -21,6 +21,7 @@ import {
   PanelLeftOpen,
   Paintbrush,
   Wrench,
+  User,
 } from "lucide-react";
 
 type PracticeType = "THERAPY" | "SALON" | "MEDICAL" | "FITNESS" | "LESSONS" | "OTHER" | undefined;
@@ -41,6 +42,7 @@ export const ALL_NAV: Record<string, NavItem> = {
   email:      { href: "/dashboard/email",    label: "Email",        icon: Mail },
   messages:   { href: "/dashboard/messages", label: "Messages",     icon: MessageSquare },
   billing:    { href: "/dashboard/billing",  label: "Billing",      icon: CreditCard },
+  account:     { href: "/dashboard/account",      label: "Account",      icon: User },
   settings:    { href: "/dashboard/settings",     label: "Settings",     icon: Settings },
   whitelabel:  { href: "/dashboard/white-label",  label: "White Label",  icon: Paintbrush },
   faq:         { href: "/dashboard/faq",           label: "Help & FAQ",   icon: HelpCircle },
@@ -49,25 +51,25 @@ export const ALL_NAV: Record<string, NavItem> = {
 // Per-type nav order + optional label overrides
 const NAV_CONFIG: Record<NonNullable<PracticeType>, { order: string[]; labels?: Partial<Record<string, string>> }> = {
   THERAPY: {
-    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "messages", "billing", "settings", "whitelabel", "faq"],
+    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "messages", "billing", "account", "settings", "whitelabel", "faq"],
   },
   SALON: {
-    order: ["dashboard", "schedule", "clients", "messages", "billing", "notes", "intake", "email", "settings", "whitelabel", "faq"],
+    order: ["dashboard", "schedule", "clients", "messages", "billing", "notes", "intake", "email", "account", "settings", "whitelabel", "faq"],
     labels: { notes: "Session Notes" },
   },
   MEDICAL: {
-    order: ["dashboard", "clients", "intake", "notes", "schedule", "email", "messages", "billing", "settings", "whitelabel", "faq"],
+    order: ["dashboard", "clients", "intake", "notes", "schedule", "email", "messages", "billing", "account", "settings", "whitelabel", "faq"],
   },
   FITNESS: {
-    order: ["dashboard", "schedule", "clients", "messages", "billing", "notes", "intake", "email", "settings", "whitelabel", "faq"],
+    order: ["dashboard", "schedule", "clients", "messages", "billing", "notes", "intake", "email", "account", "settings", "whitelabel", "faq"],
     labels: { notes: "Session Notes", intake: "Health Forms" },
   },
   LESSONS: {
-    order: ["dashboard", "schedule", "clients", "messages", "billing", "notes", "intake", "email", "settings", "whitelabel", "faq"],
+    order: ["dashboard", "schedule", "clients", "messages", "billing", "notes", "intake", "email", "account", "settings", "whitelabel", "faq"],
     labels: { notes: "Session Notes" },
   },
   OTHER: {
-    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "messages", "billing", "settings", "whitelabel", "faq"],
+    order: ["dashboard", "schedule", "clients", "notes", "intake", "email", "messages", "billing", "account", "settings", "whitelabel", "faq"],
   },
 };
 
