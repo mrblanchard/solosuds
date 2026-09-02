@@ -8,14 +8,48 @@ import { Analytics } from "@vercel/analytics/next";
 
 const nunito = Nunito({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 
+const title = "SoloSuds: Practice Management Software for Solo Practitioners";
+const description =
+  "SOAP notes, scheduling, intake forms, billing, and HIPAA-aware client messaging, all in one place. Built for independent massage therapists, physical therapists, counselors, and other solo healthcare practitioners. 14-day free trial, no credit card required.";
+
 export const metadata: Metadata = {
-  title: "SoloSuds: Clinical Documentation for Modern Practices",
-  description:
-    "SOAP notes, scheduling, client management, and billing for healthcare SMBs.",
+  metadataBase: new URL("https://solosuds.com"),
+  title: {
+    default: title,
+    template: "%s | SoloSuds",
+  },
+  description,
+  keywords: [
+    "SOAP notes software",
+    "practice management software",
+    "solo practitioner software",
+    "HIPAA compliant scheduling software",
+    "client intake form software",
+    "massage therapy software",
+    "physical therapy practice management",
+    "counseling practice management software",
+  ],
   icons: {
     icon: "/favicon.png",
     shortcut: "/favicon.png",
     apple: "/favicon.png",
+  },
+  openGraph: {
+    title,
+    description,
+    url: "https://solosuds.com",
+    siteName: "SoloSuds",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

@@ -13,9 +13,31 @@ import {
   Palette,
 } from "lucide-react";
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "SoloSuds",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web",
+  description:
+    "Practice management software for solo healthcare practitioners: SOAP notes, scheduling, intake forms, billing, and HIPAA-aware client messaging.",
+  url: "https://solosuds.com",
+  offers: {
+    "@type": "Offer",
+    price: "49",
+    priceCurrency: "USD",
+    priceValidUntil: "2027-12-31",
+    category: "subscription",
+  },
+};
+
 export default function LandingPage() {
   return (
     <div className="min-h-dvh bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Nav */}
       <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b-primary">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
