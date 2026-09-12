@@ -94,11 +94,11 @@ export default function PricingSection({ showCheckout = false }: { showCheckout?
             <h3 className="text-lg font-bold text-gray-900">Solo</h3>
             <p className="mt-1 text-sm text-gray-500">Everything you need to run your business</p>
             <p className="mt-4 text-4xl font-extrabold text-gray-900">
-              {yearly ? "$39" : "$49"}
+              {yearly ? "$31" : "$39"}
               <span className="text-base font-normal text-gray-400">/mo</span>
             </p>
             {yearly && (
-              <p className="text-xs mt-0.5 text-gray-400">$468/yr · billed annually</p>
+              <p className="text-xs mt-0.5 text-gray-400">$372/yr · billed annually</p>
             )}
             <ul className="mt-6 space-y-2">
               {coreFeatures.map((f) => (

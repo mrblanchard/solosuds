@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 
-const TRIAL_DAYS = 14;
+const TRIAL_DAYS = 30;
 
 export default async function DashboardLayout({
   children,

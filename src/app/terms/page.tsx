@@ -69,7 +69,7 @@ export default async function TermsPage() {
                 We reserve the right to change pricing with 30 days&rsquo; notice.
               </p>
               <p className="mt-2">
-                A 14-day free trial is available to new accounts. No credit card is required to start a trial.
+                A 30-day free trial is available to new accounts. No credit card is required to start a trial.
                 At trial end, continued access requires a paid subscription.
               </p>
             </section>

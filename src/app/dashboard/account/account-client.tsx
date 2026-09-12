@@ -84,7 +84,7 @@ export default function AccountClient({ user, org, exportCounts }: Props) {
   const isOwnerOrAdmin = user.role === "OWNER" || user.role === "ADMIN";
 
   // Trial days remaining
-  const TRIAL_DAYS = 14;
+  const TRIAL_DAYS = 30;
   const trialDaysLeft = status === "trialing"
     ? Math.max(0, Math.ceil((new Date(org.createdAt).getTime() + TRIAL_DAYS * 86400000 - Date.now()) / 86400000))
     : 0;
