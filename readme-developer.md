@@ -368,7 +368,7 @@ All 4 drag implementations now use consistent handles:
 - `PUT /api/account/subscription` — resume from pause.
 - Account page: pause/resume UI, trial days remaining calculation, status map includes "paused".
 - `src/app/trial-expired/page.tsx` (new): Paywall page for expired/canceled/paused accounts with `PricingSection`.
-- Dashboard layout: checks org `createdAt` + subscription status; redirects expired trials (14 days), canceled, and paused accounts to `/trial-expired`.
+- Dashboard layout: checks org `createdAt` + subscription status; redirects expired trials (30 days), canceled, and paused accounts to `/trial-expired`.
 
 #### Terms & HIPAA pages
 - `src/app/terms/page.tsx` and `src/app/hipaa/page.tsx`: Session-aware — logged-in shows "Back to dashboard", logged-out shows "Back" to registration.

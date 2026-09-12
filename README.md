@@ -21,7 +21,7 @@ Practice management software for healthcare practitioners. SOAP notes, schedulin
 - **Notifications** — In-app notification panel with unread badges
 - **Multi-user** — Role-based access (Owner, Admin, Practitioner, Front Desk) with team invite links and email invitations
 - **Dashboard** — Live stats, task manager, schedule, quick actions, recent notes, upcoming appointments, and messages. Widgets are drag-to-rearrange and resizable with visible resize handles (layout persisted per-user in localStorage)
-- **Membership** — Stripe-integrated subscriptions with pause/cancel/resume, 14-day free trial, and trial-expired paywall
+- **Membership** — Stripe-integrated subscriptions with pause/cancel/resume, 30-day free trial, and trial-expired paywall
 - **Legal** — Terms of Service and HIPAA compliance pages
 
 ## Pricing
@@ -30,7 +30,7 @@ Single tier for now — Solo, for individual practitioners. Multi-practitioner t
 
 | Plan | Monthly | Yearly |
 |------|---------|--------|
-| Solo | $49 | $39/mo ($468/yr) |
+| Solo | $39 | $31/mo ($372/yr) |
 
 ## Stack
 

@@ -10,7 +10,7 @@ const nunito = Nunito({ subsets: ["latin"], weight: ["400", "500", "600", "700",
 
 const title = "SoloSuds: Practice Management Software for Solo Practitioners";
 const description =
-  "SOAP notes, scheduling, intake forms, billing, and HIPAA-aware client messaging, all in one place. Built for independent massage therapists, physical therapists, counselors, and other solo healthcare practitioners. 14-day free trial, no credit card required.";
+  "SOAP notes, scheduling, intake forms, billing, and HIPAA-aware client messaging, all in one place. Built for independent massage therapists, physical therapists, counselors, and other solo healthcare practitioners. 30-day free trial, no credit card required.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://solosuds.com"),

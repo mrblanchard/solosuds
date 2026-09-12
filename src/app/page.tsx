@@ -72,7 +72,7 @@ export default function LandingPage() {
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/register">
               <Button size="lg" className="px-8">
-                Start 14-Day Free Trial
+                Start 30-Day Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
