@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Mail, MessageSquare, X, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { SMS_COMING_SOON, SMS_ENABLED } from "@/lib/features";
 
 type Client = {
   id: string;
@@ -78,10 +80,17 @@ export default function SendFormButtons({ formId, clients }: Props) {
       </button>
       <button
         onClick={() => openModal("sms")}
-        className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-white px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-50 transition-colors"
+        disabled={!SMS_ENABLED}
+        title={SMS_ENABLED ? undefined : SMS_COMING_SOON}
+        className={cn(
+          "shrink-0 inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors",
+          SMS_ENABLED
+            ? "border-indigo-200 bg-white text-indigo-700 hover:bg-indigo-50"
+            : "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
+        )}
       >
         <MessageSquare className="h-3.5 w-3.5" />
-        Text
+        {SMS_ENABLED ? "Text" : "Text - Coming Soon"}
       </button>
 
       {modal && (

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import { SMS_ENABLED } from "@/lib/features";
 import {
   LayoutDashboard,
   Users,
@@ -40,7 +41,7 @@ export const ALL_NAV: Record<string, NavItem> = {
   notes:      { href: "/dashboard/notes",    label: "Notes",        icon: FileText },
   intake:     { href: "/dashboard/intake",   label: "Intake Forms", icon: ClipboardList },
   email:      { href: "/dashboard/email",    label: "Email",        icon: Mail },
-  messages:   { href: "/dashboard/messages", label: "Messages",     icon: MessageSquare },
+  messages:   { href: "/dashboard/messages", label: "Messages",     icon: MessageSquare, disabled: !SMS_ENABLED },
   billing:    { href: "/dashboard/billing",  label: "Billing",      icon: CreditCard },
   account:     { href: "/dashboard/account",      label: "Account",      icon: User },
   settings:    { href: "/dashboard/settings",     label: "Settings",     icon: Settings },

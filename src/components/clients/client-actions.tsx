@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Trash2, Archive, Loader2, MoreVertical, FileText, CalendarDays, Pencil, Mail, MessageSquare } from "lucide-react";
+import { SMS_COMING_SOON, SMS_ENABLED } from "@/lib/features";
 
 interface ClientActionsProps {
   clientId: string;
@@ -125,11 +126,17 @@ export default function ClientActions({ clientId, clientName, hasEmail = false, 
           variant="outline"
           size="sm"
           onClick={() => sendBookingLink("sms")}
-          disabled={!hasPhone || sendingLink !== null}
-          title={hasPhone ? "Text this client their online booking link" : "No phone on file"}
+          disabled={!SMS_ENABLED || !hasPhone || sendingLink !== null}
+          title={
+            !SMS_ENABLED
+              ? SMS_COMING_SOON
+              : hasPhone
+                ? "Text this client their online booking link"
+                : "No phone on file"
+          }
         >
           {sendingLink === "sms" ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <MessageSquare className="h-4 w-4 mr-1" />}
-          {linkSent === "sms" ? "Sent!" : "Text Link"}
+          {!SMS_ENABLED ? "Text Link - Coming Soon" : linkSent === "sms" ? "Sent!" : "Text Link"}
         </Button>
         <Link href={`/dashboard/clients/${clientId}/edit`}>
           <Button size="sm">Edit Profile</Button>
@@ -202,11 +209,12 @@ export default function ClientActions({ clientId, clientName, hasEmail = false, 
             </button>
             <button
               onClick={() => { setMenuOpen(false); sendBookingLink("sms"); }}
-              disabled={!hasPhone || sendingLink !== null}
+              disabled={!SMS_ENABLED || !hasPhone || sendingLink !== null}
+              title={SMS_ENABLED ? undefined : SMS_COMING_SOON}
               className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-40"
             >
               <MessageSquare className="h-4 w-4" />
-              Text Booking Link
+              {SMS_ENABLED ? "Text Booking Link" : "Text Booking Link - Coming Soon"}
             </button>
             <Link
               href={`/dashboard/clients/${clientId}/edit`}

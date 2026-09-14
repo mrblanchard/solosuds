@@ -5,7 +5,8 @@ import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import MessageComposer from "@/components/messages/message-composer";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Mail, MessageSquare } from "lucide-react";
+import { SMS_ENABLED } from "@/lib/features";
 
 interface Props {
   searchParams: Promise<{ clientId?: string }>;
@@ -14,6 +15,32 @@ interface Props {
 export default async function MessagesPage({ searchParams }: Props) {
   const session = await auth();
   if (!session?.user?.organizationId) redirect("/dashboard");
+
+  // The nav entry is disabled while texting is off, but the route is still
+  // reachable by direct link or a stale tab, so it explains itself.
+  if (!SMS_ENABLED) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] items-center justify-center rounded-xl border border-gray-100 bg-white">
+        <div className="max-w-md px-6 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
+            <MessageSquare className="h-7 w-7 text-gray-400" />
+          </div>
+          <h1 className="text-lg font-semibold text-gray-900">Messages are coming soon</h1>
+          <p className="mt-2 text-sm text-gray-500">
+            Client texting isn&apos;t available yet. In the meantime you can reach clients by
+            email, and their booking and intake links can be sent that way too.
+          </p>
+          <Link
+            href="/dashboard/email"
+            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            <Mail className="h-4 w-4" />
+            Go to Email
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const orgId = session.user.organizationId;
   const { clientId: selectedClientId } = await searchParams;
