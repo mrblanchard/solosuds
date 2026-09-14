@@ -15,109 +15,21 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
-
-const SCHEMA_FIELDS = [
-  { value: "", label: "(Skip)" },
-  { value: "firstName", label: "First Name" },
-  { value: "lastName", label: "Last Name" },
-  { value: "email", label: "Email" },
-  { value: "phone", label: "Phone" },
-  { value: "dateOfBirth", label: "Date of Birth" },
-  { value: "gender", label: "Gender" },
-  { value: "pronouns", label: "Pronouns" },
-  { value: "address", label: "Address" },
-  { value: "city", label: "City" },
-  { value: "state", label: "State" },
-  { value: "zip", label: "Zip Code" },
-  { value: "country", label: "Country" },
-  { value: "emergencyName", label: "Emergency Contact Name" },
-  { value: "emergencyPhone", label: "Emergency Phone" },
-  { value: "referralSource", label: "Referral Source" },
-  { value: "internalNotes", label: "Internal Notes" },
-];
-
-const HEADER_MAP: Record<string, string> = {
-  "first name": "firstName",
-  first_name: "firstName",
-  firstname: "firstName",
-  "last name": "lastName",
-  last_name: "lastName",
-  lastname: "lastName",
-  email: "email",
-  "email address": "email",
-  phone: "phone",
-  "phone number": "phone",
-  phone_number: "phone",
-  "date of birth": "dateOfBirth",
-  date_of_birth: "dateOfBirth",
-  dob: "dateOfBirth",
-  birthday: "dateOfBirth",
-  gender: "gender",
-  pronouns: "pronouns",
-  address: "address",
-  "street address": "address",
-  street: "address",
-  city: "city",
-  state: "state",
-  province: "state",
-  zip: "zip",
-  "zip code": "zip",
-  zipcode: "zip",
-  postal: "zip",
-  "postal code": "zip",
-  country: "country",
-  "emergency contact": "emergencyName",
-  "emergency name": "emergencyName",
-  emergency_name: "emergencyName",
-  "emergency phone": "emergencyPhone",
-  emergency_phone: "emergencyPhone",
-  referral: "referralSource",
-  "referral source": "referralSource",
-  referral_source: "referralSource",
-  notes: "internalNotes",
-  "internal notes": "internalNotes",
-  internal_notes: "internalNotes",
-};
+import {
+  IMPORT_LIMITS,
+  SCHEMA_FIELDS,
+  autoDetectMapping,
+  parseLine,
+  stripBom,
+} from "@/lib/client-import";
 
 type Step = "upload" | "map" | "importing" | "done";
 
 interface ImportResult {
   imported: number;
   skipped: number;
+  duplicates: number;
   errors: { row: number; message: string }[];
-}
-
-function parseLine(line: string): string[] {
-  const fields: string[] = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (inQuotes) {
-      if (ch === '"') {
-        if (i + 1 < line.length && line[i + 1] === '"') {
-          current += '"';
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        current += ch;
-      }
-    } else {
-      if (ch === '"') {
-        inQuotes = true;
-      } else if (ch === ",") {
-        fields.push(current);
-        current = "";
-      } else {
-        current += ch;
-      }
-    }
-  }
-  fields.push(current);
-  return fields;
 }
 
 export default function CsvImport() {
@@ -136,14 +48,14 @@ export default function CsvImport() {
       setError("Please upload a CSV file");
       return;
     }
-    if (f.size > 5 * 1024 * 1024) {
-      setError("File too large (max 5MB)");
+    if (f.size > IMPORT_LIMITS.maxBytes) {
+      setError(`File too large (max ${IMPORT_LIMITS.maxBytes / 1024 / 1024}MB)`);
       return;
     }
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const text = e.target?.result as string;
+      const text = stripBom(e.target?.result as string);
       const lines = text.split(/\r?\n/).filter((l) => l.trim());
       if (lines.length < 2) {
         setError("File must have a header row and at least one data row");
@@ -153,15 +65,7 @@ export default function CsvImport() {
       const hdrs = parseLine(lines[0]).map((h) => h.trim());
       setHeaders(hdrs);
 
-      // Auto-map headers
-      const autoMap: Record<string, string> = {};
-      for (const h of hdrs) {
-        const normalized = h.toLowerCase().trim();
-        if (HEADER_MAP[normalized]) {
-          autoMap[h] = HEADER_MAP[normalized];
-        }
-      }
-      setMapping(autoMap);
+      setMapping(autoDetectMapping(hdrs));
 
       // Preview first 3 data rows
       const previewRows = lines.slice(1, 4).map((l) => parseLine(l).map((v) => v.trim()));
@@ -185,10 +89,12 @@ export default function CsvImport() {
   const handleImport = async () => {
     if (!file) return;
 
-    // Validate required fields mapped
+    // A name is the only hard requirement: either split columns or one full name
     const mappedFields = Object.values(mapping);
-    if (!mappedFields.includes("firstName") || !mappedFields.includes("lastName")) {
-      setError("First Name and Last Name must be mapped");
+    if (!mappedFields.includes("firstName") && !mappedFields.includes("fullName")) {
+      setError(
+        "Map a First Name column, or map a Full Name column and we will split it for you"
+      );
       return;
     }
 
@@ -265,7 +171,10 @@ export default function CsvImport() {
                 <p className="text-sm font-medium text-gray-700">
                   Drag and drop your CSV file here
                 </p>
-                <p className="text-xs text-gray-500 mt-1">or click to browse (max 5MB, 500 rows)</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  or click to browse (max {IMPORT_LIMITS.maxBytes / 1024 / 1024}MB,{" "}
+                  {IMPORT_LIMITS.maxRows.toLocaleString()} rows)
+                </p>
               </div>
               <input
                 ref={inputRef}
@@ -282,11 +191,17 @@ export default function CsvImport() {
             <div className="mt-6 rounded-lg bg-gray-50 p-4">
               <p className="text-sm font-medium text-gray-700 mb-2">Expected format</p>
               <p className="text-xs text-gray-500 mb-2">
-                Your CSV should have a header row. Common column names will be auto-detected:
+                Your CSV needs a header row. Exports from Acuity, Square, Mindbody, MassageBook,
+                Vagaro, Jane, Wix, and Fullslate are auto-detected, and you can adjust any column
+                on the next step.
               </p>
               <code className="block text-xs text-gray-600 bg-white rounded p-2 border">
                 First Name,Last Name,Email,Phone,Date of Birth,Address,City,State,Zip
               </code>
+              <p className="text-xs text-gray-500 mt-2">
+                Dates can be in any common format. Clients you already have are detected and
+                skipped, so re-running a file will not create duplicates.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -302,8 +217,9 @@ export default function CsvImport() {
           </CardHeader>
           <CardContent className="space-y-6">
             <p className="text-sm text-gray-500">
-              Match your CSV columns to client fields. <strong>First Name</strong> and{" "}
-              <strong>Last Name</strong> are required.
+              Match your CSV columns to client fields. A name is required: map{" "}
+              <strong>First Name</strong>, or map a single <strong>Full Name</strong> column and
+              we will split it into first and last.
             </p>
 
             <div className="space-y-3">
@@ -409,6 +325,12 @@ export default function CsvImport() {
                 <p className="text-2xl font-bold text-green-600">{result.imported}</p>
                 <p className="text-xs text-gray-500">Imported</p>
               </div>
+              {result.duplicates > 0 && (
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-gray-400">{result.duplicates}</p>
+                  <p className="text-xs text-gray-500">Already existed</p>
+                </div>
+              )}
               {result.skipped > 0 && (
                 <div className="text-center">
                   <p className="text-2xl font-bold text-amber-500">{result.skipped}</p>
