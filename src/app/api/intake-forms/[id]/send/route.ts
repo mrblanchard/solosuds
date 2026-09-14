@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { sendIntakeFormLink } from "@/lib/email";
-import { sendSms } from "@/lib/twilio";
+import { sendSms, describeSmsFailure } from "@/lib/twilio";
 
 export async function POST(
   req: Request,
@@ -82,9 +82,9 @@ export async function POST(
       const result = await sendSms({ to: client.phone, body: smsBody });
       sid = result.sid;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Unknown error";
       console.error("Twilio send error:", err);
-      return NextResponse.json({ error: `SMS failed: ${msg}` }, { status: 500 });
+      const { error, status } = describeSmsFailure(err);
+      return NextResponse.json({ error }, { status });
     }
 
     await db.message.create({

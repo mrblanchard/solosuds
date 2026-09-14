@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { sendEmail, buildBrandedEmail } from "@/lib/email";
-import { sendSms } from "@/lib/twilio";
+import { sendSms, describeSmsFailure } from "@/lib/twilio";
 
 export async function POST(
   req: Request,
@@ -63,7 +63,8 @@ export async function POST(
       });
     } catch (err) {
       console.error("[send-booking-link] sms failed:", err);
-      return NextResponse.json({ error: "Failed to send text" }, { status: 500 });
+      const { error, status } = describeSmsFailure(err);
+      return NextResponse.json({ error }, { status });
     }
   }
 

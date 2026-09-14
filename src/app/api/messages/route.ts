@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { sendSms, buildFreeformMessageSms } from "@/lib/twilio";
+import { sendSms, buildFreeformMessageSms, describeSmsFailure } from "@/lib/twilio";
 
 // This inbox is SMS-only. Email already has its own dedicated, fully-featured
 // surface at /dashboard/email (a separate Email model with inbound receiving
@@ -54,7 +54,8 @@ export async function POST(request: NextRequest) {
       sid = result.sid;
     } catch (err) {
       console.error("[POST /api/messages] Twilio send failed:", err);
-      return NextResponse.json({ error: "Failed to send text" }, { status: 500 });
+      const { error, status } = describeSmsFailure(err);
+      return NextResponse.json({ error }, { status });
     }
 
     const message = await db.message.create({

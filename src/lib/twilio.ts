@@ -66,11 +66,53 @@ export function buildFreeformMessageSms(opts: { orgName: string; content: string
   return `${brandPrefix(opts.orgName)}: ${punctuated} Reply STOP to opt out.`;
 }
 
+/**
+ * Raised when the deployment is missing Twilio environment variables, as
+ * opposed to Twilio rejecting or failing a send. Callers use this to tell a
+ * setup problem (nothing the practitioner can retry) apart from a transient
+ * delivery failure (worth retrying).
+ */
+export class SmsNotConfiguredError extends Error {
+  constructor(detail: string) {
+    super(detail);
+    this.name = "SmsNotConfiguredError";
+  }
+}
+
+/** True when every variable sendSms needs is present in this environment. */
+export function isSmsConfigured(): boolean {
+  return Boolean(
+    process.env.TWILIO_ACCOUNT_SID &&
+      process.env.TWILIO_AUTH_TOKEN &&
+      process.env.TWILIO_PHONE_NUMBER
+  );
+}
+
+/**
+ * Map a sendSms failure to something safe to show a practitioner. The
+ * underlying error text names internal infrastructure and must not reach the
+ * UI; log it server-side instead.
+ */
+export function describeSmsFailure(err: unknown): { error: string; status: number } {
+  if (err instanceof SmsNotConfiguredError) {
+    return {
+      error:
+        "Text messaging isn't set up for this practice yet. Please contact support, or send this by email instead.",
+      status: 503,
+    };
+  }
+  return { error: "Failed to send text. Please try again.", status: 500 };
+}
+
 function getTwilio() {
   if (_client) return _client;
   const sid = process.env.TWILIO_ACCOUNT_SID;
   const token = process.env.TWILIO_AUTH_TOKEN;
-  if (!sid || !token) throw new Error("Twilio credentials not configured");
+  if (!sid || !token) {
+    throw new SmsNotConfiguredError(
+      "TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN is missing from this environment"
+    );
+  }
   _client = Twilio(sid, token);
   return _client;
 }
@@ -93,7 +135,9 @@ export async function sendSms({
 
   const client = getTwilio();
   const from = process.env.TWILIO_PHONE_NUMBER;
-  if (!from) throw new Error("TWILIO_PHONE_NUMBER not configured");
+  if (!from) {
+    throw new SmsNotConfiguredError("TWILIO_PHONE_NUMBER is missing from this environment");
+  }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.AUTH_URL ?? "";
   const statusCallback = appUrl ? `${appUrl}/api/twilio/status` : undefined;
