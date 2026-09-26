@@ -1,17 +1,11 @@
-import Twilio from "twilio";
-import type { NextRequest } from "next/server";
 import { formatDate, formatDateTime } from "@/lib/utils";
 
-let _client: ReturnType<typeof Twilio> | null = null;
-
 // All client-facing SMS bodies open with "{Practice Name} via SoloSuds:" and
-// end with an opt-out instruction. The "via SoloSuds" is intentional, not
-// cosmetic: the A2P 10DLC / toll-free registration's sample messages and use
-// case description identify the sender as "SoloSuds," so every message has
-// to keep that string present even while surfacing the practitioner's own
-// business name for white-labeling. Don't drop "SoloSuds" from these — that
-// would deviate from what was actually approved on the registered number.
-// Keep the copy in sync with the registration if either changes.
+// end with an opt-out instruction. Carrier registration (10DLC or toll-free)
+// identifies the sender as "SoloSuds," so every message keeps that string
+// present even while surfacing the practitioner's own business name for
+// white-labeling. Keep this copy in sync with whatever sample messages are
+// submitted when the new provider's number is registered.
 
 function brandPrefix(orgName: string): string {
   return `${orgName} via SoloSuds`;
@@ -67,9 +61,9 @@ export function buildFreeformMessageSms(opts: { orgName: string; content: string
 }
 
 /**
- * Raised when the deployment is missing Twilio environment variables, as
- * opposed to Twilio rejecting or failing a send. Callers use this to tell a
- * setup problem (nothing the practitioner can retry) apart from a transient
+ * Raised when no SMS provider is wired up in this environment, as opposed to
+ * a provider rejecting or failing a send. Callers use this to tell a setup
+ * problem (nothing the practitioner can retry) apart from a transient
  * delivery failure (worth retrying).
  */
 export class SmsNotConfiguredError extends Error {
@@ -77,15 +71,6 @@ export class SmsNotConfiguredError extends Error {
     super(detail);
     this.name = "SmsNotConfiguredError";
   }
-}
-
-/** True when every variable sendSms needs is present in this environment. */
-export function isSmsConfigured(): boolean {
-  return Boolean(
-    process.env.TWILIO_ACCOUNT_SID &&
-      process.env.TWILIO_AUTH_TOKEN &&
-      process.env.TWILIO_PHONE_NUMBER
-  );
 }
 
 /**
@@ -104,19 +89,16 @@ export function describeSmsFailure(err: unknown): { error: string; status: numbe
   return { error: "Failed to send text. Please try again.", status: 500 };
 }
 
-function getTwilio() {
-  if (_client) return _client;
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  if (!sid || !token) {
-    throw new SmsNotConfiguredError(
-      "TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN is missing from this environment"
-    );
-  }
-  _client = Twilio(sid, token);
-  return _client;
-}
-
+/**
+ * Send one SMS. No provider is wired up yet, so outside production this logs
+ * the message and returns a mock id, and in production it throws
+ * SmsNotConfiguredError, which every caller already handles.
+ *
+ * To connect a provider: send the message here and return its message id as
+ * `sid` (callers store it on Message.externalId). Delivery-status and inbound
+ * reply webhooks go under src/app/api/webhooks/, which proxy.ts already
+ * leaves public.
+ */
 export async function sendSms({
   to,
   body,
@@ -124,42 +106,10 @@ export async function sendSms({
   to: string;
   body: string;
 }): Promise<{ sid: string }> {
-  // In development (or when Twilio is not configured), log instead of sending
-  if (
-    process.env.NODE_ENV !== "production" &&
-    (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN)
-  ) {
+  if (process.env.NODE_ENV !== "production") {
     console.log(`\n📱 [DEV SMS] To: ${to}\n${body}\n`);
     return { sid: "dev_mock_" + Date.now() };
   }
 
-  const client = getTwilio();
-  const from = process.env.TWILIO_PHONE_NUMBER;
-  if (!from) {
-    throw new SmsNotConfiguredError("TWILIO_PHONE_NUMBER is missing from this environment");
-  }
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.AUTH_URL ?? "";
-  const statusCallback = appUrl ? `${appUrl}/api/twilio/status` : undefined;
-
-  const message = await client.messages.create({
-    to,
-    from,
-    body,
-    ...(statusCallback ? { statusCallback } : {}),
-  });
-  return { sid: message.sid };
-}
-
-/** Verify that an incoming webhook request was actually sent by Twilio. */
-export function isValidTwilioRequest(request: NextRequest, params: Record<string, string>): boolean {
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const signature = request.headers.get("x-twilio-signature");
-  if (!authToken || !signature) return false;
-
-  const proto = request.headers.get("x-forwarded-proto") ?? "https";
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "";
-  const url = `${proto}://${host}${request.nextUrl.pathname}`;
-
-  return Twilio.validateRequest(authToken, signature, url, params);
+  throw new SmsNotConfiguredError("No SMS provider is configured");
 }

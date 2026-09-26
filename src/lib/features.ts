@@ -1,9 +1,8 @@
 // Build-time feature flags.
 
 /**
- * Client texting. Off until a messaging provider is in place: toll-free
- * verification never cleared on Twilio, so no SMS can actually be delivered
- * and every send path fails at the carrier.
+ * Client texting. Off until a messaging provider is in place: sendSms in
+ * @/lib/sms has no provider behind it yet, so no SMS can actually be delivered.
  *
  * While this is false, every practitioner-facing SMS entry point is shown as
  * "Coming soon" rather than failing at send time. The API routes still exist
@@ -17,4 +16,4 @@
 export const SMS_ENABLED: boolean = false;
 
 /** Shown on disabled SMS controls so the copy stays consistent. */
-export const SMS_COMING_SOON = "Texting is coming soon";
+export const SMS_COMING_SOON = "SMS reminders coming soon";

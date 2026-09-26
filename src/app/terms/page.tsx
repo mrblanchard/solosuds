@@ -17,7 +17,7 @@ export default async function TermsPage() {
 
         <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
           <h1 className="mb-2 text-3xl font-bold text-gray-900">Terms of Service</h1>
-          <p className="mb-8 text-sm text-gray-500">Effective date: January 1, 2026. Last updated: August 10, 2026.</p>
+          <p className="mb-8 text-sm text-gray-500">Effective date: January 1, 2026. Last updated: September 26, 2026.</p>
 
           <div className="prose prose-gray max-w-none text-sm leading-relaxed text-gray-700 space-y-6">
 
@@ -164,22 +164,8 @@ export default async function TermsPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">14. Text Messaging (SMS) Terms</h2>
               <p>
-                A practitioner using SoloSuds may send appointment-related text messages to their own clients
-                through the Service (&ldquo;SoloSuds Appointment Text Notifications&rdquo;). This applies only to
-                a client who has actively opted in to receive texts.
-              </p>
-              <p className="mt-2"><strong>Message types.</strong> Booking confirmations, appointment reminders, reschedule notices, waitlist availability alerts, booking links, intake form links, and direct messages a practitioner sends through the Service, plus a one-time confirmation sent when a client opts in.</p>
-              <p className="mt-2"><strong>Message frequency.</strong> Frequency varies based on a client&rsquo;s appointment activity, typically 1 to 4 messages per month.</p>
-              <p className="mt-2"><strong>Cost.</strong> Message and data rates may apply, as charged by the client&rsquo;s wireless carrier.</p>
-              <p className="mt-2"><strong>Opting out.</strong> A client can reply STOP at any time to stop receiving texts. Reply HELP for help, or contact the practitioner directly. Opting out of texts does not affect a client&rsquo;s appointments or care.</p>
-              <p className="mt-2"><strong>Consent is not a condition of service.</strong> A client is never required to opt in to text messages to book or keep an appointment.</p>
-              <p className="mt-2">
-                Carriers are not liable for delayed or undelivered messages. Supported carriers include the major
-                U.S. wireless carriers; coverage and reliability vary by carrier and are not guaranteed by SoloSuds.
-              </p>
-              <p className="mt-2">
-                See our <Link href="/privacy" className="text-indigo-600 hover:underline">Privacy Policy</Link> for
-                how phone numbers and message content are handled.
+                SMS reminders are coming soon. SoloSuds does not currently send text messages, and these Terms
+                will be updated before it does.
               </p>
             </section>
 

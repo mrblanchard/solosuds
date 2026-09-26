@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { sendIntakeFormLink } from "@/lib/email";
-import { sendSms, describeSmsFailure } from "@/lib/twilio";
+import { sendSms, describeSmsFailure } from "@/lib/sms";
 
 export async function POST(
   req: Request,
@@ -82,7 +82,7 @@ export async function POST(
       const result = await sendSms({ to: client.phone, body: smsBody });
       sid = result.sid;
     } catch (err) {
-      console.error("Twilio send error:", err);
+      console.error("SMS send error:", err);
       const { error, status } = describeSmsFailure(err);
       return NextResponse.json({ error }, { status });
     }

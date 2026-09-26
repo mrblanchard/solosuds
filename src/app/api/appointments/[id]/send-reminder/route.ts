@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { sendAppointmentReminder } from "@/lib/email";
 import { ensurePublicToken } from "@/lib/scheduling";
-import { sendSms, buildAppointmentReminderSms } from "@/lib/twilio";
+import { sendSms, buildAppointmentReminderSms } from "@/lib/sms";
 import { formatZonedDisplay } from "@/lib/timezone";
 
 export async function POST(

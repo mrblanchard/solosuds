@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hasConflict, notifyWaitlistForOpening, validateBookingWindow } from "@/lib/scheduling";
 import { sendAppointmentReminder } from "@/lib/email";
-import { sendSms, buildAppointmentRescheduledSms } from "@/lib/twilio";
+import { sendSms, buildAppointmentRescheduledSms } from "@/lib/sms";
 import { zonedTimeToUtc, formatZonedDisplay } from "@/lib/timezone";
 
 export async function PATCH(

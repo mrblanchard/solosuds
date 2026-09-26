@@ -128,16 +128,8 @@ const sections = [
     title: "Messages",
     items: [
       {
-        q: "How does messaging work?",
-        a: "SoloSuds supports SMS messaging through Twilio. You can send text messages to clients directly from the Messages page. When clients reply, their messages appear in your inbox in real-time.",
-      },
-      {
-        q: "Can I get notified when a client replies?",
-        a: "Yes! Go to Settings → Your Profile → SMS Notifications and enter a phone number. When clients reply via text, the message will be forwarded to your phone and you'll receive an email notification with the message content.",
-      },
-      {
-        q: "How do I send a message?",
-        a: "Go to Messages, select a client from the conversation list (or start a new conversation), type your message, and send. Messages are sent as SMS through your organization's Twilio number.",
+        q: "Can I text my clients?",
+        a: "SMS reminders are coming soon. For now, use the Email page to message clients, and send booking and intake links by email.",
       },
     ],
   },

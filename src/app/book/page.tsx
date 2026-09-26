@@ -7,8 +7,7 @@ interface Props {
 }
 
 // Kept alongside /book/[slug] for backward compatibility — this exact URL
-// shape is already handed out in existing links, QR codes, and the approved
-// Twilio toll-free verification's opt-in flow URL. Don't remove.
+// shape is already handed out in existing links and QR codes. Don't remove.
 export default async function BookingPage({ searchParams }: Props) {
   const { org: orgId } = await searchParams;
   if (!orgId) notFound();

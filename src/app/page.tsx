@@ -326,7 +326,7 @@ const features = [
     title: "Smart Scheduling",
     icon: CalendarDays,
     description: "A full-featured calendar with client self-booking, automated reminders, and easy appointment management.",
-    bullets: ["Self-serve online booking", "Email & SMS reminders", "Team calendar view", "Block & buffer times"],
+    bullets: ["Self-serve online booking", "Email reminders (SMS reminders coming soon)", "Team calendar view", "Block & buffer times"],
   },
   {
     title: "Client Management",

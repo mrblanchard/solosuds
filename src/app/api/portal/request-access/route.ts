@@ -97,8 +97,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to send code. Please try again." }, { status: 502 });
     }
   } else {
-    // TODO: SMS via Twilio when phone is matched
-    // For now fall back — in practice you'd send via twilio.ts here
+    // TODO: send the code by SMS (sendSms in @/lib/sms) once a provider is in place
   }
 
   return NextResponse.json({ ok: true, method: deliveryMethod });

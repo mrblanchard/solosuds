@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
 import { ensurePublicToken } from "@/lib/scheduling";
-import { sendSms, buildAppointmentReminderSms } from "@/lib/twilio";
+import { sendSms, buildAppointmentReminderSms } from "@/lib/sms";
 import { formatZonedDisplay } from "@/lib/timezone";
 
 const SWEEP_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes

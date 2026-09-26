@@ -3,9 +3,10 @@ import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendAppointmentReminder } from "@/lib/email";
 import { hasConflict, validateBookingWindow } from "@/lib/scheduling";
-import { sendSms, buildAppointmentConfirmationSms, buildOptInConfirmationSms } from "@/lib/twilio";
+import { sendSms, buildAppointmentConfirmationSms, buildOptInConfirmationSms } from "@/lib/sms";
 import { zonedTimeToUtc, formatZonedDisplay } from "@/lib/timezone";
 import { withCorsRoute, corsPreflight } from "@/lib/cors";
+import { SMS_ENABLED } from "@/lib/features";
 
 export const POST = withCorsRoute(async (request: NextRequest) => {
   try {
@@ -25,6 +26,10 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
 
     if (!orgId || !serviceId || !date || !time || !clientFirstName || !clientLastName) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    // With texting off, email is the only way to confirm a booking.
+    if (!SMS_ENABLED && !clientEmail) {
+      return NextResponse.json({ error: "Please enter your email so we can confirm your booking." }, { status: 400 });
     }
     if (!clientEmail && !clientPhone) {
       return NextResponse.json({ error: "Please provide an email or phone number so we can confirm your booking." }, { status: 400 });

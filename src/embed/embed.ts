@@ -28,6 +28,7 @@ import {
   normalizeEmail,
   isValidEmail,
 } from "./format";
+import { SMS_ENABLED } from "../lib/features";
 
 interface Service {
   id: string;
@@ -209,6 +210,13 @@ class BookingWidget {
       this.render();
       return;
     }
+    // With texting off, the phone field is hidden and email is the only way
+    // to confirm, so it's required.
+    if (!SMS_ENABLED && !this.email) {
+      this.error = "Please enter your email so we can confirm your booking.";
+      this.render();
+      return;
+    }
     if (!this.email && !this.phone) {
       this.error = "Please provide an email or phone number so we can confirm your booking.";
       this.render();
@@ -269,6 +277,11 @@ class BookingWidget {
   private async submitWaitlist() {
     if (!this.firstName || !this.lastName) {
       this.error = "Please fill in your name.";
+      this.render();
+      return;
+    }
+    if (!SMS_ENABLED && !this.email) {
+      this.error = "Please enter your email so we can notify you.";
       this.render();
       return;
     }
@@ -417,7 +430,7 @@ class BookingWidget {
       this.renderDateField(),
       this.date ? this.renderTimeField() : null,
       this.renderContactFields(),
-      this.phone ? this.renderConsent() : null,
+      SMS_ENABLED && this.phone ? this.renderConsent() : null,
       this.renderNotesField(),
       this.renderSubmitButton(),
     ]);
@@ -521,7 +534,9 @@ class BookingWidget {
 
   private renderContactFields() {
     const wrap = h("div", {}, [
-      h("p", { className: "ss-note", text: "We need at least an email or a phone number to confirm your booking." }),
+      SMS_ENABLED
+        ? h("p", { className: "ss-note", text: "We need at least an email or a phone number to confirm your booking." })
+        : null,
     ]);
 
     const row = h("div", { className: "ss-row-2" });
@@ -546,7 +561,7 @@ class BookingWidget {
     wrap.appendChild(row);
 
     wrap.appendChild(
-      this.textField("Email", this.email, "email", !this.phone, {
+      this.textField("Email", this.email, "email", !SMS_ENABLED || !this.phone, {
         onInput: (v) => (this.email = v),
         onBlur: () => {
           this.email = normalizeEmail(this.email);
@@ -576,7 +591,7 @@ class BookingWidget {
       if (shouldShowConsent !== hasConsentBlock) this.render();
     });
     phoneField.appendChild(phoneInput);
-    wrap.appendChild(phoneField);
+    if (SMS_ENABLED) wrap.appendChild(phoneField);
 
     return wrap;
   }

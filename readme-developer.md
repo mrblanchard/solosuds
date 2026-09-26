@@ -16,7 +16,7 @@ src/
 │   ├── layout/             # Sidebar, Topbar, DashboardShell, modals
 │   ├── ui/                 # Generic design-system components (Button, Input, etc.)
 │   └── (feature folders)   # billing/, booking/, clients/, notes/, etc.
-├── lib/                    # Server utilities: auth.ts, db.ts, email.ts, stripe.ts, twilio.ts, utils.ts
+├── lib/                    # Server utilities: auth.ts, db.ts, email.ts, stripe.ts, sms.ts, utils.ts
 ├── test/                   # Vitest test files
 │   ├── api/                # Schema / validation tests (no HTTP)
 │   └── components/         # React component tests (happy-dom)
@@ -53,10 +53,9 @@ src/
 - Schema: `prisma/schema.prisma`. Always run `npx prisma generate` after schema changes.
 - Seed: `prisma/seed.ts` — run with `npx prisma db seed`.
 
-### Twilio SMS
-- Sender number: `+18886215253` (toll-free — requires toll-free verification before bulk SMS works).
-- Set in `.env` as `TWILIO_PHONE_NUMBER`.
-- The `TWILIO_ACCOUNT_SID` must be the account that owns `+18886215253`.
+### SMS
+- No provider is connected. `src/lib/sms.ts` holds the message templates and `sendSms`, which logs in development and throws `SmsNotConfiguredError` in production.
+- To connect a provider, implement the send inside `sendSms`, add its delivery-status and inbound-reply webhooks under `src/app/api/webhooks/`, then set `SMS_ENABLED` in `src/lib/features.ts` to `true`.
 
 ---
 
@@ -205,12 +204,18 @@ The sidebar `<aside>` always contains `lg:translate-x-0` as a desktop override. 
 
 ## Change History
 
-### 2026-04-03
+### 2026-09-26
 
-#### Twilio SMS fix
-- **Problem:** SMS sending failed with "Mismatch between the 'From' number +18777804236 and the account".
-- **Fix:** `+18777804236` was the recipient (Twilio Virtual Phone), not the sender number. Updated `.env`: `TWILIO_PHONE_NUMBER="+18886215253"`.
-- **Note:** Toll-free number requires toll-free verification with Twilio before bulk sending works.
+#### Removed Twilio
+- Deleted the `twilio` package, `src/app/api/webhooks/twilio`, `src/app/api/twilio/status`, the `/api/Twilio/status` rewrite, the domain-verification file, and the Twilio setup scripts.
+- `src/lib/twilio.ts` is now the provider-neutral `src/lib/sms.ts`. Templates, `SmsNotConfiguredError` and `describeSmsFailure` are unchanged.
+- Inbound SMS replies, reply forwarding to `smsForwardNumber`, and delivery-status updates are gone until the new provider's webhooks are built.
+
+#### SMS copy and booking form while texting is off
+- Marketing, pricing, FAQ, privacy and terms now say "SMS reminders coming soon" instead of describing texting.
+- While `SMS_ENABLED` is false, the public booking form, the embed widget and `/api/book` + `/api/book/waitlist` require an email and hide the phone field and SMS consent checkbox. Flipping the flag restores both.
+
+### 2026-04-03
 
 #### Date picker desktop positioning
 - **Problem:** `DateWheelPicker` modal appeared at the bottom of the screen on desktop.
@@ -451,10 +456,7 @@ Full pass across auth/RBAC, file storage, webhooks, and stored-XSS surfaces. 12 
 
 #### Webhook signature verification
 - `src/app/api/webhooks/resend/route.ts` — verifies the Svix signature (`svix-id`/`svix-timestamp`/`svix-signature`) via `new Webhook(RESEND_WEBHOOK_SECRET).verify()`. **Fails closed**: `500` if `RESEND_WEBHOOK_SECRET` is unset, `401` on bad signature, `400` on unparseable payload.
-- `src/lib/twilio.ts` — new `isValidTwilioRequest(request, params)` wrapping `Twilio.validateRequest`.
-- `src/app/api/webhooks/twilio/route.ts` and `src/app/api/twilio/status/route.ts` — both verify `x-twilio-signature` and return `403` before processing.
-  - **Check:** `curl -X POST https://solosuds.com/api/webhooks/resend` with no Svix headers → `401`/`500`. Same idea for the Twilio routes with no `x-twilio-signature` → `403`.
-  - **Note:** Twilio creds are still commented out in `.env` ("coming soon"), so both Twilio routes will `403` everything until `TWILIO_ACCOUNT_SID`/`TWILIO_AUTH_TOKEN` are set — expected, not a regression.
+  - **Check:** `curl -X POST https://solosuds.com/api/webhooks/resend` with no Svix headers → `401`/`500`.
 
 #### Stored XSS prevention
 - `src/lib/sanitize.ts` (new) — `sanitizeEmailHtml()` via `sanitize-html`, allow-listing formatting tags/attributes only; strips `<script>`, `<style>`, `<iframe>`, event handlers, `javascript:` URLs.

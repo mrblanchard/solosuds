@@ -40,7 +40,7 @@ Single tier for now — Solo, for individual practitioners. Multi-practitioner t
 - **Database**: PostgreSQL via Neon, Prisma 7.6
 - **Payments**: Stripe (subscriptions, invoices, pause/resume)
 - **Email**: Resend
-- **SMS**: Twilio
+- **SMS**: none yet (provider being replaced; texting shows as coming soon)
 - **UI**: Tailwind CSS v4, FullCalendar 6, react-grid-layout 2, @dnd-kit (drag-and-drop), CKEditor 5 (GPL), Radix UI primitives
 - **Forms**: React Hook Form + Zod 4 validation
 - **Testing**: Vitest 4, Testing Library, happy-dom
@@ -167,7 +167,6 @@ Serverless functions scale automatically. Each API route spins up on demand — 
 |---|---|---|
 | Neon | 0.5 GB storage, 1 compute unit | ~500+ active clients with lots of data |
 | Resend | 3,000 emails/month | If clients actively use email features |
-| Twilio | Pay-as-you-go from day 1 | Already scales fine |
 | Stripe | 0.5% + standard fees | Revenue-based, not user-count-based |
 | Vercel | 100 GB bandwidth/month | High file download traffic |
 

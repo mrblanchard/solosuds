@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { sendEmail, buildBrandedEmail } from "@/lib/email";
-import { sendSms, describeSmsFailure } from "@/lib/twilio";
+import { sendSms, describeSmsFailure } from "@/lib/sms";
 
 export async function POST(
   req: Request,

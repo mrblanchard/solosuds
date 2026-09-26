@@ -368,14 +368,12 @@ const featureSections = [
     ],
   },
   {
-    title: "Messaging & Email",
+    title: "Email",
     icon: MessageSquare,
     description:
-      "Text and email clients from one inbox, with the guardrails healthcare communication needs.",
+      "Email clients with the guardrails healthcare communication needs.",
     bullets: [
-      "Two-way SMS through your own Twilio number",
-      "Client replies land in your inbox in real time",
-      "Optional forwarding to your own phone",
+      "SMS reminders coming soon",
       "Signed consent flow gates PHI sent by email",
       "Consent status tracked per client",
     ],

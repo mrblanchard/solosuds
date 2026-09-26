@@ -17,7 +17,7 @@ export default async function PrivacyPage() {
 
         <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
           <h1 className="mb-2 text-3xl font-bold text-gray-900">Privacy Policy</h1>
-          <p className="mb-8 text-sm text-gray-500">Effective date: August 10, 2026. Last updated: August 10, 2026.</p>
+          <p className="mb-8 text-sm text-gray-500">Effective date: August 10, 2026. Last updated: September 26, 2026.</p>
 
           <div className="prose prose-gray max-w-none text-sm leading-relaxed text-gray-700 space-y-6">
 
@@ -26,7 +26,7 @@ export default async function PrivacyPage() {
               collects, uses, and shares information through our appointment-scheduling platform for independent
               healthcare and wellness practitioners (the &ldquo;Service&rdquo;). It applies both to practitioners who
               hold an account and to their clients who interact with a practitioner through the Service, including
-              by booking an appointment or receiving text or email notifications.
+              by booking an appointment or receiving email notifications.
             </p>
 
             <section>
@@ -35,7 +35,7 @@ export default async function PrivacyPage() {
               <ul className="list-disc pl-5 mt-2 space-y-1">
                 <li><strong>Practitioner account information:</strong> name, email, phone, business details, and billing information.</li>
                 <li><strong>Client information entered by a practitioner or submitted by a client:</strong> name, email address, phone number, appointment details, and, where applicable, clinical or intake information the practitioner chooses to record.</li>
-                <li><strong>Communications data:</strong> the content and delivery status of emails and text messages sent through the Service.</li>
+                <li><strong>Communications data:</strong> the content and delivery status of emails sent through the Service.</li>
                 <li><strong>Technical data:</strong> IP address, browser type, and usage data collected automatically to operate and secure the Service.</li>
               </ul>
             </section>
@@ -45,7 +45,7 @@ export default async function PrivacyPage() {
               <p>We use information to:</p>
               <ul className="list-disc pl-5 mt-2 space-y-1">
                 <li>Operate the Service, including scheduling, invoicing, and client management.</li>
-                <li>Send transactional emails and text messages a practitioner&rsquo;s client has opted in to receive, such as booking confirmations, appointment reminders, reschedule notices, and waitlist availability alerts.</li>
+                <li>Send transactional emails a practitioner&rsquo;s client has opted in to receive, such as booking confirmations, appointment reminders, reschedule notices, and waitlist availability alerts.</li>
                 <li>Process payments and manage subscriptions.</li>
                 <li>Provide customer support and respond to inquiries.</li>
                 <li>Maintain the security and integrity of the Service.</li>
@@ -59,14 +59,8 @@ export default async function PrivacyPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">3. Text Messaging (SMS)</h2>
               <p>
-                A practitioner&rsquo;s client may provide a phone number and opt in to receive appointment text
-                messages, either by checking the consent checkbox on the practitioner&rsquo;s online booking page or
-                by another method the practitioner discloses at the time of collection. That phone number is used
-                only to send the appointment-related texts described in our{" "}
-                <Link href="/terms" className="text-indigo-600 hover:underline">Terms of Service</Link>, and is
-                shared only with our SMS delivery provider (Twilio) as needed to send those messages. No mobile
-                information is shared with third parties or affiliates for marketing or promotional purposes. A
-                client can withdraw consent at any time by replying STOP, which immediately stops future texts.
+                SMS reminders are coming soon. SoloSuds does not currently send text messages, and this policy
+                will be updated before it does.
               </p>
             </section>
 
@@ -74,8 +68,8 @@ export default async function PrivacyPage() {
               <h2 className="text-base font-semibold text-gray-900 mb-2">4. Third-Party Service Providers</h2>
               <p>
                 We share information with the service providers that operate the Service on our behalf, each bound
-                by contract to use information only to provide their service to us. These currently include Twilio
-                (text messaging), a transactional email provider, Stripe (payment processing), and our cloud
+                by contract to use information only to provide their service to us. These currently include a
+                transactional email provider, Stripe (payment processing), and our cloud
                 hosting and storage providers. We do not permit these providers to use information for their own
                 purposes.
               </p>
@@ -113,8 +107,7 @@ export default async function PrivacyPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">8. Your Choices</h2>
               <p>
-                A client can ask their practitioner to stop text or email communications at any time, or reply
-                STOP to any text message to opt out immediately. A practitioner can access, correct, or export
+                A client can ask their practitioner to stop email communications at any time. A practitioner can access, correct, or export
                 account data at any time from their SoloSuds account, or contact us at{" "}
                 <a href="mailto:support@solosuds.com" className="text-indigo-600 hover:underline">support@solosuds.com</a>{" "}
                 with questions about their data.

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
 import { sendWaitlistOpening } from "@/lib/email";
-import { sendSms, buildWaitlistOpeningSms } from "@/lib/twilio";
+import { sendSms, buildWaitlistOpeningSms } from "@/lib/sms";
 import { zonedTimeToUtc, getZonedHourFraction, getZonedDayOfWeek, getZonedDayBounds, getZonedDateString, formatZonedHHmm } from "@/lib/timezone";
 
 const ACTIVE_STATUSES = ["SCHEDULED", "CONFIRMED", "IN_PROGRESS", "COMPLETED"] as const;

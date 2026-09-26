@@ -9,6 +9,7 @@ import { DateWheelPicker } from "@/components/ui/date-wheel-picker";
 import Link from "next/link";
 import { formatCurrency, formatSlotLabel } from "@/lib/utils";
 import { formatPhone, stripPhone, titleCase, normalizeEmail } from "@/lib/utils";
+import { SMS_ENABLED } from "@/lib/features";
 import { CheckCircle, Clock } from "lucide-react";
 
 interface Service {
@@ -92,6 +93,12 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
       setError("Please fill in all required fields.");
       return;
     }
+    // With texting off, the phone field is hidden and email is the only way
+    // to confirm, so it's required.
+    if (!SMS_ENABLED && !email) {
+      setError("Please enter your email so we can confirm your booking.");
+      return;
+    }
     if (!email && !phone) {
       setError("Please provide an email or phone number so we can confirm your booking.");
       return;
@@ -151,6 +158,10 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
   async function submitWaitlist() {
     if (!firstName || !lastName) {
       setError("Please fill in your name.");
+      return;
+    }
+    if (!SMS_ENABLED && !email) {
+      setError("Please enter your email so we can notify you.");
       return;
     }
     if (!email && !phone) {
@@ -391,12 +402,14 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
               </div>
             </div>
 
-            <p className="text-xs text-gray-500">
-              We need at least an email or a phone number to confirm your booking.
-            </p>
+            {SMS_ENABLED && (
+              <p className="text-xs text-gray-500">
+                We need at least an email or a phone number to confirm your booking.
+              </p>
+            )}
 
             <div>
-              <Label htmlFor="email">Email {!phone && <span className="text-red-500">*</span>}</Label>
+              <Label htmlFor="email">Email {(!SMS_ENABLED || !phone) && <span className="text-red-500">*</span>}</Label>
               <Input
                 id="email"
                 type="email"
@@ -407,6 +420,7 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
               />
             </div>
 
+            {SMS_ENABLED && (
             <div>
               <Label htmlFor="phone">Phone {!email && <span className="text-red-500">*</span>}</Label>
               <Input
@@ -422,8 +436,9 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
                 className="mt-1"
               />
             </div>
+            )}
 
-            {phone && (
+            {SMS_ENABLED && phone && (
               <label className="flex items-start gap-2 text-xs text-gray-600">
                 <input
                   type="checkbox"

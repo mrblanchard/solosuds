@@ -11,7 +11,7 @@ const coreFeatures = [
   "Online scheduling & self-booking",
   "Intake form builder",
   "Invoicing",
-  "Email & SMS messaging",
+  "Email messaging (SMS reminders coming soon)",
   "Client document portal",
   "White label branding",
   "Community support",

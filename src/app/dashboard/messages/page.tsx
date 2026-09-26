@@ -25,10 +25,10 @@ export default async function MessagesPage({ searchParams }: Props) {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
             <MessageSquare className="h-7 w-7 text-gray-400" />
           </div>
-          <h1 className="text-lg font-semibold text-gray-900">Messages are coming soon</h1>
+          <h1 className="text-lg font-semibold text-gray-900">SMS reminders coming soon</h1>
           <p className="mt-2 text-sm text-gray-500">
-            Client texting isn&apos;t available yet. In the meantime you can reach clients by
-            email, and their booking and intake links can be sent that way too.
+            In the meantime you can reach clients by email, and their booking and intake links
+            can be sent that way too.
           </p>
           <Link
             href="/dashboard/email"

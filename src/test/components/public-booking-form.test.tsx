@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { render, screen, fireEvent } from "@testing-library/react";
 import PublicBookingForm from "@/components/booking/public-booking-form";
+import { SMS_ENABLED } from "@/lib/features";
 
 const services = [
   {
@@ -71,8 +72,17 @@ describe("PublicBookingForm", () => {
       expect(screen.getByText(/First name/i)).toBeInTheDocument();
       expect(screen.getByText(/Last name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Phone/i)).toBeInTheDocument();
       expect(screen.getByText(/Notes for the practitioner/i)).toBeInTheDocument();
+    });
+
+    it("shows the phone field only while texting is enabled", () => {
+      goToStep2();
+      if (SMS_ENABLED) {
+        expect(screen.getByLabelText(/Phone/i)).toBeInTheDocument();
+      } else {
+        expect(screen.queryByLabelText(/Phone/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/text messages/i)).not.toBeInTheDocument();
+      }
     });
 
     it("step 2 labels are linked to inputs via htmlFor/id", () => {

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { sendSms, buildOptInConfirmationSms } from "@/lib/twilio";
+import { sendSms, buildOptInConfirmationSms } from "@/lib/sms";
 import { withCorsRoute, corsPreflight } from "@/lib/cors";
+import { SMS_ENABLED } from "@/lib/features";
 
 export const POST = withCorsRoute(async (request: NextRequest) => {
   try {
@@ -10,6 +11,10 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
 
     if (!orgId || !firstName || !lastName) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    // With texting off, email is the only way to notify a waitlisted client.
+    if (!SMS_ENABLED && !email) {
+      return NextResponse.json({ error: "Please enter your email so we can notify you." }, { status: 400 });
     }
     if (!email && !phone) {
       return NextResponse.json({ error: "Please provide an email or phone number so we can confirm your booking." }, { status: 400 });
