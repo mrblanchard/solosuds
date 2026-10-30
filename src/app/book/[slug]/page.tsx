@@ -7,7 +7,7 @@ interface Props {
 }
 
 // The friendly booking link a practitioner gets shown/copies going forward:
-// solosuds.com/book/shop-jeremy-store instead of the old solosuds.com/book?org=<cuid>.
+// bookedandnoted.com/book/shop-jeremy-store instead of the old /book?org=<cuid>.
 export default async function BookingSlugPage({ params }: Props) {
   const { slug } = await params;
 

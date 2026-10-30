@@ -8,8 +8,8 @@ interface Props {
 }
 
 // The friendly intake-form link generated going forward:
-// solosuds.com/intake/shop-jeremy-store/<formId> instead of the old
-// solosuds.com/intake/<formId>. The form is still keyed by its own id (forms
+// bookedandnoted.com/intake/shop-jeremy-store/<formId> instead of the old
+// /intake/<formId>. The form is still keyed by its own id (forms
 // don't have their own slug), but the org's name is now visible in the URL.
 //
 // The [slug] param here is the org's slug (folder can't be named [orgSlug] —

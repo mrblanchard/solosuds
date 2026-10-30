@@ -2,7 +2,7 @@
 
 Practice management software for healthcare practitioners. SOAP notes, scheduling, billing, intake forms, and client messaging, all in one place.
 
-**Production:** https://solosuds.com  
+**Production:** https://www.bookedandnoted.com (hosted on Vercel, deploys on push to `main`)  
 **Dev:** https://dev.solosuds.com
 
 ---

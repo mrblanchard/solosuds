@@ -5,10 +5,7 @@
  * into public/embed.js). A customer pastes:
  *
  *   <div data-booking-widget="their-org-slug"></div>
- *   <script src="https://solosuds.com/embed.js" async></script>
- *
- * Snippets pasted before the rename use data-solosuds-booking, which is still
- * recognized so those sites keep working.
+ *   <script src="https://bookedandnoted.com/embed.js" async></script>
  *
  * onto their own website. This finds every such element, mounts a Shadow DOM
  * root inside it (so the widget's styles can't leak into the host page and
@@ -677,16 +674,14 @@ class BookingWidget {
 
 function mount(el: HTMLElement) {
   if (el.dataset.ssMounted === "true") return;
-  const slug = el.dataset.bookingWidget ?? el.dataset.solosudsBooking;
+  const slug = el.dataset.bookingWidget;
   if (!slug) return;
   el.dataset.ssMounted = "true";
   new BookingWidget(el, slug);
 }
 
 function init() {
-  document
-    .querySelectorAll<HTMLElement>("[data-booking-widget], [data-solosuds-booking]")
-    .forEach(mount);
+  document.querySelectorAll<HTMLElement>("[data-booking-widget]").forEach(mount);
 }
 
 if (document.readyState === "loading") {
