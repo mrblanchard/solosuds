@@ -17,7 +17,7 @@ function getClient() {
   });
 }
 
-const BUCKET = process.env.STORAGE_BUCKET ?? "SoloSuds-files";
+const BUCKET = process.env.STORAGE_BUCKET!;
 
 export async function uploadFile({
   key,

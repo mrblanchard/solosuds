@@ -2,8 +2,7 @@
 
 Practice management software for healthcare practitioners. SOAP notes, scheduling, billing, intake forms, and client messaging, all in one place.
 
-**Production:** https://www.bookedandnoted.com (hosted on Vercel, deploys on push to `main`)  
-**Dev:** https://dev.solosuds.com
+**Production:** https://www.bookedandnoted.com
 
 ---
 
@@ -44,7 +43,7 @@ Single tier for now — Solo, for individual practitioners. Multi-practitioner t
 - **UI**: Tailwind CSS v4, FullCalendar 6, react-grid-layout 2, @dnd-kit (drag-and-drop), CKEditor 5 (GPL), Radix UI primitives
 - **Forms**: React Hook Form + Zod 4 validation
 - **Testing**: Vitest 4, Testing Library, happy-dom
-- **Hosting**: Linode (Ubuntu 24.04, PM2, Cloudflare Tunnel)
+- **Hosting**: Vercel (auto-deploys from GitHub `main`)
 
 ---
 
@@ -55,7 +54,7 @@ npm install
 npm run dev
 ```
 
-Runs at `http://localhost:3000`. The Cloudflare tunnel at `dev.solosuds.com` proxies to this port.
+Runs at `http://localhost:3000`.
 
 Copy `.env.example` to `.env` and fill in the required values (see below).
 
@@ -71,28 +70,28 @@ GOOGLE_CLIENT_SECRET
 
 ### Cloudflare R2 (file storage)
 
-The client document portal requires Cloudflare R2. The bucket is already named `SoloSuds` in the `.env`.
+The client document portal, practice logo uploads and full account export use Cloudflare R2. The bucket name is set by `STORAGE_BUCKET`.
 
 **Getting credentials:**
 
 1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → **R2 Object Storage** (left sidebar)
 2. Your **Account ID** appears in the URL: `dash.cloudflare.com/<account-id>/r2/...`
 3. Click **Manage R2 API Tokens** (top right)
-4. Click **Create API Token** — name it `SoloSuds-app`, set permissions to **Object Read & Write**, scope it to the `SoloSuds` bucket
-5. Copy the credentials immediately — they are shown once
+4. Click **Create API Token**, set permissions to **Object Read & Write**, and scope it to the app's bucket
+5. Copy the credentials immediately, they are shown once
 
 **Fill in `.env`:**
 ```
 STORAGE_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com"
 STORAGE_ACCESS_KEY_ID="<token access key id>"
 STORAGE_SECRET_ACCESS_KEY="<token secret access key>"
-STORAGE_BUCKET="SoloSuds"
-STORAGE_PUBLIC_URL=""   # leave blank — never expose the bucket publicly
+STORAGE_BUCKET="<bucket name>"
+STORAGE_PUBLIC_URL=""   # leave blank, never expose the bucket publicly
 ```
 
 > **Do not enable public bucket access.** Files are served through 15-minute expiring signed URLs generated server-side after authorization. A public bucket URL would bypass all access controls and violate HIPAA.
 
-**On the production server**, update `/app/solosuds/.env` with the same values and restart: `pm2 restart solosuds`
+For production, set the same values in the Vercel project's Environment Variables and redeploy.
 
 ### Database
 
@@ -106,47 +105,26 @@ npx prisma studio        # open DB browser
 
 ## Deploying to Production
 
-Code is hosted on [Forgejo](https://v14.next.forgejo.org/SoloSuds/SoloSuds). The production server is a Linode VPS (Ubuntu 24.04, 1GB RAM, Newark NJ) running PM2 + cloudflared.
-
-**Server IP:** `45.33.68.189`  
-**Tunnel:** `SoloSuds-prod` (ID: `96854119-0d6e-4303-a1b7-914706b14f52`) → `solosuds.com`  
-**Process manager:** PM2 (`pm2 list`, `pm2 logs solosuds`)  
-**Swap:** 2GB swapfile at `/swapfile` (needed for builds on 1GB RAM)
+Code lives on GitHub (`origin`). Production runs on Vercel, project `bookedandnoted`, serving `www.bookedandnoted.com` (the bare `bookedandnoted.com` redirects to it).
 
 ### Deploy workflow
 
-1. Make changes locally and test on `dev.solosuds.com`
-2. Commit and push to Forgejo:
+1. Make changes locally and test on `http://localhost:3000`
+2. Commit and push to `main`:
    ```bash
-   git add .
-   git commit -m "describe your change"
-   git push
+   git push origin main
    ```
-3. SSH into the server and deploy:
-   ```bash
-   ssh root@45.33.68.189
-   cd /app/solosuds
-   git pull
-   npm install        # only if package.json changed
-   npx prisma generate  # only if schema.prisma changed
-   npm run build
-   pm2 restart solosuds
-   ```
+3. Vercel builds and deploys automatically. Check with `npx vercel ls`.
 
-### First-time server setup (already done)
+Environment variables live in Vercel → Project → Settings → Environment Variables. After changing one, redeploy (`npx vercel redeploy <latest-production-url> --target production`), because `NEXT_PUBLIC_*` values are baked in at build time.
 
-- Node.js 22 via NodeSource
-- PM2 with systemd startup (`pm2 startup systemd`)
-- cloudflared as systemd service (`/etc/systemd/system/cloudflared.service`)
-- 2GB swap at `/swapfile`
-- App cloned to `/app/solosuds`
-- `.env` at `/app/solosuds/.env` (not in git — must be set manually on server)
+If `schema.prisma` changed, run `npx prisma db push` once locally (dev and prod share the same Neon database).
 
 ### Google OAuth redirect URIs
 
-Both of these must be in Google Console → OAuth client → Authorized redirect URIs:
-- `https://dev.solosuds.com/api/auth/callback/google`
-- `https://solosuds.com/api/auth/callback/google`
+These must be in Google Console → OAuth client → Authorized redirect URIs:
+- `http://localhost:3000/api/auth/callback/google`
+- `https://www.bookedandnoted.com/api/auth/callback/google`
 
 ## Scalability Notes
 

@@ -15,14 +15,14 @@ async function main() {
     );
   }
 
-  const email = "admin@SoloSuds.dev";
+  const email = "admin@bookedandnoted.dev";
   const password = "Admin1234!";
-  const orgName = "SoloSuds Demo Practice";
+  const orgName = "Booked & Noted Seed Practice";
 
   // Create org
   const org = await db.organization.upsert({
-    where: { slug: "SoloSuds-demo" },
-    create: { id: "demo-org", name: orgName, slug: "SoloSuds-demo" },
+    where: { slug: "bookedandnoted-seed" },
+    create: { id: "demo-org", name: orgName, slug: "bookedandnoted-seed" },
     update: { name: orgName },
   });
 

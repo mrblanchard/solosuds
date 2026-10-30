@@ -1,4 +1,4 @@
-﻿# SoloSuds — Developer Notes
+﻿# Booked & Noted: Developer Notes
 
 Internal reference for ongoing development decisions, fixes, and conventions. Not intended for end users.
 
@@ -357,7 +357,7 @@ All 4 drag implementations now use consistent handles:
 - Drag state: `opacity: 0.4`, `ring-2 ring-indigo-200`, `border-indigo-300`.
 
 #### Sidebar branding
-- Added "Soap Suds" text next to logo in sidebar header. Hidden when sidebar is collapsed.
+- Added the app name next to the logo in sidebar header. Hidden when sidebar is collapsed.
 
 #### Bug fixes
 - **Messages page**: `searchParams` is a `Promise` in Next.js 16 — added `await` before destructuring.
@@ -419,7 +419,7 @@ Added PRACTITIONER/FRONT_DESK role blocking to all DELETE routes:
 
 #### Inbound email via Resend webhook
 - `src/app/api/webhooks/resend/route.ts` (new): Handles `email.received` webhook events. Fetches full email via `resend.emails.receiving.get()`, matches sender to client by email (case-insensitive), stores as INBOUND email with `read: false`.
-- Requires Resend MX record on `solosuds.com` domain for inbound routing.
+- Requires a Resend inbound (MX) record on the sending domain for inbound routing.
 
 #### Conversational email threads
 - `src/components/email/conversation-list.tsx` (new): Conversations grouped by client with initials avatar, unread count badge (indigo), last message preview.
@@ -456,7 +456,7 @@ Full pass across auth/RBAC, file storage, webhooks, and stored-XSS surfaces. 12 
 
 #### Webhook signature verification
 - `src/app/api/webhooks/resend/route.ts` — verifies the Svix signature (`svix-id`/`svix-timestamp`/`svix-signature`) via `new Webhook(RESEND_WEBHOOK_SECRET).verify()`. **Fails closed**: `500` if `RESEND_WEBHOOK_SECRET` is unset, `401` on bad signature, `400` on unparseable payload.
-  - **Check:** `curl -X POST https://solosuds.com/api/webhooks/resend` with no Svix headers → `401`/`500`.
+  - **Check:** `curl -X POST https://www.bookedandnoted.com/api/webhooks/resend` with no Svix headers → `401`/`500`.
 
 #### Stored XSS prevention
 - `src/lib/sanitize.ts` (new) — `sanitizeEmailHtml()` via `sanitize-html`, allow-listing formatting tags/attributes only; strips `<script>`, `<style>`, `<iframe>`, event handlers, `javascript:` URLs.
@@ -480,17 +480,17 @@ Full pass across auth/RBAC, file storage, webhooks, and stored-XSS surfaces. 12 
   - **Check:** generate a team invite link, then in the DB set that org's `inviteCodeExpiresAt` to a past date — `/register?invite=<code>` should now show "Invalid invite code" and registering with it returns "Invalid or expired invite link".
 
 #### Seed script guard
-- `prisma/seed.ts` — refuses to run when `NODE_ENV=production` (the seed `upsert`s a hardcoded `admin@SoloSuds.dev` / `Admin1234!` account — running it against prod would create/reset that login). Also exits non-zero on error instead of silently logging via `console.error` only.
+- `prisma/seed.ts` — refuses to run when `NODE_ENV=production` (the seed `upsert`s a hardcoded `admin@bookedandnoted.dev` / `Admin1234!` account — running it against prod would create/reset that login). Also exits non-zero on error instead of silently logging via `console.error` only.
   - **Check:** `NODE_ENV=production npx tsx prisma/seed.ts` should throw and exit 1 immediately.
 
 #### New dependencies / config
 - `package.json` — added `sanitize-html`, `svix`, `@types/sanitize-html`.
-- `.env` — added `RESEND_WEBHOOK_SECRET` (from Resend dashboard → Webhooks → endpoint signing secret). **Set in both local `.env` and prod `/app/solosuds/.env`** as of 2026-06-12. Without it, `/api/webhooks/resend` returns `500` for every request.
+- `.env` — added `RESEND_WEBHOOK_SECRET` (from Resend dashboard → Webhooks → endpoint signing secret). **Set in both local `.env` and the production env** as of 2026-06-12. Without it, `/api/webhooks/resend` returns `500` for every request.
 
 #### Deploy checklist for this batch
-1. `git push`, then on the server: `cd /app/solosuds && git pull`.
+1. `git push`, then on the server: `git pull`.
 2. `npm install` (new deps: sanitize-html, svix).
 3. `npx prisma generate` (schema changed; DB itself is already synced as of 2026-06-12 — this just regenerates types).
-4. `npm run build && pm2 restart solosuds`.
+4. `npm run build`, then restart the app.
 5. `RESEND_WEBHOOK_SECRET` is already in prod `.env` — no action needed.
 

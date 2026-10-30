@@ -3,9 +3,9 @@
  * Run: node scripts/create-test-tiers.mjs
  *
  * Credentials:
- *   Solo     › solo@test.SoloSuds.dev     / Test1234!
- *   Practice › practice@test.SoloSuds.dev / Test1234!
- *   Clinic   › clinic@test.SoloSuds.dev   / Test1234!
+ *   Solo     › solo@test.bookedandnoted.dev     / Test1234!
+ *   Practice › practice@test.bookedandnoted.dev / Test1234!
+ *   Clinic   › clinic@test.bookedandnoted.dev   / Test1234!
  */
 
 import { PrismaClient } from "@prisma/client";
@@ -27,7 +27,7 @@ const tiers = [
     orgId: "test-org-solo",
     orgName: "Test Practice – Solo",
     plan: "solo",
-    email: "solo@test.SoloSuds.dev",
+    email: "solo@test.bookedandnoted.dev",
     userId: "test-user-solo",
     name: "Solo Tester",
   },
@@ -36,7 +36,7 @@ const tiers = [
     orgId: "test-org-practice",
     orgName: "Test Practice – Practice",
     plan: "practice",
-    email: "practice@test.SoloSuds.dev",
+    email: "practice@test.bookedandnoted.dev",
     userId: "test-user-practice",
     name: "Practice Tester",
   },
@@ -45,7 +45,7 @@ const tiers = [
     orgId: "test-org-clinic",
     orgName: "Test Practice – Clinic",
     plan: "clinic",
-    email: "clinic@test.SoloSuds.dev",
+    email: "clinic@test.bookedandnoted.dev",
     userId: "test-user-clinic",
     name: "Clinic Tester",
   },

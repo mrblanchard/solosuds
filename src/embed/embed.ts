@@ -147,7 +147,7 @@ class BookingWidget {
         : isValidHex(this.org?.primaryColor)
         ? (this.org!.primaryColor as string)
         : "#4f46e5";
-      this.host.style.setProperty("--ss-accent", this.accent);
+      this.host.style.setProperty("--bn-accent", this.accent);
       this.render();
     } catch {
       this.renderUnavailable();
@@ -155,23 +155,23 @@ class BookingWidget {
   }
 
   private clear() {
-    this.root.querySelectorAll(".ss-root").forEach((n) => n.remove());
+    this.root.querySelectorAll(".bn-root").forEach((n) => n.remove());
   }
 
   private renderLoading() {
     this.clear();
-    const wrap = h("div", { className: "ss-root" }, [
-      h("p", { className: "ss-loading", text: "Loading booking form…" }),
+    const wrap = h("div", { className: "bn-root" }, [
+      h("p", { className: "bn-loading", text: "Loading booking form…" }),
     ]);
     this.root.appendChild(wrap);
   }
 
   private renderUnavailable() {
     this.clear();
-    const wrap = h("div", { className: "ss-root" }, [
-      h("div", { className: "ss-card" }, [
-        h("div", { className: "ss-card-body" }, [
-          h("p", { className: "ss-alert ss-alert-info", text: "Online booking isn't available right now." }),
+    const wrap = h("div", { className: "bn-root" }, [
+      h("div", { className: "bn-card" }, [
+        h("div", { className: "bn-card-body" }, [
+          h("p", { className: "bn-alert bn-alert-info", text: "Online booking isn't available right now." }),
         ]),
       ]),
     ]);
@@ -340,13 +340,13 @@ class BookingWidget {
 
   private render() {
     this.clear();
-    const wrap = h("div", { className: "ss-root" }, [
-      this.error ? h("p", { className: "ss-alert ss-alert-error", text: this.error }) : null,
+    const wrap = h("div", { className: "bn-root" }, [
+      this.error ? h("p", { className: "bn-alert bn-alert-error", text: this.error }) : null,
       this.step === "confirmed" ? this.renderConfirmed() : null,
       this.step === "waitlisted" ? this.renderWaitlisted() : null,
       this.step === "service" ? this.renderServiceStep() : null,
       this.step === "details" ? this.renderDetailsStep() : null,
-      h("p", { className: "ss-footer", text: `Booking powered by Booked & Noted · ${this.org?.name ?? ""}` }),
+      h("p", { className: "bn-footer", text: `Booking powered by Booked & Noted · ${this.org?.name ?? ""}` }),
     ]);
     this.root.appendChild(wrap);
   }
@@ -357,11 +357,11 @@ class BookingWidget {
       this.email ? `an email to ${this.email}` : null,
       willText ? `a text to ${this.phone}` : null,
     ].filter(Boolean);
-    return h("div", { className: "ss-card" }, [
-      h("div", { className: "ss-confirm" }, [
-        h("p", { className: "ss-confirm-title", text: "Booking confirmed!" }),
+    return h("div", { className: "bn-card" }, [
+      h("div", { className: "bn-confirm" }, [
+        h("p", { className: "bn-confirm-title", text: "Booking confirmed!" }),
         h("p", {
-          className: "ss-confirm-text",
+          className: "bn-confirm-text",
           text: `We'll send ${destinations.join(" and ")}. See you soon!`,
         }),
       ]),
@@ -372,33 +372,33 @@ class BookingWidget {
     const text = this.email
       ? `We'll email ${this.email} the moment a spot opens up.`
       : `We'll text ${this.phone} the moment a spot opens up.`;
-    return h("div", { className: "ss-card" }, [
-      h("div", { className: "ss-confirm" }, [
-        h("p", { className: "ss-confirm-title", text: "You're on the waitlist!" }),
-        h("p", { className: "ss-confirm-text", text }),
+    return h("div", { className: "bn-card" }, [
+      h("div", { className: "bn-confirm" }, [
+        h("p", { className: "bn-confirm-title", text: "You're on the waitlist!" }),
+        h("p", { className: "bn-confirm-text", text }),
       ]),
     ]);
   }
 
   private renderServiceStep() {
     const services = this.org!.services;
-    return h("div", { className: "ss-card" }, [
-      h("div", { className: "ss-card-header" }, [h("p", { className: "ss-card-title", text: "Choose a Service" })]),
+    return h("div", { className: "bn-card" }, [
+      h("div", { className: "bn-card-header" }, [h("p", { className: "bn-card-title", text: "Choose a Service" })]),
       h(
         "div",
-        { className: "ss-card-body" },
+        { className: "bn-card-body" },
         services.length === 0
-          ? [h("p", { className: "ss-note", text: "No services available for online booking." })]
+          ? [h("p", { className: "bn-note", text: "No services available for online booking." })]
           : services.map((service) => {
-              const btn = h("button", { className: "ss-service" }, [
-                h("div", { className: "ss-service-row" }, [
+              const btn = h("button", { className: "bn-service" }, [
+                h("div", { className: "bn-service-row" }, [
                   h("div", {}, [
-                    h("p", { className: "ss-service-name", text: service.name }),
-                    service.description ? h("p", { className: "ss-service-desc", text: service.description }) : null,
-                    h("p", { className: "ss-service-duration", text: `${service.durationMinutes} minutes` }),
+                    h("p", { className: "bn-service-name", text: service.name }),
+                    service.description ? h("p", { className: "bn-service-desc", text: service.description }) : null,
+                    h("p", { className: "bn-service-duration", text: `${service.durationMinutes} minutes` }),
                   ]),
                   service.price != null
-                    ? h("span", { className: "ss-service-price", text: formatCurrency(service.price) })
+                    ? h("span", { className: "bn-service-price", text: formatCurrency(service.price) })
                     : null,
                 ]),
               ]);
@@ -417,14 +417,14 @@ class BookingWidget {
 
   private renderDetailsStep() {
     const service = this.selectedService!;
-    const backBtn = h("button", { className: "ss-back", text: "← Change service" });
+    const backBtn = h("button", { className: "bn-back", text: "← Change service" });
     backBtn.addEventListener("click", () => {
       this.step = "service";
       this.render();
     });
 
     const form = h("form", {}, [
-      h("div", { className: "ss-alert ss-alert-info" }, [
+      h("div", { className: "bn-alert bn-alert-info" }, [
         document.createTextNode(`${service.name} · ${service.durationMinutes} min`),
       ]),
       this.renderDateField(),
@@ -440,23 +440,23 @@ class BookingWidget {
       else this.submitBooking();
     });
 
-    return h("div", { className: "ss-card" }, [
-      h("div", { className: "ss-card-header" }, [
-        h("p", { className: "ss-card-title", text: "Your Details" }),
+    return h("div", { className: "bn-card" }, [
+      h("div", { className: "bn-card-header" }, [
+        h("p", { className: "bn-card-title", text: "Your Details" }),
         backBtn,
       ]),
-      h("div", { className: "ss-card-body" }, [form]),
+      h("div", { className: "bn-card-body" }, [form]),
     ]);
   }
 
   private renderDateField() {
-    const field = h("div", { className: "ss-field" }, [
-      h("label", { className: "ss-label" }, [
+    const field = h("div", { className: "bn-field" }, [
+      h("label", { className: "bn-label" }, [
         document.createTextNode("Date "),
-        h("span", { className: "ss-required", text: "*" }),
+        h("span", { className: "bn-required", text: "*" }),
       ]),
     ]);
-    const input = h("input", { className: "ss-input" }) as HTMLInputElement;
+    const input = h("input", { className: "bn-input" }) as HTMLInputElement;
     input.type = "date";
     input.min = todayLocalDateString();
     input.value = this.date;
@@ -470,23 +470,23 @@ class BookingWidget {
   }
 
   private renderTimeField() {
-    const field = h("div", { className: "ss-field" }, [
+    const field = h("div", { className: "bn-field" }, [
       h("label", {
-        className: "ss-label",
+        className: "bn-label",
         text: "Time *",
       }),
     ]);
 
     if (this.loadingSlots) {
-      field.appendChild(h("p", { className: "ss-loading", text: "Loading available times…" }));
+      field.appendChild(h("p", { className: "bn-loading", text: "Loading available times…" }));
       return field;
     }
     if (this.slotsError) {
-      const retry = h("button", { className: "ss-button ss-button-outline", text: "Try again" });
+      const retry = h("button", { className: "bn-button bn-button-outline", text: "Try again" });
       retry.type = "button";
       retry.addEventListener("click", () => this.loadSlots());
       field.appendChild(
-        h("div", { className: "ss-alert ss-alert-info" }, [
+        h("div", { className: "bn-alert bn-alert-info" }, [
           h("p", { text: "Couldn't load available times." }),
           retry,
         ])
@@ -495,19 +495,19 @@ class BookingWidget {
     }
     if (this.dayClosed) {
       field.appendChild(
-        h("div", { className: "ss-alert ss-alert-info", text: "Not available on this day. Please pick another date." })
+        h("div", { className: "bn-alert bn-alert-info", text: "Not available on this day. Please pick another date." })
       );
       return field;
     }
     if (this.fullyBooked) {
-      const joinBtn = h("button", { className: "ss-button ss-button-outline", text: "Join Waitlist" });
+      const joinBtn = h("button", { className: "bn-button bn-button-outline", text: "Join Waitlist" });
       joinBtn.type = "button";
       joinBtn.addEventListener("click", () => {
         this.wantsWaitlist = true;
         this.render();
       });
       field.appendChild(
-        h("div", { className: "ss-alert ss-alert-warn" }, [
+        h("div", { className: "bn-alert bn-alert-warn" }, [
           h("p", { text: "Fully booked that day. Want to be notified if a spot opens up?" }),
           joinBtn,
         ])
@@ -515,9 +515,9 @@ class BookingWidget {
       return field;
     }
 
-    const grid = h("div", { className: "ss-slots" });
+    const grid = h("div", { className: "bn-slots" });
     for (const slot of this.slots) {
-      const btn = h("button", { className: "ss-slot", text: formatSlotLabel(slot.time) }) as HTMLButtonElement;
+      const btn = h("button", { className: "bn-slot", text: formatSlotLabel(slot.time) }) as HTMLButtonElement;
       btn.type = "button";
       btn.disabled = !slot.available;
       btn.dataset.selected = String(this.time === slot.time);
@@ -535,11 +535,11 @@ class BookingWidget {
   private renderContactFields() {
     const wrap = h("div", {}, [
       SMS_ENABLED
-        ? h("p", { className: "ss-note", text: "We need at least an email or a phone number to confirm your booking." })
+        ? h("p", { className: "bn-note", text: "We need at least an email or a phone number to confirm your booking." })
         : null,
     ]);
 
-    const row = h("div", { className: "ss-row-2" });
+    const row = h("div", { className: "bn-row-2" });
     row.appendChild(
       this.textField("First name", this.firstName, "text", true, {
         onInput: (v) => (this.firstName = v),
@@ -570,13 +570,13 @@ class BookingWidget {
       })
     );
 
-    const phoneField = h("div", { className: "ss-field" }, [
-      h("label", { className: "ss-label" }, [
+    const phoneField = h("div", { className: "bn-field" }, [
+      h("label", { className: "bn-label" }, [
         document.createTextNode("Phone "),
-        !this.email ? h("span", { className: "ss-required", text: "*" }) : null,
+        !this.email ? h("span", { className: "bn-required", text: "*" }) : null,
       ]),
     ]);
-    const phoneInput = h("input", { className: "ss-input" }) as HTMLInputElement;
+    const phoneInput = h("input", { className: "bn-input" }) as HTMLInputElement;
     phoneInput.type = "tel";
     phoneInput.placeholder = "802-258-0000";
     phoneInput.value = this.phone;
@@ -587,7 +587,7 @@ class BookingWidget {
       // but we do need the consent checkbox (and the email/phone required
       // asterisks) to update once a phone is entered or cleared.
       const shouldShowConsent = !!this.phone;
-      const hasConsentBlock = !!this.root.querySelector(".ss-consent");
+      const hasConsentBlock = !!this.root.querySelector(".bn-consent");
       if (shouldShowConsent !== hasConsentBlock) this.render();
     });
     phoneField.appendChild(phoneInput);
@@ -603,13 +603,13 @@ class BookingWidget {
     required: boolean,
     handlers: { onInput: (v: string) => void; onBlur?: () => string }
   ) {
-    const field = h("div", { className: "ss-field" }, [
-      h("label", { className: "ss-label" }, [
+    const field = h("div", { className: "bn-field" }, [
+      h("label", { className: "bn-label" }, [
         document.createTextNode(label + " "),
-        required ? h("span", { className: "ss-required", text: "*" }) : null,
+        required ? h("span", { className: "bn-required", text: "*" }) : null,
       ]),
     ]);
-    const input = h("input", { className: "ss-input" }) as HTMLInputElement;
+    const input = h("input", { className: "bn-input" }) as HTMLInputElement;
     input.type = type;
     input.value = value;
     input.required = required;
@@ -624,7 +624,7 @@ class BookingWidget {
   }
 
   private renderConsent() {
-    const label = h("label", { className: "ss-consent" });
+    const label = h("label", { className: "bn-consent" });
     const checkbox = h("input") as HTMLInputElement;
     checkbox.type = "checkbox";
     checkbox.checked = this.smsConsent;
@@ -648,8 +648,8 @@ class BookingWidget {
   }
 
   private renderNotesField() {
-    const field = h("div", { className: "ss-field" }, [h("label", { className: "ss-label", text: "Notes for the practitioner" })]);
-    const input = h("input", { className: "ss-input" }) as HTMLInputElement;
+    const field = h("div", { className: "bn-field" }, [h("label", { className: "bn-label", text: "Notes for the practitioner" })]);
+    const input = h("input", { className: "bn-input" }) as HTMLInputElement;
     input.type = "text";
     input.placeholder = "Optional";
     input.value = this.notes;
@@ -659,7 +659,7 @@ class BookingWidget {
   }
 
   private renderSubmitButton() {
-    const btn = h("button", { className: "ss-button" }) as HTMLButtonElement;
+    const btn = h("button", { className: "bn-button" }) as HTMLButtonElement;
     btn.type = "submit";
     if (this.wantsWaitlist) {
       btn.textContent = this.submitting ? "Joining…" : "Join Waitlist";
@@ -673,10 +673,10 @@ class BookingWidget {
 }
 
 function mount(el: HTMLElement) {
-  if (el.dataset.ssMounted === "true") return;
+  if (el.dataset.bnMounted === "true") return;
   const slug = el.dataset.bookingWidget;
   if (!slug) return;
-  el.dataset.ssMounted = "true";
+  el.dataset.bnMounted = "true";
   new BookingWidget(el, slug);
 }
 

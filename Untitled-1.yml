@@ -3,13 +3,11 @@ Decline: 4000 0000 0000 0002
 Requires auth: 4000 0025 0000 3155
 
 \Tier	Email	Password
-Solo	solo@test.solosuds.dev	Test1234!
-Practice	practice@test.solosuds.dev	Test1234!
-Clinic	clinic@test.solosuds.dev	Test1234!
+Solo	solo@test.bookedandnoted.dev	Test1234!
+Practice	practice@test.bookedandnoted.dev	Test1234!
+Clinic	clinic@test.bookedandnoted.dev	Test1234!
 
 
 
-Stripe webhook URL — update to https://solosuds.com/api/webhooks/stripe
-Deploy code — git pull && npm run build && pm2 restart solosuds --update-env on the server
-
-cloudflared.exe service install eyJhIjoiZGVjMTAyY2QxOWYwMjkxYmU5ZTdkYjhjZGIxYzE3NDQiLCJ0IjoiZjk2MTRjOWQtNmY2Yi00MjY1LWI2NDgtMzMzZTFlZmRhODFkIiwicyI6IlkyTTRZekJpTTJRdFpUYzRaaTAwTXpneExUazBNMll0T0dNeE5tWXdPR0prWmpBNSJ9
+Stripe webhook URL: https://www.bookedandnoted.com/api/webhooks/stripe
+Deploy code: push to main on GitHub, Vercel deploys automatically
