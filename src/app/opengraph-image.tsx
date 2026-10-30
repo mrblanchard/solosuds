@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "SoloSuds: Practice Management Software for Solo Practitioners";
+export const alt = "Booked & Noted: Practice Management Software for Solo Practitioners";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -48,7 +48,7 @@ export default async function Image() {
             S
           </div>
           <div style={{ fontSize: "34px", fontWeight: 800, color: "#1f2937" }}>
-            SoloSuds
+            Booked & Noted
           </div>
         </div>
         <div

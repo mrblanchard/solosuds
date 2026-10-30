@@ -7,7 +7,7 @@ import { getFileBody } from "@/lib/storage";
 
 // Full-account export: everything that belongs to the practice, for an owner
 // who wants a complete local copy (a backup, or because they are leaving
-// SoloSuds). Unlike the scoped per-type exports in ../clients, ../appointments,
+// Booked & Noted). Unlike the scoped per-type exports in ../clients, ../appointments,
 // etc., this bundles actual SOAP/session note clinical content and the real
 // uploaded document files, not just metadata, so access is restricted to the
 // account Owner (not Admin) and every run is audit-logged.
@@ -443,11 +443,11 @@ export async function GET(request: NextRequest) {
     // ── README ────────────────────────────────────────────────────────
     zip.file(
       "README.txt",
-      `SoloSuds full account export
+      `Booked & Noted full account export
 Organization: ${org.name}
 Generated: ${new Date().toISOString()}
 
-This archive contains everything stored in your SoloSuds account:
+This archive contains everything stored in your Booked & Noted account:
 
 data/organization.json      Your practice profile and settings
 data/team.csv                Team members
@@ -481,7 +481,7 @@ ${skipped.length > 0 ? `Note: ${skipped.length} document(s) were too large to in
       },
     });
 
-    const filename = `solosuds-export-${org.slug}-${new Date().toISOString().slice(0, 10)}.zip`;
+    const filename = `bookedandnoted-export-${org.slug}-${new Date().toISOString().slice(0, 10)}.zip`;
     return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,
       headers: {

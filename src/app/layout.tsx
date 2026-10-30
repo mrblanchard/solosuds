@@ -5,18 +5,19 @@ import { SessionProvider } from "next-auth/react";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Analytics } from "@vercel/analytics/next";
+import { SITE_URL } from "@/lib/brand";
 
 const nunito = Nunito({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 
-const title = "SoloSuds: Practice Management Software for Solo Practitioners";
+const title = "Booked & Noted: Practice Management Software for Solo Practitioners";
 const description =
   "SOAP notes, scheduling, intake forms, billing, and HIPAA-aware client messaging, all in one place. Built for independent massage therapists, physical therapists, counselors, and other solo healthcare practitioners. 30-day free trial, no credit card required.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://solosuds.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: title,
-    template: "%s | SoloSuds",
+    template: "%s | Booked & Noted",
   },
   description,
   keywords: [
@@ -37,8 +38,8 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
-    url: "https://solosuds.com",
-    siteName: "SoloSuds",
+    url: SITE_URL,
+    siteName: "Booked & Noted",
     locale: "en_US",
     type: "website",
   },

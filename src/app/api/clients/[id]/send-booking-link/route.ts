@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { sendEmail, buildBrandedEmail } from "@/lib/email";
 import { sendSms, describeSmsFailure } from "@/lib/sms";
+import { SITE_URL } from "@/lib/brand";
 
 export async function POST(
   req: Request,
@@ -28,7 +29,7 @@ export async function POST(
   });
   if (!org) return NextResponse.json({ error: "Organization not found" }, { status: 404 });
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+  const baseUrl = process.env.NEXTAUTH_URL ?? SITE_URL;
   const bookingUrl = `${baseUrl}/book/${org.slug}`;
 
   if (method === "email") {
@@ -59,7 +60,7 @@ export async function POST(
     try {
       await sendSms({
         to: client.phone,
-        body: `${org.name} via SoloSuds: Hi ${client.firstName}, book your next appointment here: ${bookingUrl}. Reply HELP for help, STOP to opt out.`,
+        body: `${org.name} via Booked & Noted: Hi ${client.firstName}, book your next appointment here: ${bookingUrl}. Reply HELP for help, STOP to opt out.`,
       });
     } catch (err) {
       console.error("[send-booking-link] sms failed:", err);

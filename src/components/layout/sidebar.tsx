@@ -133,7 +133,7 @@ export function Sidebar({
   const navItems = buildNav(practiceType, userRole);
 
   const logoSrc = branding?.logoUrl ?? "/logo.png";
-  const logoAlt = branding?.name ?? "SoloSuds";
+  const logoAlt = branding?.name ?? "Booked & Noted";
 
   function sidebarContent({ mobile }: { mobile: boolean }) {
     const isCollapsed = !mobile && collapsed;

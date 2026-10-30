@@ -53,13 +53,13 @@ export async function POST(request: NextRequest) {
   try {
     const result = await sendEmail({
       to: email,
-      subject: `You're invited to join ${org.name} on SoloSuds`,
+      subject: `You're invited to join ${org.name} on Booked & Noted`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto;">
           <h2 style="color: #1f2937;">You're invited!</h2>
           <p style="color: #4b5563; line-height: 1.6;">
             <strong>${user.name || "A team member"}</strong> has invited you to join
-            <strong>${org.name}</strong> on SoloSuds.
+            <strong>${org.name}</strong> on Booked &amp; Noted.
           </p>
           <p style="color: #4b5563; line-height: 1.6;">
             Click the button below to create your account and get started:

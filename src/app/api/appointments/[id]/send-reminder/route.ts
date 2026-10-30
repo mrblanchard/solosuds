@@ -5,6 +5,7 @@ import { sendAppointmentReminder } from "@/lib/email";
 import { ensurePublicToken } from "@/lib/scheduling";
 import { sendSms, buildAppointmentReminderSms } from "@/lib/sms";
 import { formatZonedDisplay } from "@/lib/timezone";
+import { SITE_URL } from "@/lib/brand";
 
 export async function POST(
   req: Request,
@@ -45,7 +46,7 @@ export async function POST(
   const apptTime = zonedDisplay.timeStr;
 
   const publicToken = await ensurePublicToken(appointment.id, appointment.publicToken);
-  const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+  const baseUrl = process.env.NEXTAUTH_URL ?? SITE_URL;
 
   await sendAppointmentReminder({
     to: appointment.client.email,

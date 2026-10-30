@@ -24,11 +24,12 @@ import {
   Music2,
   Briefcase,
 } from "lucide-react";
+import { APP_DOMAIN, SUPPORT_EMAIL } from "@/lib/brand";
 
 export const metadata = {
-  title: "Features | SoloSuds",
+  title: "Features | Booked & Noted",
   description:
-    "Every feature included with SoloSuds: scheduling, client management, notes, intake forms, messaging, billing, white label branding, and HIPAA-ready security.",
+    "Every feature included with Booked & Noted: scheduling, client management, notes, intake forms, messaging, billing, white label branding, and HIPAA-ready security.",
 };
 
 export default function FeaturesPage() {
@@ -39,8 +40,8 @@ export default function FeaturesPage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center shrink-0">
             <Link href="/" className="flex items-center gap-2">
-              <img src="/logo.png" alt="SoloSuds" className="h-10 w-auto" />
-              <span className="text-xl font-bold text-gray-800">SoloSuds</span>
+              <img src="/logo.png" alt="Booked & Noted" className="h-10 w-auto" />
+              <span className="text-xl font-bold text-gray-800">Booked & Noted</span>
             </Link>
           </div>
           <LandingNav />
@@ -54,7 +55,7 @@ export default function FeaturesPage() {
             The complete feature guide
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
-            Everything SoloSuds does for your practice
+            Everything Booked & Noted does for your practice
           </h1>
           <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
             One login for scheduling, notes, billing, messaging, and client records. Here is exactly
@@ -102,7 +103,7 @@ export default function FeaturesPage() {
               Built for independent practitioners across industries
             </h2>
             <p className="mt-2 text-gray-500 max-w-xl mx-auto">
-              Pick your practice type during setup and SoloSuds seeds starter services to match.
+              Pick your practice type during setup and Booked & Noted seeds starter services to match.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
@@ -168,7 +169,7 @@ export default function FeaturesPage() {
                 Make it yours. Your brand, your portal.
               </h2>
               <p className="mt-4 text-lg text-indigo-100 leading-relaxed">
-                SoloSuds fades into the background so your practice shines. Customize your logo,
+                Booked & Noted fades into the background so your practice shines. Customize your logo,
                 colors, and client-facing portal to match your brand, with no &quot;Powered by&quot;
                 watermarks.
               </p>
@@ -234,7 +235,7 @@ export default function FeaturesPage() {
                 who accessed what, and when.
               </div>
               <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-4 text-sm text-gray-700">
-                Standard email is not fully encrypted, so SoloSuds gates PHI behind a signed
+                Standard email is not fully encrypted, so Booked & Noted gates PHI behind a signed
                 client consent form before it is ever sent.
               </div>
             </div>
@@ -246,7 +247,7 @@ export default function FeaturesPage() {
                 Handle client information the right way
               </h2>
               <p className="mt-4 text-lg text-gray-600 leading-relaxed">
-                SoloSuds is designed for practitioners who handle sensitive client information
+                Booked & Noted is designed for practitioners who handle sensitive client information
                 every day, with the safeguards to match.
               </p>
               <ul className="mt-8 space-y-3">
@@ -284,7 +285,7 @@ export default function FeaturesPage() {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <a href="mailto:support@solosuds.com?subject=Question%20about%20SoloSuds">
+            <a href={`mailto:${SUPPORT_EMAIL}?subject=Question%20about%20Booked%20%26%20Noted`}>
               <Button size="lg" variant="outline" className="px-8">
                 Ask a question
               </Button>
@@ -358,7 +359,7 @@ const featureSections = [
     title: "Digital Intake Forms",
     icon: ClipboardList,
     description:
-      "Build custom forms once and let SoloSuds send and collect them for you automatically.",
+      "Build custom forms once and let Booked & Noted send and collect them for you automatically.",
     bullets: [
       "Drag-and-drop form builder, 7+ field types",
       "Auto-sent to clients the moment they book",
@@ -384,7 +385,7 @@ const featureSections = [
     description:
       "A secure, password-free page where clients upload and download documents, no account required.",
     bullets: [
-      "Your own portal link, e.g. solosuds.com/portal/you",
+      `Your own portal link, e.g. ${APP_DOMAIN}/portal/you`,
       "One-time 6-digit code verification",
       "Share files to clients or receive uploads from them",
       "AES-256 encryption at rest, signed 15-minute links",

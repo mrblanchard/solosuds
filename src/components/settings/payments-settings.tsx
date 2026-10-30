@@ -137,7 +137,7 @@ function PaymentsSettingsInner({ org }: Props) {
             <CreditCard className="h-4 w-4" /> Card Payments (Stripe)
           </Label>
           <p className="text-xs text-gray-500">
-            Connect your own Stripe account to accept card payments on invoices. Funds go directly to you, SoloSuds takes no fee.
+            Connect your own Stripe account to accept card payments on invoices. Funds go directly to you, Booked & Noted takes no fee.
           </p>
           <div className="flex flex-wrap items-center gap-2">
             {!connected && (

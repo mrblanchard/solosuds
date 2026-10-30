@@ -1,6 +1,6 @@
-﻿# SoloSuds
+﻿# Booked & Noted
 
-Practice management software for healthcare practitioners. SOAP notes, scheduling, billing, intake forms, and client messaging — in one place.
+Practice management software for healthcare practitioners. SOAP notes, scheduling, billing, intake forms, and client messaging, all in one place.
 
 **Production:** https://solosuds.com  
 **Dev:** https://dev.solosuds.com

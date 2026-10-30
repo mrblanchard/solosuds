@@ -6,6 +6,7 @@ import { z } from "zod";
 import { sendAppointmentReminder } from "@/lib/email";
 import { hasConflict } from "@/lib/scheduling";
 import { formatZonedDisplay } from "@/lib/timezone";
+import { SITE_URL } from "@/lib/brand";
 
 const schema = z.object({
   // Client: either select an existing client by id, OR pass a name to create one on the fly
@@ -170,7 +171,7 @@ export async function POST(req: Request) {
         where: { id: resolvedPractitionerId },
         select: { name: true },
       });
-      const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+      const baseUrl = process.env.NEXTAUTH_URL ?? SITE_URL;
       await sendAppointmentReminder({
         to: client.email,
         clientName: `${client.firstName} ${client.lastName}`,
@@ -215,7 +216,7 @@ export async function POST(req: Request) {
         });
 
         if (intakeForm) {
-          const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+          const baseUrl = process.env.NEXTAUTH_URL ?? SITE_URL;
           const intakeUrl = `${baseUrl}/intake/${org.slug}/${intakeForm.id}?clientId=${resolvedClientId}`;
           try {
             const { sendEmail } = await import("@/lib/email");

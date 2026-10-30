@@ -34,7 +34,7 @@ describe("Sidebar", () => {
   describe("rendering", () => {
     it("renders the logo", () => {
       render(<Sidebar />);
-      expect(screen.getAllByAltText("SoloSuds").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByAltText("Booked & Noted").length).toBeGreaterThanOrEqual(1);
     });
 
     it("renders all navigation items", () => {

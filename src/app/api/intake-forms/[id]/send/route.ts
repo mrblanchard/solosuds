@@ -75,7 +75,7 @@ export async function POST(
       );
     }
 
-    const smsBody = `${org.name} via SoloSuds: Hi ${client.firstName}, please complete your intake form here: ${formUrl}. Reply HELP for help, STOP to opt out.`;
+    const smsBody = `${org.name} via Booked & Noted: Hi ${client.firstName}, please complete your intake form here: ${formUrl}. Reply HELP for help, STOP to opt out.`;
 
     let sid: string | undefined;
     try {

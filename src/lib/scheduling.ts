@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { sendWaitlistOpening } from "@/lib/email";
 import { sendSms, buildWaitlistOpeningSms } from "@/lib/sms";
 import { zonedTimeToUtc, getZonedHourFraction, getZonedDayOfWeek, getZonedDayBounds, getZonedDateString, formatZonedHHmm } from "@/lib/timezone";
+import { SITE_URL } from "@/lib/brand";
 
 const ACTIVE_STATUSES = ["SCHEDULED", "CONFIRMED", "IN_PROGRESS", "COMPLETED"] as const;
 
@@ -251,7 +252,7 @@ export async function notifyWaitlistForOpening({
 
   if (!org || entries.length === 0) return 0;
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+  const baseUrl = process.env.NEXTAUTH_URL ?? SITE_URL;
   const bookingUrl = `${baseUrl}/book/${org.slug}`;
 
   await Promise.allSettled(

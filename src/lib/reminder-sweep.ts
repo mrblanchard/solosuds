@@ -3,6 +3,7 @@ import { sendAppointmentReminder } from "@/lib/email";
 import { ensurePublicToken } from "@/lib/scheduling";
 import { sendSms, buildAppointmentReminderSms } from "@/lib/sms";
 import { formatZonedDisplay } from "@/lib/timezone";
+import { SITE_URL } from "@/lib/brand";
 
 const SWEEP_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const REMINDER_WINDOW_MS = 24 * 60 * 60 * 1000; // remind once an appointment is within 24h
@@ -18,7 +19,7 @@ export async function runReminderSweep(): Promise<{ sent: number; failed: number
   const now = new Date();
   const windowEnd = new Date(now.getTime() + REMINDER_WINDOW_MS);
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+  const baseUrl = process.env.NEXTAUTH_URL ?? SITE_URL;
 
   const dueAppointments = await db.appointment.findMany({
     where: {

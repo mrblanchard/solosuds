@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
+import { SUPPORT_EMAIL } from "@/lib/brand";
 
 const coreFeatures = [
   "Unlimited SOAP & session notes",
@@ -157,7 +158,7 @@ export default function PricingSection({ showCheckout = false }: { showCheckout?
         <p className="mt-8 text-center text-sm text-gray-500">
           Interested in a plan for a team of 3 or more?{" "}
           <a
-            href="mailto:support@solosuds.com?subject=Team%20pricing"
+            href={`mailto:${SUPPORT_EMAIL}?subject=Team%20pricing`}
             className="text-indigo-600 hover:underline"
           >
             Contact us

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, Info } from "lucide-react";
+import { NOREPLY_EMAIL } from "@/lib/brand";
 
 interface Props {
   initialReplyToEmail: string;
@@ -57,8 +58,8 @@ export default function EmailWhiteLabelSettings({ initialReplyToEmail }: Props) 
             <div className="space-y-1">
               <p className="font-medium">How outgoing email works</p>
               <p className="text-blue-700">
-                Emails are sent from <span className="font-mono font-semibold">no-reply@solosuds.com</span> using
-                your practice name as the display name, so clients see your brand, not "SoloSuds".
+                Emails are sent from <span className="font-mono font-semibold">{NOREPLY_EMAIL}</span> using
+                your practice name as the display name, so clients see your brand, not "Booked & Noted".
               </p>
               <p className="text-blue-700">
                 Set a <strong>reply-to address</strong> below so that when a client hits Reply, it goes
@@ -113,7 +114,7 @@ export default function EmailWhiteLabelSettings({ initialReplyToEmail }: Props) 
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-2 text-sm font-mono">
             <div className="flex gap-2 text-gray-600">
               <span className="w-16 shrink-0 text-gray-400">From:</span>
-              <span className="text-gray-800">Your Practice Name &lt;no-reply@solosuds.com&gt;</span>
+              <span className="text-gray-800">Your Practice Name &lt;{NOREPLY_EMAIL}&gt;</span>
             </div>
             <div className="flex gap-2 text-gray-600">
               <span className="w-16 shrink-0 text-gray-400">Reply-To:</span>

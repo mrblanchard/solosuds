@@ -1,11 +1,14 @@
 /**
- * SoloSuds embeddable booking widget.
+ * Booked & Noted embeddable booking widget.
  *
  * Ships as a single self-contained script (built by scripts/build-embed.mjs
  * into public/embed.js). A customer pastes:
  *
- *   <div data-solosuds-booking="their-org-slug"></div>
+ *   <div data-booking-widget="their-org-slug"></div>
  *   <script src="https://solosuds.com/embed.js" async></script>
+ *
+ * Snippets pasted before the rename use data-solosuds-booking, which is still
+ * recognized so those sites keep working.
  *
  * onto their own website. This finds every such element, mounts a Shadow DOM
  * root inside it (so the widget's styles can't leak into the host page and
@@ -346,7 +349,7 @@ class BookingWidget {
       this.step === "waitlisted" ? this.renderWaitlisted() : null,
       this.step === "service" ? this.renderServiceStep() : null,
       this.step === "details" ? this.renderDetailsStep() : null,
-      h("p", { className: "ss-footer", text: `Booking powered by SoloSuds · ${this.org?.name ?? ""}` }),
+      h("p", { className: "ss-footer", text: `Booking powered by Booked & Noted · ${this.org?.name ?? ""}` }),
     ]);
     this.root.appendChild(wrap);
   }
@@ -640,7 +643,7 @@ class BookingWidget {
     }
     span.appendChild(
       document.createTextNode(
-        `I agree to receive appointment text messages from ${this.org?.name ?? "this business"} via SoloSuds at the number above. Msg & data rates may apply. Reply STOP to opt out.`
+        `I agree to receive appointment text messages from ${this.org?.name ?? "this business"} via Booked & Noted at the number above. Msg & data rates may apply. Reply STOP to opt out.`
       )
     );
     label.appendChild(span);
@@ -674,14 +677,16 @@ class BookingWidget {
 
 function mount(el: HTMLElement) {
   if (el.dataset.ssMounted === "true") return;
-  const slug = el.dataset.solosudsBooking;
+  const slug = el.dataset.bookingWidget ?? el.dataset.solosudsBooking;
   if (!slug) return;
   el.dataset.ssMounted = "true";
   new BookingWidget(el, slug);
 }
 
 function init() {
-  document.querySelectorAll<HTMLElement>("[data-solosuds-booking]").forEach(mount);
+  document
+    .querySelectorAll<HTMLElement>("[data-booking-widget], [data-solosuds-booking]")
+    .forEach(mount);
 }
 
 if (document.readyState === "loading") {

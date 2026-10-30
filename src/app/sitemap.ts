@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/brand";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://solosuds.com";
+  const base = SITE_URL;
   const now = new Date();
 
   return [

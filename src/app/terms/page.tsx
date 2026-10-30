@@ -1,8 +1,9 @@
 ﻿import Link from "next/link";
 import { AppFooter } from "@/components/layout/app-footer";
 import { auth } from "@/lib/auth";
+import { SUPPORT_EMAIL } from "@/lib/brand";
 
-export const metadata = { title: "Terms of Service | SoloSuds" };
+export const metadata = { title: "Terms of Service | Booked & Noted" };
 
 export default async function TermsPage() {
   const session = await auth();
@@ -11,7 +12,7 @@ export default async function TermsPage() {
       <div className="mx-auto max-w-3xl">
         <div className="mb-8 flex items-center gap-2">
           <Link href="/" className="flex items-center">
-            <img src="/logo.png" alt="SoloSuds" className="h-10 w-auto" />
+            <img src="/logo.png" alt="Booked & Noted" className="h-10 w-auto" />
           </Link>
         </div>
 
@@ -22,7 +23,7 @@ export default async function TermsPage() {
           <div className="prose prose-gray max-w-none text-sm leading-relaxed text-gray-700 space-y-6">
 
             <p>
-              Please read these Terms of Service (&ldquo;Terms&rdquo;) carefully before using SoloSuds. By
+              Please read these Terms of Service (&ldquo;Terms&rdquo;) carefully before using Booked & Noted. By
               creating an account or using the Service, you agree to be bound by these Terms. If you do not
               agree, do not use the Service.
             </p>
@@ -30,7 +31,7 @@ export default async function TermsPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">1. The Service</h2>
               <p>
-                Jeremy Blanchard, doing business as SoloSuds (&ldquo;SoloSuds,&rdquo; &ldquo;we,&rdquo; &ldquo;us&rdquo;) provides a
+                Jeremy Blanchard, doing business as Booked & Noted (&ldquo;Booked & Noted,&rdquo; &ldquo;we,&rdquo; &ldquo;us&rdquo;) provides a
                 cloud-based practice management platform (&ldquo;Service&rdquo;) for healthcare professionals,
                 including tools for SOAP notes, scheduling, client management, intake forms, invoicing, and
                 secure messaging. The Service is intended for licensed healthcare providers and their authorized
@@ -52,8 +53,8 @@ export default async function TermsPage() {
               <p>
                 You are responsible for maintaining the confidentiality of your login credentials and for all
                 activity that occurs under your account. You agree to notify us immediately at{" "}
-                <a href="mailto:support@solosuds.com" className="text-indigo-600 hover:underline">
-                  support@solosuds.com
+                <a href={`mailto:${SUPPORT_EMAIL}`} className="text-indigo-600 hover:underline">
+                  {SUPPORT_EMAIL}
                 </a>{" "}
                 of any unauthorized use of your account. We reserve the right to suspend or terminate accounts
                 that violate these Terms.
@@ -63,7 +64,7 @@ export default async function TermsPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">4. Subscription and Billing</h2>
               <p>
-                SoloSuds is offered on a subscription basis. Fees are billed in advance on a monthly or annual
+                Booked & Noted is offered on a subscription basis. Fees are billed in advance on a monthly or annual
                 cycle. You authorize us to charge your payment method on file at the start of each billing
                 period. All fees are non-refundable except as required by law or as stated in our refund policy.
                 We reserve the right to change pricing with 30 days&rsquo; notice.
@@ -90,7 +91,7 @@ export default async function TermsPage() {
               <h2 className="text-base font-semibold text-gray-900 mb-2">6. Data Ownership</h2>
               <p>
                 You retain full ownership of all data you input into the Service, including patient records and
-                clinical notes. You grant SoloSuds a limited license to process your data solely to provide and
+                clinical notes. You grant Booked & Noted a limited license to process your data solely to provide and
                 improve the Service. We will never sell your data or your patients&rsquo; data to third parties.
               </p>
             </section>
@@ -108,7 +109,7 @@ export default async function TermsPage() {
               <h2 className="text-base font-semibold text-gray-900 mb-2">8. Uptime and Service Availability</h2>
               <p>
                 We target 99.9% monthly uptime and will notify customers of planned maintenance in advance.
-                SoloSuds shall not be liable for interruptions due to circumstances beyond our reasonable control,
+                Booked & Noted shall not be liable for interruptions due to circumstances beyond our reasonable control,
                 including internet outages, third-party service failures, or force majeure events.
               </p>
             </section>
@@ -116,9 +117,9 @@ export default async function TermsPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">9. Disclaimer of Warranties</h2>
               <p>
-                The Service is provided &ldquo;as is&rdquo; and &ldquo;as available.&rdquo; SoloSuds makes no
+                The Service is provided &ldquo;as is&rdquo; and &ldquo;as available.&rdquo; Booked & Noted makes no
                 warranties, express or implied, regarding the Service, including warranties of merchantability,
-                fitness for a particular purpose, or non-infringement. SoloSuds does not warrant that the Service
+                fitness for a particular purpose, or non-infringement. Booked & Noted does not warrant that the Service
                 will be error-free or uninterrupted.
               </p>
             </section>
@@ -126,9 +127,9 @@ export default async function TermsPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">10. Limitation of Liability</h2>
               <p>
-                To the fullest extent permitted by law, SoloSuds shall not be liable for any indirect,
+                To the fullest extent permitted by law, Booked & Noted shall not be liable for any indirect,
                 incidental, special, consequential, or punitive damages, or for any loss of profits or data.
-                Our total cumulative liability to you shall not exceed the fees paid by you to SoloSuds in the
+                Our total cumulative liability to you shall not exceed the fees paid by you to Booked & Noted in the
                 12 months preceding the claim.
               </p>
             </section>
@@ -164,7 +165,7 @@ export default async function TermsPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">14. Text Messaging (SMS) Terms</h2>
               <p>
-                SMS reminders are coming soon. SoloSuds does not currently send text messages, and these Terms
+                SMS reminders are coming soon. Booked & Noted does not currently send text messages, and these Terms
                 will be updated before it does.
               </p>
             </section>

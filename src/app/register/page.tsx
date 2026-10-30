@@ -139,7 +139,7 @@ function RegisterContent() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Link href="/">
-              <img src="/logo.png" alt="SoloSuds" className="h-12 w-auto" />
+              <img src="/logo.png" alt="Booked & Noted" className="h-12 w-auto" />
             </Link>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">

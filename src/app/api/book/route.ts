@@ -7,6 +7,7 @@ import { sendSms, buildAppointmentConfirmationSms, buildOptInConfirmationSms } f
 import { zonedTimeToUtc, formatZonedDisplay } from "@/lib/timezone";
 import { withCorsRoute, corsPreflight } from "@/lib/cors";
 import { SMS_ENABLED } from "@/lib/features";
+import { SITE_URL } from "@/lib/brand";
 
 export const POST = withCorsRoute(async (request: NextRequest) => {
   try {
@@ -153,7 +154,7 @@ export const POST = withCorsRoute(async (request: NextRequest) => {
       },
     });
 
-    const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+    const baseUrl = process.env.NEXTAUTH_URL ?? SITE_URL;
     const manageUrl = `${baseUrl}/manage/${appointment.publicToken}`;
     const zonedDisplay = formatZonedDisplay(startTime, org.timezone);
 

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Leaf } from "lucide-react";
+import { SUPPORT_EMAIL } from "@/lib/brand";
 
-export const metadata = { title: "Business Associate Agreement | SoloSuds" };
+export const metadata = { title: "Business Associate Agreement | Booked & Noted" };
 
 export default function HipaaPage() {
   return (
@@ -10,7 +11,7 @@ export default function HipaaPage() {
         <div className="mb-8 flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2 text-gray-900 hover:text-indigo-600">
             <Leaf className="h-6 w-6 text-indigo-600" />
-            <span className="text-xl font-bold">SoloSuds</span>
+            <span className="text-xl font-bold">Booked & Noted</span>
           </Link>
         </div>
 
@@ -22,9 +23,9 @@ export default function HipaaPage() {
 
             <p>
               This Business Associate Agreement (&ldquo;BAA&rdquo;) is entered into between Jeremy Blanchard, doing
-              business as SoloSuds (&ldquo;Business Associate&rdquo;) and the healthcare provider or covered entity that creates an
+              business as Booked & Noted (&ldquo;Business Associate&rdquo;) and the healthcare provider or covered entity that creates an
               account (&ldquo;Covered Entity&rdquo;). This BAA is incorporated into and forms part of the
-              SoloSuds Terms of Service.
+              Booked & Noted Terms of Service.
             </p>
 
             <section>
@@ -44,7 +45,7 @@ export default function HipaaPage() {
 
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">2. Obligations of Business Associate</h2>
-              <p>SoloSuds agrees to:</p>
+              <p>Booked & Noted agrees to:</p>
               <ul className="list-disc pl-5 mt-2 space-y-1">
                 <li>Not use or disclose PHI other than as permitted by this BAA or required by law.</li>
                 <li>Use appropriate safeguards, and comply with the HIPAA Security Rule with respect to ePHI, to prevent unauthorized use or disclosure of PHI.</li>
@@ -57,7 +58,7 @@ export default function HipaaPage() {
 
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">3. Permitted Uses and Disclosures</h2>
-              <p>SoloSuds may use or disclose PHI only to:</p>
+              <p>Booked & Noted may use or disclose PHI only to:</p>
               <ul className="list-disc pl-5 mt-2 space-y-1">
                 <li>Perform the services described in the Terms of Service on behalf of the Covered Entity.</li>
                 <li>Provide data aggregation services relating to the health care operations of the Covered Entity.</li>
@@ -69,8 +70,8 @@ export default function HipaaPage() {
               <h2 className="text-base font-semibold text-gray-900 mb-2">4. Obligations of Covered Entity</h2>
               <p>The Covered Entity agrees to:</p>
               <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li>Notify SoloSuds of any restriction on the use or disclosure of PHI that the Covered Entity has agreed to with individuals.</li>
-                <li>Not request SoloSuds to use or disclose PHI in any manner that would violate the HIPAA Rules.</li>
+                <li>Notify Booked & Noted of any restriction on the use or disclosure of PHI that the Covered Entity has agreed to with individuals.</li>
+                <li>Not request Booked & Noted to use or disclose PHI in any manner that would violate the HIPAA Rules.</li>
                 <li>Obtain all necessary authorizations from patients before submitting PHI through the platform.</li>
               </ul>
             </section>
@@ -78,7 +79,7 @@ export default function HipaaPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">5. Security Measures</h2>
               <p>
-                SoloSuds maintains industry-standard administrative, physical, and technical safeguards to protect
+                Booked & Noted maintains industry-standard administrative, physical, and technical safeguards to protect
                 ePHI, including but not limited to: AES-256 encryption at rest, TLS 1.2+ in transit, role-based
                 access controls, audit logging, and regular security assessments. Data is hosted on SOC 2
                 Type II certified infrastructure.
@@ -88,10 +89,10 @@ export default function HipaaPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">6. Breach Notification</h2>
               <p>
-                In the event of a breach of unsecured PHI, SoloSuds will notify the Covered Entity without
+                In the event of a breach of unsecured PHI, Booked & Noted will notify the Covered Entity without
                 unreasonable delay and no later than 60 calendar days after discovery. Notification will include,
                 to the extent possible: the identification of affected individuals; a description of the breach;
-                types of PHI involved; steps individuals should take; and remediation steps taken by SoloSuds.
+                types of PHI involved; steps individuals should take; and remediation steps taken by Booked & Noted.
               </p>
             </section>
 
@@ -100,7 +101,7 @@ export default function HipaaPage() {
               <p>
                 This BAA is effective upon account creation and remains in effect for the duration of the
                 service relationship. Either party may terminate if the other party materially breaches this BAA
-                and fails to cure within 30 days of written notice. Upon termination, SoloSuds will return or
+                and fails to cure within 30 days of written notice. Upon termination, Booked & Noted will return or
                 destroy all PHI in its possession within 30 days.
               </p>
             </section>
@@ -117,8 +118,8 @@ export default function HipaaPage() {
               <h2 className="text-base font-semibold text-gray-900 mb-2">9. Contact</h2>
               <p>
                 Questions regarding this BAA may be directed to our Privacy Officer at{" "}
-                <a href="mailto:privacy@solosuds.app" className="text-indigo-600 hover:underline">
-                  privacy@solosuds.app
+                <a href={`mailto:${SUPPORT_EMAIL}`} className="text-indigo-600 hover:underline">
+                  {SUPPORT_EMAIL}
                 </a>.
               </p>
             </section>

@@ -26,7 +26,7 @@ export interface OrgBranding {
 
 /** Wraps email body HTML in a branded template with logo, font, and signature. */
 export function buildBrandedEmail(content: string, branding?: OrgBranding | null): string {
-  const orgName = escapeHtml(branding?.name || "SoloSuds");
+  const orgName = escapeHtml(branding?.name || "Booked & Noted");
   const color = branding?.primaryColor && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(branding.primaryColor)
     ? branding.primaryColor
     : "#4f46e5";
@@ -92,7 +92,7 @@ function buildIcsContent(title: string, description: string, start: Date, end: D
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//SoloSuds//EN",
+    "PRODID:-//Booked and Noted//EN",
     "BEGIN:VEVENT",
     `DTSTART:${toIcsDate(start)}`,
     `DTEND:${toIcsDate(end)}`,

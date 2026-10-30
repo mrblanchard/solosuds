@@ -276,7 +276,7 @@ export default function AccountClient({ user, org, exportCounts }: Props) {
             ({exportCounts.documents} document{exportCounts.documents === 1 ? "" : "s"}), all in
             one .zip file. This is the whole practice, not just a quick backup, so it&apos;s only
             available to the account owner. Use it any time you want a full local copy, or if
-            you&apos;re planning to leave SoloSuds.
+            you&apos;re planning to leave Booked & Noted.
           </p>
           <a href="/api/export/all" className="block sm:inline-block">
             <Button variant="outline" size="sm" className="w-full sm:w-auto justify-center gap-1.5">

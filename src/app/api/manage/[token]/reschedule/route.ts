@@ -4,6 +4,7 @@ import { hasConflict, notifyWaitlistForOpening, validateBookingWindow } from "@/
 import { sendAppointmentReminder } from "@/lib/email";
 import { sendSms, buildAppointmentRescheduledSms } from "@/lib/sms";
 import { zonedTimeToUtc, formatZonedDisplay } from "@/lib/timezone";
+import { SITE_URL } from "@/lib/brand";
 
 export async function PATCH(
   req: Request,
@@ -74,7 +75,7 @@ export async function PATCH(
     },
   });
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? "https://solosuds.com";
+  const baseUrl = process.env.NEXTAUTH_URL ?? SITE_URL;
   const manageUrl = `${baseUrl}/manage/${token}`;
 
   const zonedDisplay = formatZonedDisplay(newStart, appointment.organization.timezone);

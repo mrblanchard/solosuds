@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
 import { EmailConsentStatus } from "@prisma/client";
+import { SITE_URL } from "@/lib/brand";
 
 // POST — send (or resend) the email consent form to the client
 export async function POST(
@@ -102,7 +103,7 @@ export async function POST(
     select: { name: true, slug: true },
   });
 
-  const baseUrl = process.env.NEXTAUTH_URL || "https://solosuds.com";
+  const baseUrl = process.env.NEXTAUTH_URL || SITE_URL;
   const formLink = `${baseUrl}/intake/${org?.slug ?? ""}/${consentForm.id}?clientId=${clientId}`;
 
   const html = `

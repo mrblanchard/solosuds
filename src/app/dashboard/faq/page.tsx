@@ -1,5 +1,6 @@
 ﻿import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { APP_DOMAIN, SUPPORT_EMAIL } from "@/lib/brand";
 
 const sections = [
   {
@@ -138,11 +139,11 @@ const sections = [
     items: [
       {
         q: "What is email consent and why do I need it?",
-        a: "Standard email is not fully encrypted. It travels through multiple servers before reaching its destination, and could theoretically be read by others along the way. Under HIPAA, sending protected health information via standard email requires that the patient understands this risk and explicitly consents. SoloSuds enforces this by gating all email communication behind a signed consent form.",
+        a: "Standard email is not fully encrypted. It travels through multiple servers before reaching its destination, and could theoretically be read by others along the way. Under HIPAA, sending protected health information via standard email requires that the patient understands this risk and explicitly consents. Booked & Noted enforces this by gating all email communication behind a signed consent form.",
       },
       {
         q: "How does the email consent flow work?",
-        a: "When you first try to email a client, SoloSuds will show a prompt to send them a consent form. The client receives a branded email with a link to a plain-English form explaining the risks of email communication. Once they check the boxes and submit, their status updates to Consented and you can email them freely.",
+        a: "When you first try to email a client, Booked & Noted will show a prompt to send them a consent form. The client receives a branded email with a link to a plain-English form explaining the risks of email communication. Once they check the boxes and submit, their status updates to Consented and you can email them freely.",
       },
       {
         q: "What are the consent statuses?",
@@ -167,11 +168,11 @@ const sections = [
     items: [
       {
         q: "What is the client document portal?",
-        a: "The client document portal is a secure, password-free web page where your clients can upload documents to you and download documents you've shared with them. It's accessible at your practice's portal link, for example: solosuds.com/portal/your-practice-name.",
+        a: `The client document portal is a secure, password-free web page where your clients can upload documents to you and download documents you've shared with them. It's accessible at your practice's portal link, for example: ${APP_DOMAIN}/portal/your-practice-name.`,
       },
       {
         q: "How do clients access the portal without an account?",
-        a: "Clients don't need to create an account. They go to your portal link and enter the email address or phone number you have on file for them. SoloSuds sends a 6-digit verification code to that address. Once they enter the code, they're in. The code expires in 15 minutes and can only be used once.",
+        a: "Clients don't need to create an account. They go to your portal link and enter the email address or phone number you have on file for them. Booked & Noted sends a 6-digit verification code to that address. Once they enter the code, they're in. The code expires in 15 minutes and can only be used once.",
       },
       {
         q: "How do I share the portal link with a client?",
@@ -212,7 +213,7 @@ const sections = [
       },
       {
         q: "How do payments work?",
-        a: "SoloSuds integrates with Stripe for payment processing. Clients can pay invoices online using credit/debit cards. Payment status is tracked automatically and updated via webhooks.",
+        a: "Booked & Noted integrates with Stripe for payment processing. Clients can pay invoices online using credit/debit cards. Payment status is tracked automatically and updated via webhooks.",
       },
       {
         q: "What invoice statuses are there?",
@@ -246,7 +247,7 @@ const sections = [
     items: [
       {
         q: "What plans are available?",
-        a: "SoloSuds offers a free trial, then monthly or annual subscription plans. Visit the Billing page in your dashboard to view plans, upgrade, or manage your subscription.",
+        a: "Booked & Noted offers a free trial, then monthly or annual subscription plans. Visit the Billing page in your dashboard to view plans, upgrade, or manage your subscription.",
       },
       {
         q: "How do I cancel or pause my subscription?",
@@ -254,7 +255,7 @@ const sections = [
       },
       {
         q: "Is my data HIPAA compliant?",
-        a: "SoloSuds is designed with HIPAA compliance in mind. We use encrypted connections, secure authentication, and follow best practices for protecting health information. Review our HIPAA notice and Terms of Service via the links in the footer.",
+        a: "Booked & Noted is designed with HIPAA compliance in mind. We use encrypted connections, secure authentication, and follow best practices for protecting health information. Review our HIPAA notice and Terms of Service via the links in the footer.",
       },
     ],
   },
@@ -274,10 +275,10 @@ export default function FaqPage() {
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Help & FAQ</h1>
         <p className="text-gray-500 mb-10">
-          Everything you need to know about using SoloSuds. Can't find what you're looking for?
+          Everything you need to know about using Booked & Noted. Can't find what you're looking for?
           Email us at{" "}
-          <a href="mailto:support@solosuds.com" className="text-indigo-600 hover:underline">
-            support@solosuds.com
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="text-indigo-600 hover:underline">
+            {SUPPORT_EMAIL}
           </a>
         </p>
 
@@ -326,7 +327,7 @@ export default function FaqPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-1">Still need help?</h3>
           <p className="text-sm text-gray-600 mb-4">Our support team is here to assist you.</p>
           <a
-            href="mailto:support@solosuds.com"
+            href={`mailto:${SUPPORT_EMAIL}`}
             className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
           >
             Contact Support

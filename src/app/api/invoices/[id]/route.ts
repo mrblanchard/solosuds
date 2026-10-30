@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { sendInvoiceEmail } from "@/lib/email";
 import { buildAltPaymentOptions } from "@/lib/alt-payments";
 import { formatDate } from "@/lib/utils";
+import { NOREPLY_EMAIL } from "@/lib/brand";
 
 export async function PATCH(
   request: NextRequest,
@@ -81,7 +82,7 @@ export async function PATCH(
               senderId: session.user.id,
               clientId: invoice.clientId,
               direction: "OUTBOUND",
-              fromEmail: process.env.FROM_EMAIL || "noreply@solosuds.com",
+              fromEmail: process.env.FROM_EMAIL || NOREPLY_EMAIL,
               toEmail: clientEmail,
               subject,
               htmlBody: html,

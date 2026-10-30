@@ -1,17 +1,17 @@
 import { formatDate, formatDateTime } from "@/lib/utils";
 
-// All client-facing SMS bodies open with "{Practice Name} via SoloSuds:" and
+// All client-facing SMS bodies open with "{Practice Name} via Booked & Noted:" and
 // end with an opt-out instruction. Carrier registration (10DLC or toll-free)
-// identifies the sender as "SoloSuds," so every message keeps that string
+// identifies the sender as "Booked & Noted," so every message keeps that string
 // present even while surfacing the practitioner's own business name for
 // white-labeling. Keep this copy in sync with whatever sample messages are
 // submitted when the new provider's number is registered.
 
 function brandPrefix(orgName: string): string {
-  return `${orgName} via SoloSuds`;
+  return `${orgName} via Booked & Noted`;
 }
 
-/** "{Practice} via SoloSuds: You're confirmed for {service} on {date}. Manage: {url}. Reply STOP to opt out." */
+/** "{Practice} via Booked & Noted: You're confirmed for {service} on {date}. Manage: {url}. Reply STOP to opt out." */
 export function buildAppointmentConfirmationSms(opts: {
   orgName: string;
   serviceName: string;
@@ -21,7 +21,7 @@ export function buildAppointmentConfirmationSms(opts: {
   return `${brandPrefix(opts.orgName)}: You're confirmed for ${opts.serviceName} on ${formatDateTime(opts.startTime)}. Manage: ${opts.manageUrl}. Reply STOP to opt out.`;
 }
 
-/** "{Practice} via SoloSuds: Reminder, your {service} appointment is {date}. Reply STOP to opt out." */
+/** "{Practice} via Booked & Noted: Reminder, your {service} appointment is {date}. Reply STOP to opt out." */
 export function buildAppointmentReminderSms(opts: {
   orgName: string;
   serviceName: string;
@@ -30,7 +30,7 @@ export function buildAppointmentReminderSms(opts: {
   return `${brandPrefix(opts.orgName)}: Reminder, your ${opts.serviceName} appointment is ${formatDateTime(opts.startTime)}. Reply STOP to opt out.`;
 }
 
-/** "{Practice} via SoloSuds: Your appointment was rescheduled to {date}. Details: {url}. Reply STOP to opt out." */
+/** "{Practice} via Booked & Noted: Your appointment was rescheduled to {date}. Details: {url}. Reply STOP to opt out." */
 export function buildAppointmentRescheduledSms(opts: {
   orgName: string;
   startTime: Date | string;
@@ -39,7 +39,7 @@ export function buildAppointmentRescheduledSms(opts: {
   return `${brandPrefix(opts.orgName)}: Your appointment was rescheduled to ${formatDateTime(opts.startTime)}. Details: ${opts.manageUrl}. Reply STOP to opt out.`;
 }
 
-/** "{Practice} via SoloSuds: A spot opened up on {date}. Book now: {url}. Reply STOP to opt out." */
+/** "{Practice} via Booked & Noted: A spot opened up on {date}. Book now: {url}. Reply STOP to opt out." */
 export function buildWaitlistOpeningSms(opts: {
   orgName: string;
   openingDate: Date | string;
@@ -48,12 +48,12 @@ export function buildWaitlistOpeningSms(opts: {
   return `${brandPrefix(opts.orgName)}: A spot opened up on ${formatDate(opts.openingDate, "MMMM d, yyyy")}. Book now: ${opts.bookingUrl}. Reply STOP to opt out.`;
 }
 
-/** "{Practice} via SoloSuds: You are now opted in to receive appointment text notifications. ..." */
+/** "{Practice} via Booked & Noted: You are now opted in to receive appointment text notifications. ..." */
 export function buildOptInConfirmationSms(orgName: string): string {
   return `${brandPrefix(orgName)}: You are now opted in to receive appointment text notifications. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.`;
 }
 
-/** "{Practice} via SoloSuds: {content} Reply STOP to opt out." — a practitioner's own free-text message to a client. */
+/** "{Practice} via Booked & Noted: {content} Reply STOP to opt out." — a practitioner's own free-text message to a client. */
 export function buildFreeformMessageSms(opts: { orgName: string; content: string }): string {
   const body = opts.content.trim();
   const punctuated = /[.!?]$/.test(body) ? body : `${body}.`;

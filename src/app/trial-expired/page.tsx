@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import PricingSection from "@/components/pricing-section";
 import { Clock, PauseCircle } from "lucide-react";
 import ResumeButton from "./resume-button";
+import { SUPPORT_EMAIL } from "@/lib/brand";
 
 export default async function TrialExpiredPage() {
   const session = await auth();
@@ -58,7 +59,7 @@ export default async function TrialExpiredPage() {
             <>
               <h1 className="text-3xl font-bold text-gray-900">Your free trial has ended</h1>
               <p className="mt-3 text-lg text-gray-600 max-w-md mx-auto">
-                Select a plan below to continue using SoloSuds and access all your data.
+                Select a plan below to continue using Booked & Noted and access all your data.
               </p>
             </>
           )}
@@ -71,7 +72,7 @@ export default async function TrialExpiredPage() {
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">
             Have questions?{" "}
-            <a href="mailto:support@solosuds.com" className="text-indigo-600 hover:underline">
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-indigo-600 hover:underline">
               Contact support
             </a>
           </p>

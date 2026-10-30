@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { AppFooter } from "@/components/layout/app-footer";
 import { auth } from "@/lib/auth";
+import { SUPPORT_EMAIL } from "@/lib/brand";
 
-export const metadata = { title: "Privacy Policy | SoloSuds" };
+export const metadata = { title: "Privacy Policy | Booked & Noted" };
 
 export default async function PrivacyPage() {
   const session = await auth();
@@ -11,7 +12,7 @@ export default async function PrivacyPage() {
       <div className="mx-auto max-w-3xl">
         <div className="mb-8 flex items-center gap-2">
           <Link href="/" className="flex items-center">
-            <img src="/logo.png" alt="SoloSuds" className="h-10 w-auto" />
+            <img src="/logo.png" alt="Booked & Noted" className="h-10 w-auto" />
           </Link>
         </div>
 
@@ -22,7 +23,7 @@ export default async function PrivacyPage() {
           <div className="prose prose-gray max-w-none text-sm leading-relaxed text-gray-700 space-y-6">
 
             <p>
-              This Privacy Policy describes how Jeremy Blanchard, doing business as SoloSuds (&ldquo;SoloSuds,&rdquo; &ldquo;we,&rdquo; &ldquo;us&rdquo;)
+              This Privacy Policy describes how Jeremy Blanchard, doing business as Booked & Noted (&ldquo;Booked & Noted,&rdquo; &ldquo;we,&rdquo; &ldquo;us&rdquo;)
               collects, uses, and shares information through our appointment-scheduling platform for independent
               healthcare and wellness practitioners (the &ldquo;Service&rdquo;). It applies both to practitioners who
               hold an account and to their clients who interact with a practitioner through the Service, including
@@ -59,7 +60,7 @@ export default async function PrivacyPage() {
             <section>
               <h2 className="text-base font-semibold text-gray-900 mb-2">3. Text Messaging (SMS)</h2>
               <p>
-                SMS reminders are coming soon. SoloSuds does not currently send text messages, and this policy
+                SMS reminders are coming soon. Booked & Noted does not currently send text messages, and this policy
                 will be updated before it does.
               </p>
             </section>
@@ -81,7 +82,7 @@ export default async function PrivacyPage() {
                 Clinical and health information a practitioner records through the Service is handled under the
                 terms of our{" "}
                 <Link href="/hipaa" className="text-indigo-600 hover:underline">Business Associate Agreement</Link>.
-                The practitioner, not SoloSuds, controls what health information is collected and how it is used
+                The practitioner, not Booked & Noted, controls what health information is collected and how it is used
                 in the course of care.
               </p>
             </section>
@@ -108,8 +109,8 @@ export default async function PrivacyPage() {
               <h2 className="text-base font-semibold text-gray-900 mb-2">8. Your Choices</h2>
               <p>
                 A client can ask their practitioner to stop email communications at any time. A practitioner can access, correct, or export
-                account data at any time from their SoloSuds account, or contact us at{" "}
-                <a href="mailto:support@solosuds.com" className="text-indigo-600 hover:underline">support@solosuds.com</a>{" "}
+                account data at any time from their Booked & Noted account, or contact us at{" "}
+                <a href={`mailto:${SUPPORT_EMAIL}`} className="text-indigo-600 hover:underline">{SUPPORT_EMAIL}</a>{" "}
                 with questions about their data.
               </p>
             </section>
@@ -134,7 +135,7 @@ export default async function PrivacyPage() {
               <h2 className="text-base font-semibold text-gray-900 mb-2">11. Contact Us</h2>
               <p>
                 Questions about this Privacy Policy can be sent to{" "}
-                <a href="mailto:support@solosuds.com" className="text-indigo-600 hover:underline">support@solosuds.com</a>.
+                <a href={`mailto:${SUPPORT_EMAIL}`} className="text-indigo-600 hover:underline">{SUPPORT_EMAIL}</a>.
               </p>
             </section>
 

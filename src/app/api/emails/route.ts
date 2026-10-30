@@ -2,6 +2,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { sendEmail, buildBrandedEmail } from "@/lib/email";
+import { NOREPLY_EMAIL } from "@/lib/brand";
 
 const ALLOWED_TYPES = [
   "application/pdf",
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
         senderId: session.user.id,
         clientId: clientId || null,
         direction: "OUTBOUND",
-        fromEmail: process.env.FROM_EMAIL || "noreply@solosuds.com",
+        fromEmail: process.env.FROM_EMAIL || NOREPLY_EMAIL,
         toEmail,
         subject,
         htmlBody,

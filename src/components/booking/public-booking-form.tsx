@@ -454,7 +454,7 @@ export default function PublicBookingForm({ orgId, orgName, services, primaryCol
                     </strong>
                   )}
                   I agree to receive appointment text messages (booking confirmations, reminders, reschedule
-                  notices, and waitlist alerts) from {orgName} via SoloSuds at the number above. Msg frequency
+                  notices, and waitlist alerts) from {orgName} via Booked & Noted at the number above. Msg frequency
                   varies. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help.{" "}
                   <Link href="/terms" target="_blank" className="text-indigo-600 hover:underline">Terms of Service</Link>{" "}
                   and{" "}

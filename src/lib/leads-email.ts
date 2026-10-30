@@ -1,7 +1,7 @@
 import type { Lead } from "@/lib/leads-types";
+import { SITE_URL, SUPPORT_EMAIL } from "@/lib/brand";
 
-const SUPPORT_EMAIL = "support@solosuds.com";
-const WEBSITE = "https://solosuds.com";
+const WEBSITE = SITE_URL;
 const SIGNATURE = `Jeremy Blanchard\n603-937-7378\n${SUPPORT_EMAIL}\n${WEBSITE}`;
 
 export function buildEmail(lead: Lead): { subject: string; body: string } {
@@ -11,7 +11,7 @@ export function buildEmail(lead: Lead): { subject: string; body: string } {
   const subject = "Quick question about how you handle scheduling + notes";
 
   const pitch = hasSoftware
-    ? `I saw ${lead.business} uses ${lead.software} for booking. SoloSUDS does that plus SOAP/session notes, intake forms, and invoicing in one place, for about what you're probably already paying.`
+    ? `I saw ${lead.business} uses ${lead.software} for booking. Booked & Noted does that plus SOAP/session notes, intake forms, and invoicing in one place, for about what you're probably already paying.`
     : `I didn't see online booking on your site. Happy to show you a simple option that also handles intake forms and session notes in one place, in case juggling everything by phone or text ever gets old.`;
 
   const unsubscribeUrl = buildUnsubscribeMailto(lead);
@@ -22,7 +22,7 @@ I'm Jeremy Blanchard. I live in the Brattleboro area, and my wife Missy runs MB 
 
 ${pitch}
 
-SoloSUDS is a one person operation, so you'd be talking directly to the person building it, not a call center. You can see more at ${WEBSITE}.
+Booked & Noted is a one person operation, so you'd be talking directly to the person building it, not a call center. You can see more at ${WEBSITE}.
 
 Would you be open to a quick 10 minute look? No pressure either way.
 

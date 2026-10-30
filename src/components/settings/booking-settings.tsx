@@ -46,7 +46,7 @@ export default function BookingSettings({
 
   const bookingUrl = origin ? `${origin}/book/${orgSlug}` : "";
   const embedSnippet = origin
-    ? `<div data-solosuds-booking="${orgSlug}"></div>\n<script src="${origin}/embed.js" async></script>`
+    ? `<div data-booking-widget="${orgSlug}"></div>\n<script src="${origin}/embed.js" async></script>`
     : "";
 
   async function copyLink() {

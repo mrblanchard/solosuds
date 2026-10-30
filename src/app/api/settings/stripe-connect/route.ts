@@ -53,7 +53,7 @@ export async function POST() {
   }
 }
 
-/** Unlinks the org's Stripe Connect account from SoloSuds (does not delete the Stripe account itself). */
+/** Unlinks the org's Stripe Connect account from Booked & Noted (does not delete the Stripe account itself). */
 export async function DELETE() {
   const session = await auth();
   if (!session?.user?.organizationId) {

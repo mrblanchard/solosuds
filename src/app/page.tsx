@@ -12,16 +12,17 @@ import {
   CheckCircle,
   Palette,
 } from "lucide-react";
+import { SITE_URL } from "@/lib/brand";
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "SoloSuds",
+  name: "Booked & Noted",
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description:
     "Practice management software for solo healthcare practitioners: SOAP notes, scheduling, intake forms, billing, and HIPAA-aware client messaging.",
-  url: "https://solosuds.com",
+  url: SITE_URL,
   offers: {
     "@type": "Offer",
     price: "49",
@@ -43,8 +44,8 @@ export default function LandingPage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center shrink-0">
             <Link href="/" className="flex items-center gap-2">
-              <img src="/logo.png" alt="SoloSuds" className="h-10 w-auto" />
-              <span className="text-xl font-bold text-gray-800">SoloSuds</span>
+              <img src="/logo.png" alt="Booked & Noted" className="h-10 w-auto" />
+              <span className="text-xl font-bold text-gray-800">Booked & Noted</span>
             </Link>
           </div>
           <LandingNav />
@@ -83,89 +84,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SoloSuds Acronym Explainer */}
-      <section className="py-20 px-4 bg-gradient-to-b from-white to-indigo-50">
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-gray-900">
-              What does{" "}
-              <span className="text-indigo-600">SoloSuds</span> mean?
-            </h2>
-            <p className="mt-3 text-gray-500 max-w-2xl mx-auto">
-              The name tells the whole story.{" "}
-              <strong className="text-gray-700">Solo</strong>&nbsp; because it&apos;s built
-              for independent practitioners, just you and your clients, no enterprise
-              bloat.{" "}
-              <strong className="text-gray-700">Suds</strong> is the platform itself:
-              Scheduling, Unified client management, Documentation, and Sync.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-            {/* Solo */}
-            <div className="rounded-2xl border border-indigo-100 bg-white p-8 shadow-sm">
-              <div className="mb-8 flex items-center gap-3">
-                <span className="rounded-xl bg-indigo-600 px-3 py-1.5 font-mono text-lg font-extrabold text-white tracking-widest">
-                  Solo
-                </span>
-                <span className="text-sm font-medium text-gray-500">
-                  Built for independent practitioners
-                </span>
-              </div>
-              <div className="space-y-6">
-                {soloLetters.map(({ letter, label, description }) => (
-                  <div key={label} className="flex gap-4">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-xl font-extrabold text-indigo-600">
-                      {letter}
-                    </span>
-                    <div>
-                      <p className="font-semibold text-gray-900">{label}</p>
-                      <p className="mt-0.5 text-sm leading-relaxed text-gray-500">
-                        {description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Suds */}
-            <div className="rounded-2xl border border-indigo-100 bg-white p-8 shadow-sm">
-              <div className="mb-8 flex items-center gap-3">
-                <span className="rounded-xl bg-indigo-600 px-3 py-1.5 font-mono text-lg font-extrabold text-white tracking-widest">
-                  Suds
-                </span>
-                <span className="text-sm font-medium text-gray-500">
-                  The practice management platform
-                </span>
-              </div>
-              <div className="space-y-6">
-                {sudsLetters.map(({ letter, label, description }) => (
-                  <div key={label} className="flex gap-4">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-xl font-extrabold text-indigo-600">
-                      {letter}
-                    </span>
-                    <div>
-                      <p className="font-semibold text-gray-900">{label}</p>
-                      <p className="mt-0.5 text-sm leading-relaxed text-gray-500">
-                        {description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Features */}
       <section id="features" className="py-24 px-4">
         <div className="mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900">Everything your practice needs</h2>
             <p className="mt-3 text-gray-500 max-w-xl mx-auto">
-              From first appointment to final invoice, SoloSUDS handles the workflow.
+              From first appointment to final invoice, Booked & Noted handles the workflow.
             </p>
             <Link
               href="/features"
@@ -213,7 +138,7 @@ export default function LandingPage() {
                 Make it yours: your brand, your portal
               </h2>
               <p className="mt-4 text-lg text-indigo-100 leading-relaxed">
-                SoloSuds fades into the background so your practice shines. Customize your logo, colors, and client-facing portal to match your brand, no "Powered by" watermarks.
+                Booked & Noted fades into the background so your practice shines. Customize your logo, colors, and client-facing portal to match your brand, no "Powered by" watermarks.
               </p>
               <ul className="mt-8 space-y-3">
                 {[
@@ -266,60 +191,6 @@ export default function LandingPage() {
     </div>
   );
 }
-
-const soloLetters = [
-  {
-    letter: "S",
-    label: "Streamlined",
-    description:
-      "No bloat, no enterprise complexity. Every feature is purpose-built for one practitioner running their own show.",
-  },
-  {
-    letter: "O",
-    label: "Owned",
-    description:
-      "Your brand, your client data, your portal. White label the entire experience so clients only see you, not us.",
-  },
-  {
-    letter: "L",
-    label: "Lightweight",
-    description:
-      "Set up in minutes, not months. No IT department required, just sign up, configure, and start seeing clients.",
-  },
-  {
-    letter: "O",
-    label: "Organized",
-    description:
-      "Every appointment, note, invoice, and message in one place. Stop juggling apps and start focusing on your clients.",
-  },
-];
-
-const sudsLetters = [
-  {
-    letter: "S",
-    label: "Scheduling",
-    description:
-      "Online booking & calendar management: let clients book themselves while you stay in full control of your time.",
-  },
-  {
-    letter: "U",
-    label: "Unified",
-    description:
-      "Client profiles & full communication history in one place: everything you need to know about a client at a glance.",
-  },
-  {
-    letter: "D",
-    label: "Documentation",
-    description:
-      "The SOAP notes themselves: structured, stored securely, and accessible for every session.",
-  },
-  {
-    letter: "S",
-    label: "Sync",
-    description:
-      "Real-time updates across all your devices, with Google Calendar and Outlook integration built right in.",
-  },
-];
 
 const features = [
   {
