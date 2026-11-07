@@ -346,7 +346,8 @@ class BookingWidget {
       this.step === "waitlisted" ? this.renderWaitlisted() : null,
       this.step === "service" ? this.renderServiceStep() : null,
       this.step === "details" ? this.renderDetailsStep() : null,
-      h("p", { className: "bn-footer", text: `Booking powered by Booked & Noted · ${this.org?.name ?? ""}` }),
+      // White label: no product branding on the client-facing widget.
+      this.org?.name ? h("p", { className: "bn-footer", text: this.org.name }) : null,
     ]);
     this.root.appendChild(wrap);
   }
