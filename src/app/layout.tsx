@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SITE_URL } from "@/lib/brand";
 
 const nunito = Nunito({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
@@ -148,6 +149,7 @@ export default async function RootLayout({
       >
         <SessionProvider>{children}</SessionProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
