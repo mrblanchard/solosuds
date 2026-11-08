@@ -124,7 +124,7 @@ export default function ProfileSettings({ user }: Props) {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="mt-1"
-                placeholder="Minimum 12 characters"
+                placeholder="At least 10 characters"
               />
               <p className="mt-1 text-xs text-gray-400">{PASSWORD_RULES}</p>
             </div>

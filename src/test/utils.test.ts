@@ -189,38 +189,34 @@ describe("getInitials", () => {
 // ─── passwordSchema ───────────────────────────────────────────────────────────
 
 describe("passwordSchema", () => {
-  it("accepts a valid strong password", () => {
+  it("accepts a plain 10-character password", () => {
+    expect(passwordSchema.safeParse("sunnybeach").success).toBe(true);
+  });
+
+  it("accepts a passphrase with spaces", () => {
+    expect(passwordSchema.safeParse("blue kettle river").success).toBe(true);
+  });
+
+  it("still accepts passwords made under the old complexity rules", () => {
     expect(passwordSchema.safeParse("Abcdefgh1234!").success).toBe(true);
   });
 
-  it("rejects passwords shorter than 12 characters", () => {
-    const result = passwordSchema.safeParse("Ab1!");
+  it("rejects passwords shorter than 10 characters", () => {
+    const result = passwordSchema.safeParse("Ab1!xyz9");
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toMatch(/12/);
+    expect(result.error?.issues[0].message).toMatch(/10/);
   });
 
-  it("rejects passwords without uppercase", () => {
-    const result = passwordSchema.safeParse("abcdefgh1234!");
+  it("rejects passwords that only reach 10 characters with spaces", () => {
+    const result = passwordSchema.safeParse("   abc    ");
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toMatch(/uppercase/i);
+    expect(result.error?.issues[0].message).toMatch(/spaces/i);
   });
 
-  it("rejects passwords without lowercase", () => {
-    const result = passwordSchema.safeParse("ABCDEFGH1234!");
+  it("rejects a single repeated character", () => {
+    const result = passwordSchema.safeParse("aaaaaaaaaaaa");
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toMatch(/lowercase/i);
-  });
-
-  it("rejects passwords without a digit", () => {
-    const result = passwordSchema.safeParse("Abcdefghijkl!");
-    expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toMatch(/digit/i);
-  });
-
-  it("rejects passwords without a special character", () => {
-    const result = passwordSchema.safeParse("Abcdefgh12345");
-    expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toMatch(/special/i);
+    expect(result.error?.issues[0].message).toMatch(/same character/i);
   });
 
   it("rejects passwords longer than 128 characters", () => {

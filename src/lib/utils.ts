@@ -56,16 +56,18 @@ export function getInitials(name: string): string {
 
 // ─── Shared Validation Schemas ────────────────────────────────────────────────
 
-export const PASSWORD_RULES = "At least 12 characters, one uppercase, one lowercase, one digit, and one special character";
+// Length only, no character-class rules: NIST SP 800-63B recommends against
+// composition rules, and they were a real barrier at sign-up. Passwords set
+// under the old 12-character rules still pass.
+export const PASSWORD_MIN_LENGTH = 10;
+export const PASSWORD_RULES = `At least ${PASSWORD_MIN_LENGTH} characters. A short phrase works well.`;
 
 export const passwordSchema = z
   .string()
-  .min(12, "Password must be at least 12 characters")
+  .min(PASSWORD_MIN_LENGTH, `Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
   .max(128, "Password must be at most 128 characters")
-  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-  .regex(/[0-9]/, "Password must contain at least one digit")
-  .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character");
+  .refine((p) => p.trim().length >= PASSWORD_MIN_LENGTH, "Password can't be mostly spaces")
+  .refine((p) => new Set(p).size > 2, "Password can't be the same character repeated");
 
 export function validatePassword(password: string): string | null {
   const result = passwordSchema.safeParse(password);

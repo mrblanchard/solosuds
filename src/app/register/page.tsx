@@ -12,6 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { passwordSchema, PASSWORD_RULES } from "@/lib/utils";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { Loader2 } from "lucide-react";
+import { GoogleIcon } from "@/components/auth/google-icon";
+import { CaptchaHint } from "@/components/auth/captcha-hint";
 
 const registerSchema = z.object({
   organizationName: z.string().min(2, "Organization name is required").max(200, "Organization name is too long"),
@@ -39,6 +42,18 @@ function RegisterContent() {
   const [inviteOrgName, setInviteOrgName] = useState<string | null>(null);
   const [inviteRoleToken, setInviteRoleToken] = useState<string | null>(null);
   const [cfToken, setCfToken] = useState<string | null>(null);
+  const [captchaFailed, setCaptchaFailed] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  async function handleGoogleSignUp() {
+    setIsGoogleLoading(true);
+    const { signIn, signOut } = await import("next-auth/react");
+    // Clear any leftover session so Auth.js doesn't reject the callback as
+    // OAuthAccountNotLinked. A new Google address is sent back here with
+    // ?fromGoogle=1 to finish sign-up; an existing account just signs in.
+    await signOut({ redirect: false }).catch(() => {});
+    await signIn("google", { callbackUrl: "/dashboard" });
+  }
 
   const schema = fromGoogle
     ? registerSchema.extend({ password: z.string().optional() })
@@ -107,9 +122,11 @@ function RegisterContent() {
         setError(json.error ?? "Registration failed");
         return;
       }
-      const { signIn } = await import("next-auth/react");
+      const { signIn, signOut } = await import("next-auth/react");
       if (fromGoogle) {
-        // Sign in via Google now that the account exists
+        // Sign in via Google now that the account exists. Clear any leftover
+        // session first so Auth.js doesn't reject it as OAuthAccountNotLinked.
+        await signOut({ redirect: false }).catch(() => {});
         await signIn("google", { callbackUrl: "/onboarding" });
       } else {
         // Auto sign-in using the bypass token returned by the register API
@@ -166,6 +183,35 @@ function RegisterContent() {
             </div>
           )}
 
+          {/* Google sign-up. Not offered for invites: the invite code would be
+              lost on the round trip through Google. */}
+          {!fromGoogle && !inviteCode && (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full mb-4"
+                onClick={handleGoogleSignUp}
+                disabled={isGoogleLoading}
+              >
+                {isGoogleLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <GoogleIcon />
+                )}
+                Continue with Google
+              </Button>
+              <div className="relative mb-5">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-gray-400">or sign up with email</span>
+                </div>
+              </div>
+            </>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {!inviteCode && (
             <div>
@@ -218,7 +264,7 @@ function RegisterContent() {
               <Input
                 id="password"
                 type="password"
-                placeholder="Minimum 12 characters"
+                placeholder="At least 10 characters"
                 className="mt-1"
                 {...register("password")}
               />
@@ -248,13 +294,22 @@ function RegisterContent() {
             )}
 
             {!fromGoogle && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-              <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-                onSuccess={(token) => setCfToken(token)}
-                onExpire={() => setCfToken(null)}
-                onError={() => setCfToken(null)}
-                options={{ theme: "light" }}
-              />
+              <>
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                  onSuccess={(token) => {
+                    setCfToken(token);
+                    setCaptchaFailed(false);
+                  }}
+                  onExpire={() => setCfToken(null)}
+                  onError={() => {
+                    setCfToken(null);
+                    setCaptchaFailed(true);
+                  }}
+                  options={{ theme: "light" }}
+                />
+                <CaptchaHint waiting={!cfToken} failed={captchaFailed} />
+              </>
             )}
 
             <Button

@@ -101,23 +101,13 @@ describe("POST /api/auth/register — payload validation", () => {
     expect(result.status).toBe(201);
   });
 
-  it("accepts the minimum valid password", () => {
-    const result = validateRegisterPayload({ ...valid, password: "Abcdefgh1234!" });
+  it("accepts a 10-character password with no symbols or capitals", () => {
+    const result = validateRegisterPayload({ ...valid, password: "sunnybeach" });
     expect(result.status).toBe(201);
   });
 
-  it("rejects password without uppercase letter", () => {
-    const result = validateRegisterPayload({ ...valid, password: "abcdefgh1234!" });
-    expect(result.status).toBe(400);
-  });
-
-  it("rejects password without digit", () => {
-    const result = validateRegisterPayload({ ...valid, password: "Abcdefghijkl!" });
-    expect(result.status).toBe(400);
-  });
-
-  it("rejects password without special character", () => {
-    const result = validateRegisterPayload({ ...valid, password: "Abcdefgh12345" });
+  it("rejects a password under 10 characters", () => {
+    const result = validateRegisterPayload({ ...valid, password: "sunnybea" });
     expect(result.status).toBe(400);
   });
 });

@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
@@ -6,6 +6,16 @@ import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { createHmac } from "crypto";
 // UserRole will be typed inline as string until prisma generate is run
+
+// Coded credential failures. The code reaches the login page (as
+// `result.code` or `?code=`) so it can say what went wrong instead of a blanket
+// "Invalid email or password". Keep in sync with src/lib/login-errors.ts.
+class CaptchaFailed extends CredentialsSignin {
+  code = "captcha";
+}
+class GoogleOnlyAccount extends CredentialsSignin {
+  code = "google_account";
+}
 
 const prismaAdapter = PrismaAdapter(db);
 
@@ -82,6 +92,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
+        // Match email without case: people type it differently than at sign-up.
+        const email = String(credentials.email).trim().toLowerCase();
 
         // Check for post-registration bypass token (internal:expiry:sig)
         const cfToken = credentials.cfToken as string | undefined;
@@ -91,7 +103,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const [, expiry, sig] = parts;
           const secret = (process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET)!;
           const expectedSig = createHmac("sha256", secret)
-            .update(`${credentials.email}:${expiry}`)
+            .update(`${email}:${expiry}`)
             .digest("hex");
           const valid = sig === expectedSig && Date.now() < parseInt(expiry);
           if (!valid) return null;
@@ -100,14 +112,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // Normal login flow — verify Turnstile CAPTCHA
           const { verifyTurnstile } = await import("@/lib/turnstile");
           const captchaOk = await verifyTurnstile(cfToken);
-          if (!captchaOk) return null;
+          if (!captchaOk) throw new CaptchaFailed();
         }
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email as string },
+        const user = await db.user.findFirst({
+          where: { email: { equals: email, mode: "insensitive" } },
+          include: { accounts: { where: { provider: "google" }, select: { id: true } } },
         });
 
-        if (!user || !user.hashedPassword) return null;
+        if (!user) return null;
+        if (!user.hashedPassword) {
+          // Signed up with Google and never set a password. Registration
+          // already reveals that an email has an account, so saying so here
+          // leaks nothing new.
+          if (user.accounts.length > 0) throw new GoogleOnlyAccount();
+          return null;
+        }
 
         const passwordMatch = await bcrypt.compare(
           credentials.password as string,
@@ -117,7 +137,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!passwordMatch) return null;
 
         // Same organizationId null/undefined normalization as getUserByAccount above.
-        return { ...user, organizationId: user.organizationId ?? undefined };
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { accounts, ...rest } = user;
+        return { ...rest, organizationId: user.organizationId ?? undefined };
       },
     }),
   ],
@@ -127,8 +149,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // then check if the user has completed registration (has an org).
       // If not, redirect them to finish signing up with their info pre-filled.
       if (account?.provider === "google" && user.email) {
-        const dbUser = await db.user.findUnique({
-          where: { email: user.email },
+        const dbUser = await db.user.findFirst({
+          where: { email: { equals: user.email, mode: "insensitive" } },
           select: { organizationId: true },
         });
         if (!dbUser?.organizationId) {

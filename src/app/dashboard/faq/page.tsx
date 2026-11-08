@@ -226,7 +226,7 @@ const sections = [
     items: [
       {
         q: "How do I change my password?",
-        a: "Go to Settings → Your Profile → Change Password. Enter your current password and your new password. Passwords must be at least 12 characters with a mix of uppercase, lowercase, numbers, and special characters.",
+        a: "Go to Settings → Your Profile → Change Password. Enter your current password and your new password. Passwords must be at least 10 characters. A short phrase is easy to remember and hard to guess.",
       },
       {
         q: "How do I manage my services?",

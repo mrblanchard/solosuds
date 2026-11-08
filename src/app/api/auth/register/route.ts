@@ -41,7 +41,9 @@ function verifyRoleToken(token: string, orgId: string): InviteRole | null {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { organizationName, name, email, password, fromGoogle, inviteCode, roleToken, cfToken } = body;
+    const { organizationName, name, password, fromGoogle, inviteCode, roleToken, cfToken } = body;
+    // Store emails lowercased so sign-in matches however the user types it later.
+    const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : body.email;
 
     // Verify CAPTCHA for non-Google credential registrations
     if (!fromGoogle) {
